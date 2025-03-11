@@ -1,0 +1,130 @@
+package org.example.game;
+
+
+
+
+public class Unit {
+
+    private final String name;  // Имя юнита
+    private int health;  // Здоровье юнита
+    private final int damage;  // Урон, который наносит юнит
+    private final int moveRange;  // Дальность перемещения
+    private final int attackRange;  // Дальность атаки
+    private final Team team;  // Команда, к которой принадлежит юнит
+    private int stackSize;  // Количество юнитов в стеке
+    private Position position;  // Позиция юнита на карте
+
+    public enum UnitType {
+        WARRIOR,
+        ARCHER,
+        MAGE;  // Пример нескольких типов юнитов
+    }
+
+    private final UnitType unitType;  // Тип юнита
+
+    // Конструктор юнита
+    public Unit(UnitType unitType, int health, int damage, int moveRange, int attackRange, Team team, Position position) {
+        this.unitType = unitType;
+        this.name = unitType.name();  // Имя юнита по умолчанию — это его тип
+        this.health = health;
+        this.damage = damage;
+        this.moveRange = moveRange;
+        this.attackRange = attackRange;
+        this.team = team;
+        this.stackSize = 1;  // Изначально один юнит в стеке
+        this.position = position != null ? position : new Position(0, 0);  // Используем переданную позицию или (0, 0) по умолчанию
+    }
+
+
+    // Метод для установки позиции юнита
+    public void setPosition(Position position) {
+        this.position = position;
+    }
+
+    // Метод для получения общего здоровья юнитов в стеке
+    public int getTotalHealth() {
+        return health * stackSize;
+    }
+
+    // Метод для получения общего урона юнитов в стеке
+    public int getTotalDamage() {
+        return damage * stackSize;
+    }
+
+    // Метод для перемещения юнита
+    public void move() {
+        // Логика перемещения
+        System.out.println(name + " перемещается на " + moveRange + " клеток.");
+    }
+
+    // Метод для атаки
+    public void attack(Unit target) {
+        // Логика атаки
+        System.out.println(name + " атакует " + target.getName() + " с урона: " + getTotalDamage());
+        // Уменьшаем здоровье цели
+        target.takeDamage(getTotalDamage());
+    }
+
+    // Геттеры для полей
+    public String getName() {
+        return name;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    // Метод для получения команды юнита
+    public Team getTeam() {
+        return team;
+    }
+
+    // Метод для получения дальности перемещения
+    public int getMoveRange() {
+        return moveRange;
+    }
+
+    // Метод для получения дальности атаки
+    public int getAttackRange() {
+        return attackRange;
+    }
+
+    // Метод для получения количества юнитов в стеке
+    public int getStackSize() {
+        return stackSize;
+    }
+
+    // Метод для увеличения количества юнитов в стеке
+    public void increaseStack(int amount) {
+        stackSize += amount;
+    }
+
+    // Метод для получения типа юнита
+    public UnitType getUnitType() {
+        return unitType;
+    }
+
+    // Метод для получения позиции юнита
+    public Position getPosition() {
+        return position;
+    }
+
+    public void takeDamage(int damage) {
+        health -= damage;
+        if (health <= 0) {
+            health = 0; // чтобы здоровье не стало отрицательным
+            System.out.println(name + " был уничтожен.");
+        }
+    }
+
+    // Метод для объединения юнитов в стеке
+    public void mergeStacks(Unit unit) {
+        if (this.unitType == unit.getUnitType()) {
+            this.stackSize += unit.getStackSize();  // Объединение стеков
+            unit.stackSize = 0;  // Очистка стека у другого юнита
+            System.out.println(name + " объединился с " + unit.getName() + ". Новый размер стека: " + stackSize);
+        } else {
+            System.out.println("Невозможно объединить юнитов разных типов.");
+        }
+    }
+}

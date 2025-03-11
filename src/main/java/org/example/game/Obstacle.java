@@ -1,13 +1,14 @@
 package org.example.game;
 
 public class Obstacle {
-    private final String name;
 
-    public Obstacle(String name) {
-        this.name = name;
+    // Конструктор без параметров (можно добавить параметры, если потребуется, например, тип препятствия)
+    public Obstacle() {
+        // Пока не требуется дополнительной логики
     }
 
-    public String getName() {
-        return name;
+    // Метод для проверки, является ли клетка препятствием
+    public boolean isImpassable() {
+        return true;  // Все объекты Obstacle блокируют путь
     }
 }

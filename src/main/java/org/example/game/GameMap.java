@@ -1,125 +1,161 @@
 package org.example.game;
 
-import org.example.entities.Hero;
-import org.example.entities.Position;
-import org.example.entities.units.Unit;
-import org.example.entities.units.Team;
-
 public class GameMap {
+
     private final int width;
     private final int height;
-    private final Cell[][] map;
-    private final Hero playerHero;
-    private final Hero enemyHero;
+    private final char[][] map;  // Карта будет представлять собой массив символов.
+    private int heroX;  // Координата X героя
+    private int heroY;  // Координата Y героя
+    private int enemyX;  // Координата X врага
+    private int enemyY;  // Координата Y врага
 
-    // Позиции замков
-    private final Position playerCastle;
-    private final Position enemyCastle;
-
+    // Конструктор для создания карты с размером n x m.
     public GameMap(int width, int height) {
         this.width = width;
         this.height = height;
-        this.map = new Cell[height][width];
+        this.map = new char[height][width];
 
-        // Инициализация карты с препятствиями и дорогами
+        // Инициализация карты
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                // Разделение карты на три области
                 if (x < width / 3) {
-                    // Область игрока
-                    map[y][x] = new Cell(CellType.TERRITORY_PLAYER, 1);
+                    map[y][x] = 'P';  // Область игрока
                 } else if (x < 2 * width / 3) {
-                    // Нейтральная область
-                    map[y][x] = new Cell(CellType.TERRITORY_NEUTRAL, 3);
+                    map[y][x] = '.';  // Нейтральная территория
                 } else {
-                    // Область компьютера
-                    map[y][x] = new Cell(CellType.TERRITORY_ENEMY, 1);
+                    map[y][x] = 'E';  // Область противника
                 }
             }
         }
 
-        // Добавляем препятствия, разделяющие области
+        // Размещение препятствий на границе между областями
         for (int y = 0; y < height; y++) {
-            map[y][width / 3] = new Cell(CellType.OBSTACLE, 0);
-            map[y][2 * width / 3] = new Cell(CellType.OBSTACLE, 0);
+            map[y][width / 3] = '#';  // Препятствия между областью игрока и нейтральной
+            map[y][2 * width / 3] = '#';  // Препятствия между нейтральной областью и противником
         }
 
-        // Добавляем дорогу
-        for (int y = height / 4; y < 3 * height / 4; y++) {
-            map[y][width / 3 + 1] = new Cell(CellType.ROAD, 1);
-            map[y][2 * width / 3 - 1] = new Cell(CellType.ROAD, 1);
+        // Размещение замков
+        // Замок игрока в области игрока (например, в верхнем левом углу области игрока)
+        map[height / 4][width / 6] = 'L';  // Замок игрока
+
+        // Замок противника в области противника (например, в верхнем правом углу области противника)
+        map[height / 4][5 * width / 6] = 'L';  // Замок противника
+
+        // Размещение дороги между замками игрока и противника
+        // Прокладываем дорогу от замка игрока до замка противника
+        int startX = width / 6;  // X координата замка игрока
+        int startY = height / 4; // Y координата замка игрока
+        int endX = 5 * width / 6;  // X координата замка противника
+        int endY = height / 4;     // Y координата замка противника
+
+        // Прокладываем дорогу между замками (по горизонтали и вертикали)
+        for (int x = startX; x <= endX; x++) {
+            map[startY][x] = 'R';  // Размещение дороги по горизонтали
+        }
+        for (int y = startY + 1; y < height / 2; y++) {
+            map[y][endX] = 'R';  // Размещение дороги по вертикали, если нужно
         }
 
-        // Позиции замков
-        playerCastle = new Position(0, height / 2);  // Замок игрока
-        enemyCastle = new Position(width - 1, height / 2);  // Замок противника
+        // Размещение героя в области игрока (вблизи замка)
+        heroX = width / 6;
+        heroY = height / 4 + 1;  // Немного ниже замка
+        map[heroY][heroX] = 'H';  // Размещение героя
 
-        // Создаем команды
-        Team playerTeam = new Team("Игрок");
-        Team enemyTeam = new Team("Компьютер");
-
-        // Размещение героя игрока и компьютера
-        this.playerHero = new Hero("Игрок", 100, 50, playerCastle);
-        this.enemyHero = new Hero("Компьютер", 100, 50, enemyCastle);
-
-        // Добавляем юнитов в армию обоих героев
-        playerHero.addUnit(new Unit("Солдат", 50, 20, 3, 2, playerTeam));
-        enemyHero.addUnit(new Unit("Солдат", 50, 20, 3, 2, enemyTeam));
+        // Размещение врага в области противника (вблизи замка)
+        enemyX = 5 * width / 6;
+        enemyY = height / 4 + 1;  // Немного ниже замка
+        map[enemyY][enemyX] = 'A';  // Размещение врага
     }
 
-    public Hero getPlayerHero() {
-        return playerHero;
+    // Геттеры для получения координат героя и врага
+    public int getHeroX() {
+        return heroX;
     }
 
-    public Hero getEnemyHero() {
-        return enemyHero;
+    public int getHeroY() {
+        return heroY;
     }
 
-    // Метод для проверки доступности клетки
-    public boolean isWalkable(Position position) {
-        Cell cell = map[position.getY()][position.getX()];
-        return cell.getType() != CellType.OBSTACLE;  // Проверка на препятствия
+    public int getEnemyX() {
+        return enemyX;
     }
 
-    // Метод для проверки, что перемещение между замками занимает минимум 2 хода
-    public boolean isMinTwoMoves(Position from, Position to) {
-        // Проверяем, если игрок двигается от замка до замка
-        if (from.equals(playerCastle) && to.equals(enemyCastle)) {
-            return true;  // Перемещение от замка игрока к замку компьютера
-        } else if (from.equals(enemyCastle) && to.equals(playerCastle)) {
-            return true;  // Перемещение от замка компьютера к замку игрока
+    public int getEnemyY() {
+        return enemyY;
+    }
+
+    // Метод для проверки, можно ли пройти по клетке (если это не препятствие).
+    public boolean isWalkable(int x, int y) {
+        return map[y][x] != '#';  // Проверка на препятствие
+    }
+
+    // Метод для получения штрафа на клетке
+    public int getMovementPenalty(int x, int y) {
+        if (map[y][x] == 'P') {
+            return 1;  // Минимальный штраф в области игрока
+        } else if (map[y][x] == 'E') {
+            return 1;  // Минимальный штраф в области противника
+        } else if (map[y][x] == '.') {
+            return 3;  // Наибольший штраф на нейтральной территории
+        } else {
+            return Integer.MAX_VALUE;  // Невозможность перемещения по препятствиям
         }
-        return false;
     }
 
-    // Метод для отображения карты
+    public boolean moveHero(int dx, int dy, Hero hero) {
+        // Проверяем, можно ли еще перемещаться (герой не использовал все свои перемещения)
+        if (hero.getCurrentMoves() <= 0) {
+            return false;  // Герой не может перемещаться, если у него нет оставшихся перемещений
+        }
+
+        // Получаем текущие координаты героя
+        int heroX = hero.getPosition().getX();
+        int heroY = hero.getPosition().getY();
+
+        int newX = heroX + dx;
+        int newY = heroY + dy;
+
+        // Проверка на выход за пределы карты
+        if (newX < 0 || newX >= width || newY < 0 || newY >= height) {
+            return false;  // Герой не может выйти за пределы карты
+        }
+
+        // Проверка на проходимость клетки и штраф
+        if (!isWalkable(newX, newY)) {
+            return false;  // Герой не может пройти через препятствия
+        }
+
+        // Обновляем позицию героя на карте
+        map[heroY][heroX] = '.';  // Освобождаем старую позицию
+        map[newY][newX] = 'H';    // Обновляем позицию героя
+
+        // Обновляем позицию героя в объекте Hero
+        hero.move(new Position(newX, newY));  // Двигаем героя и уменьшаем количество перемещений
+
+        return true;
+    }
+    // Метод для отображения карты в текстовом виде.
     public void printMap() {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                char displayChar = '.';
-
-                // Печать различных типов клеток
-                if (map[y][x].getType() == CellType.OBSTACLE) {
-                    displayChar = '#';
-                } else if (map[y][x].getType() == CellType.ROAD) {
-                    displayChar = '=';
-                } else if (map[y][x].getType() == CellType.TERRITORY_PLAYER) {
-                    displayChar = 'P';
-                } else if (map[y][x].getType() == CellType.TERRITORY_ENEMY) {
-                    displayChar = 'E';
-                } else if (map[y][x].getType() == CellType.TERRITORY_NEUTRAL) {
-                    displayChar = 'N';
-                }
-
-                // Отображение героев
-                if (new Position(x, y).equals(playerHero.getPosition())) {
-                    displayChar = 'H'; // 'H' для героя игрока
-                } else if (new Position(x, y).equals(enemyHero.getPosition())) {
-                    displayChar = 'C'; // 'C' для героя противника
-                }
-
-                System.out.print(displayChar + " ");
+                System.out.print(map[y][x] + " ");
             }
             System.out.println();
         }
+    }
+
+    // Геттеры для получения размеров карты.
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public char[][] getMap() {
+        return map;
     }
 }
