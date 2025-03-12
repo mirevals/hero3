@@ -1,73 +1,93 @@
 package org.example.game;
 
+import java.util.List;
 
 public class Battle {
+    private BattleField battleField;
+    private List<Unit> units;
 
-    private Character playerCharacter;
-    private Character enemyCharacter;
-    private boolean isBattleOngoing;
-
-    public Battle(Character playerCharacter, Character enemyCharacter) {
-        this.playerCharacter = playerCharacter;
-        this.enemyCharacter = enemyCharacter;
-        this.isBattleOngoing = false;
+    public Battle(BattleField battleField) {
+        this.battleField = battleField;
+        this.units = battleField.getUnits();
     }
 
-    // Метод для начала сражения
-    public void startBattle() {
-        // Проверяем, что оба героя могут вступить в сражение (например, они находятся рядом или в одной клетке)
-        if (canStartBattle()) {
-            isBattleOngoing = true;
-            System.out.println("Сражение началось между " + playerCharacter.getName() + " и " + enemyCharacter.getName());
-            performBattle();
-        } else {
-            System.out.println("Сражение невозможно начать. Герои должны находиться рядом.");
+    public boolean autoFight() {
+        boolean heroWon = false;
+
+        while (true) {
+            boolean hasHeroes = false;
+            boolean hasEnemies = false;
+
+            for (Unit unit : units) {
+                if (unit.getHealth() > 0) {
+                    Unit enemy = findNearestEnemy(unit);
+
+                    if (enemy != null) {
+                        if (unit.getTeam() == Team.HERO) hasHeroes = true;
+                        else hasEnemies = true;
+
+                        double distance = getDistance(unit, enemy);
+
+                        if (distance <= unit.getAttackRange()) {
+                            unit.attack(enemy);
+                        } else if (distance <= unit.getMoveRange()) {
+                            moveUnitTowardsEnemy(unit, enemy);
+                        }
+                    }
+                }
+            }
+
+            battleField.printField();
+
+            if (!hasHeroes) {
+                System.out.println("Враги победили!");
+                return false;
+            }
+            if (!hasEnemies) {
+                System.out.println("Герои победили!");
+                heroWon = true;
+                break;
+            }
         }
+
+        return heroWon;
     }
 
-    // Проверка, что герои могут начать сражение
-    private boolean canStartBattle() {
-        // Здесь можно добавить логику для проверки расстояния между героями, чтобы они могли встретиться.
-        return playerCharacter.getPosition().equals(enemyCharacter.getPosition());
-    }
+    private Unit findNearestEnemy(Unit unit) {
+        Unit nearestEnemy = null;
+        double minDistance = Double.MAX_VALUE;
 
-    // Метод для выполнения сражения
-    private void performBattle() {
-        while (isBattleOngoing) {
-            // Каждому герою нужно атаковать в сражении
-            attack(playerCharacter, enemyCharacter);
-            if (!isBattleOngoing) break;
-
-            attack(enemyCharacter, playerCharacter);
-            if (!isBattleOngoing) break;
+        for (Unit target : units) {
+            if (target.getTeam() != unit.getTeam() && target.getHealth() > 0) {
+                double distance = getDistance(unit, target);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestEnemy = target;
+                }
+            }
         }
-
-        // Определение победителя и последствий
-        determineWinner();
+        return nearestEnemy;
     }
 
-    private void attack(Character attacker, Character defender) {
-        if (attacker.getTeam().hasUnits() && defender.getTeam().hasUnits()) {
-            // Удаляем всех юнитов противника (потери)
-            defender.getTeam().removeAllUnits();
-            System.out.println(attacker.getName() + " атакует " + defender.getName() + "!");
-        } else {
-            // Если у кого-то не осталось юнитов
-            isBattleOngoing = false;
+    private double getDistance(Unit unit1, Unit unit2) {
+        int dx = unit2.getPosition().getX() - unit1.getPosition().getX();
+        int dy = unit2.getPosition().getY() - unit1.getPosition().getY();
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    private void moveUnitTowardsEnemy(Unit unit, Unit enemy) {
+        Position enemyPos = enemy.getPosition();
+        Position unitPos = unit.getPosition();
+
+        int dx = Integer.compare(enemyPos.getX(), unitPos.getX());
+        int dy = Integer.compare(enemyPos.getY(), unitPos.getY());
+
+        int newX = unitPos.getX() + dx;
+        int newY = unitPos.getY() + dy;
+
+        if (battleField.canMoveTo(newX, newY)) {
+            unit.setPosition(new Position(newX, newY));
+            System.out.println(unit.getName() + " перемещается к врагу.");
         }
-    }
-
-    // Метод для определения победителя
-    private void determineWinner() {
-        if (playerCharacter.getTeam().hasUnits()) {
-            System.out.println(playerCharacter.getName() + " победил в сражении!");
-        } else {
-            System.out.println(enemyCharacter.getName() + " победил в сражении!");
-        }
-    }
-
-    // Метод для получения состояния сражения
-    public boolean isBattleOngoing() {
-        return isBattleOngoing;
     }
 }

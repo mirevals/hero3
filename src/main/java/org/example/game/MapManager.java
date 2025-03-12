@@ -6,8 +6,8 @@ public class MapManager {
     private final char[][] map;
 
     // Координаты героя и врага
-    private int heroX;
-    private int heroY;
+    private static int heroX;
+    private static int heroY;
     private int enemyX;
     private int enemyY;
 
@@ -119,11 +119,11 @@ public class MapManager {
     }
 
     // Геттеры для координат героя и врага
-    public int getHeroX() {
+    public static int getHeroX() {
         return heroX;
     }
 
-    public int getHeroY() {
+    public static int getHeroY() {
         return heroY;
     }
 
