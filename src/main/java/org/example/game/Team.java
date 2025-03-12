@@ -3,7 +3,7 @@ package org.example.game;
 import java.util.ArrayList;
 import java.util.List;
 public enum Team {
-    PLAYER("Player"),
+    HERO("Player"),
     ENEMY("Enemy");
 
     private final String name;

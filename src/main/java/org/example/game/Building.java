@@ -1,44 +1,19 @@
 package org.example.game;
 
-// Абстрактный класс для всех строений
-public abstract class Building {
+public class Building {
+    private String name;
+    private boolean canRecruitUnits;
 
-    private final String name;  // Имя строения
-    private final int cost;  // Стоимость строительства
-    private boolean isConstructed;  // Строение построено или нет
-
-    // Конструктор
-    public Building(String name, int cost) {
+    public Building(String name, boolean canRecruitUnits) {
         this.name = name;
-        this.cost = cost;
-        this.isConstructed = false;  // Строение ещё не построено
+        this.canRecruitUnits = canRecruitUnits;
     }
 
-    // Метод для постройки строения
-    public void construct() {
-        if (!isConstructed) {
-            isConstructed = true;
-            System.out.println(name + " построено.");
-        } else {
-            System.out.println(name + " уже построено.");
-        }
-    }
-
-    // Метод для получения имени строения
     public String getName() {
         return name;
     }
 
-    // Метод для получения стоимости строения
-    public int getCost() {
-        return cost;
+    public boolean canRecruitUnits() {
+        return canRecruitUnits;
     }
-
-    // Метод для проверки, построено ли строение
-    public boolean isConstructed() {
-        return isConstructed;
-    }
-
-    // Абстрактный метод для выполнения действия, связанного со строением
-    public abstract void executeAction();
 }

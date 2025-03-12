@@ -1,17 +1,16 @@
 package org.example.game;
 
+import java.util.Objects;
+
 public class Position {
+    private int x;
+    private int y;
 
-    private final int x;  // Координата X
-    private final int y;  // Координата Y
-
-    // Конструктор для инициализации координат
     public Position(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    // Геттеры для получения координат
     public int getX() {
         return x;
     }
@@ -20,8 +19,18 @@ public class Position {
         return y;
     }
 
-    // Метод для получения смещения (если нужно)
-    public int getOffset() {
-        return 0;  // Можно определить логику для смещения, если требуется
+    // Переопределяем equals для корректного сравнения объектов Position
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Position position = (Position) o;
+        return x == position.x && y == position.y;
+    }
+
+    // Переопределяем hashCode для корректной работы коллекций
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }

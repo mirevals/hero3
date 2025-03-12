@@ -3,13 +3,13 @@ package org.example.game;
 
 public class Battle {
 
-    private Hero playerHero;
-    private Hero enemyHero;
+    private Character playerCharacter;
+    private Character enemyCharacter;
     private boolean isBattleOngoing;
 
-    public Battle(Hero playerHero, Hero enemyHero) {
-        this.playerHero = playerHero;
-        this.enemyHero = enemyHero;
+    public Battle(Character playerCharacter, Character enemyCharacter) {
+        this.playerCharacter = playerCharacter;
+        this.enemyCharacter = enemyCharacter;
         this.isBattleOngoing = false;
     }
 
@@ -18,7 +18,7 @@ public class Battle {
         // Проверяем, что оба героя могут вступить в сражение (например, они находятся рядом или в одной клетке)
         if (canStartBattle()) {
             isBattleOngoing = true;
-            System.out.println("Сражение началось между " + playerHero.getName() + " и " + enemyHero.getName());
+            System.out.println("Сражение началось между " + playerCharacter.getName() + " и " + enemyCharacter.getName());
             performBattle();
         } else {
             System.out.println("Сражение невозможно начать. Герои должны находиться рядом.");
@@ -28,17 +28,17 @@ public class Battle {
     // Проверка, что герои могут начать сражение
     private boolean canStartBattle() {
         // Здесь можно добавить логику для проверки расстояния между героями, чтобы они могли встретиться.
-        return playerHero.getPosition().equals(enemyHero.getPosition());
+        return playerCharacter.getPosition().equals(enemyCharacter.getPosition());
     }
 
     // Метод для выполнения сражения
     private void performBattle() {
         while (isBattleOngoing) {
             // Каждому герою нужно атаковать в сражении
-            attack(playerHero, enemyHero);
+            attack(playerCharacter, enemyCharacter);
             if (!isBattleOngoing) break;
 
-            attack(enemyHero, playerHero);
+            attack(enemyCharacter, playerCharacter);
             if (!isBattleOngoing) break;
         }
 
@@ -46,7 +46,7 @@ public class Battle {
         determineWinner();
     }
 
-    private void attack(Hero attacker, Hero defender) {
+    private void attack(Character attacker, Character defender) {
         if (attacker.getTeam().hasUnits() && defender.getTeam().hasUnits()) {
             // Удаляем всех юнитов противника (потери)
             defender.getTeam().removeAllUnits();
@@ -59,10 +59,10 @@ public class Battle {
 
     // Метод для определения победителя
     private void determineWinner() {
-        if (playerHero.getTeam().hasUnits()) {
-            System.out.println(playerHero.getName() + " победил в сражении!");
+        if (playerCharacter.getTeam().hasUnits()) {
+            System.out.println(playerCharacter.getName() + " победил в сражении!");
         } else {
-            System.out.println(enemyHero.getName() + " победил в сражении!");
+            System.out.println(enemyCharacter.getName() + " победил в сражении!");
         }
     }
 

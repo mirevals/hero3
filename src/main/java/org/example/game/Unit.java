@@ -59,10 +59,26 @@ public class Unit {
 
     // Метод для атаки
     public void attack(Unit target) {
+        // Проверка, что цель не принадлежит той же команде
+        if (this.team == target.getTeam()) {
+            System.out.println(name + " не может атаковать юнитов своей команды.");
+            return;  // Прекращаем выполнение метода, если цель из той же команды
+        }
+
         // Логика атаки
         System.out.println(name + " атакует " + target.getName() + " с урона: " + getTotalDamage());
         // Уменьшаем здоровье цели
         target.takeDamage(getTotalDamage());
+    }
+
+    public String getSymbol() {
+        // Возвращаем символ в зависимости от типа юнита
+        switch (unitType) {
+            case WARRIOR: return "W";  // Воин
+            case ARCHER: return "A";   // Лучник
+            case MAGE: return "M";     // Маг
+            default: return "?";       // Если тип неизвестен
+        }
     }
 
     // Геттеры для полей
