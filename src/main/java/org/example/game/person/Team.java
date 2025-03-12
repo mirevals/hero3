@@ -1,4 +1,4 @@
-package org.example.game;
+package org.example.game.person;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,5 +1,8 @@
 package org.example.game;
 
+import org.example.game.map.Position;
+import org.example.game.person.Team;
+import org.example.game.person.Unit;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

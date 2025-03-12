@@ -1,4 +1,8 @@
-package org.example.game;
+package org.example.game.battle;
+
+import org.example.game.map.Position;
+import org.example.game.person.Team;
+import org.example.game.person.Unit;
 
 import java.util.List;
 
@@ -30,6 +34,7 @@ public class Battle {
 
                         if (distance <= unit.getAttackRange()) {
                             unit.attack(enemy);
+                            System.out.println(unit.getName() + " атакует " + enemy.getName());
                         } else if (distance <= unit.getMoveRange()) {
                             moveUnitTowardsEnemy(unit, enemy);
                         }
@@ -37,7 +42,15 @@ public class Battle {
                 }
             }
 
+            // Обновление и вывод состояния поля после каждого хода
             battleField.printField();
+
+            // Задержка между итерациями, чтобы игрок успел заметить действия
+            try {
+                Thread.sleep(1500); // Задержка 1.5 секунды между итерациями
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             if (!hasHeroes) {
                 System.out.println("Враги победили!");

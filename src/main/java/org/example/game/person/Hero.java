@@ -1,4 +1,6 @@
-package org.example.game;
+package org.example.game.person;
+
+import org.example.game.map.Position;
 
 import java.util.List;
 

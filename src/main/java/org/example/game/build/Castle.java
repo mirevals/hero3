@@ -1,4 +1,7 @@
-package org.example.game;
+package org.example.game.build;
+
+import org.example.game.person.Character;
+import org.example.game.map.Position;
 
 import java.util.ArrayList;
 import java.util.List;

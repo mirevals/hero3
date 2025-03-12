@@ -1,9 +1,14 @@
 package org.example;
 
-import org.example.game.*;
+import org.example.game.map.GameMap;
+import org.example.game.map.MapManager;
+import org.example.game.map.Position;
+import org.example.game.person.Enemy;
+import org.example.game.person.Hero;
+import org.example.game.person.Team;
+import org.example.game.person.Unit;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class App {
@@ -12,13 +17,13 @@ public class App {
 
         Position heroStartPosition = new Position(MapManager.getHeroX(), MapManager.getHeroY());
         List<Unit> heroUnits = new ArrayList<>();
-        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 100, 10, 5, 3, Team.HERO, heroStartPosition));
+        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 100, 10, 5, 3, Team.HERO, heroStartPosition, "H"));
         Hero hero = new Hero("Герой", 5, heroStartPosition, heroUnits, Team.HERO);
 
 
         Position enemyStartPosition = new Position(MapManager.getHeroX(), MapManager.getHeroY());
         List<Unit> enemyUnits = new ArrayList<>();
-        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 100, 10, 5, 3, Team.ENEMY, heroStartPosition));
+        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 100, 10, 5, 3, Team.ENEMY, heroStartPosition, "E"));
         Enemy enemy = new Enemy("Враг", 5, enemyStartPosition, enemyUnits, Team.ENEMY);
 
 

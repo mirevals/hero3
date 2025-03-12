@@ -1,7 +1,7 @@
-package org.example.game;
+package org.example.game.person;
 
 
-
+import org.example.game.map.Position;
 
 public class Unit {
 
@@ -13,6 +13,8 @@ public class Unit {
     private final Team team;  // Команда, к которой принадлежит юнит
     private int stackSize;  // Количество юнитов в стеке
     private Position position;  // Позиция юнита на карте
+    private String symbol;
+
 
     public enum UnitType {
         WARRIOR,
@@ -23,7 +25,7 @@ public class Unit {
     private final UnitType unitType;  // Тип юнита
 
     // Конструктор юнита
-    public Unit(UnitType unitType, int health, int damage, int moveRange, int attackRange, Team team, Position position) {
+    public Unit(UnitType unitType, int health, int damage, int moveRange, int attackRange, Team team, Position position, String symbol) {
         this.unitType = unitType;
         this.name = unitType.name();  // Имя юнита по умолчанию — это его тип
         this.health = health;
@@ -33,7 +35,9 @@ public class Unit {
         this.team = team;
         this.stackSize = 1;  // Изначально один юнит в стеке
         this.position = position != null ? position : new Position(0, 0);  // Используем переданную позицию или (0, 0) по умолчанию
+        this.symbol = symbol != null ? symbol : getDefaultSymbol();
     }
+
 
 
     // Метод для установки позиции юнита
@@ -71,14 +75,19 @@ public class Unit {
         target.takeDamage(getTotalDamage());
     }
 
-    public String getSymbol() {
-        // Возвращаем символ в зависимости от типа юнита
+    // Получение дефолтного символа по типу юнита
+    private String getDefaultSymbol() {
         switch (unitType) {
             case WARRIOR: return "W";  // Воин
             case ARCHER: return "A";   // Лучник
             case MAGE: return "M";     // Маг
             default: return "?";       // Если тип неизвестен
         }
+    }
+
+    // Метод для получения символа юнита
+    public String getSymbol() {
+        return symbol;
     }
 
     // Геттеры для полей

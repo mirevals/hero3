@@ -1,4 +1,4 @@
-package org.example.game;
+package org.example.game.map;
 
 import java.util.Objects;
 

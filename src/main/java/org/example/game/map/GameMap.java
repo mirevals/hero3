@@ -1,4 +1,11 @@
-package org.example.game;
+package org.example.game.map;
+
+import org.example.game.person.Character;
+import org.example.game.person.Enemy;
+import org.example.game.person.Hero;
+import org.example.game.battle.Battle;
+import org.example.game.battle.BattleField;
+import org.example.game.build.CastleManager;
 
 import java.util.Scanner;
 
@@ -90,11 +97,15 @@ public class GameMap {
         int oldX = mapManager.getHeroX();
         int oldY = mapManager.getHeroY();
 
+        // Заменяем старую позицию героя на пустое место или точку в зависимости от текущего содержимого
         if (mapManager.getMap()[oldY][oldX] == 'H') {
-            mapManager.getMap()[oldY][oldX] = '.';
+            mapManager.getMap()[oldY][oldX] = mapManager.getMap()[oldY][oldX] == '.' ? '.' : ' ';  // Если это точка, оставляем точку, иначе заменяем на пустое место
         }
 
+        // Обновляем позицию героя на новой клетке
         mapManager.setHeroPosition(x, y);
+
+        // Устанавливаем символ героя на новой позиции
         mapManager.getMap()[y][x] = 'H';
     }
 
@@ -109,13 +120,23 @@ public class GameMap {
 
             if (!heroWon) {
                 System.out.println("Герой проиграл битву!");
-                // Можно добавить обработку поражения, например, завершение игры
+                endGame(); // Завершаем игру
             }
+
 
             return true;
         }
         return false;
     }
+    private void endGame() {
+        System.out.println("Игра завершена.");
+        // Дополнительная логика завершения игры, например:
+        // - Сохранение статистики
+        // - Очистка ресурсов
+        // - Вывод финального экрана и т.д.
+        System.exit(0); // Завершаем выполнение программы
+    }
+
 
     public void exitCastle(Character character) {
         CastleManager.isInCastle = false;

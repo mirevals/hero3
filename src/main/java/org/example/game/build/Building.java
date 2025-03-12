@@ -1,4 +1,4 @@
-package org.example.game;
+package org.example.game.build;
 
 public class Building {
     private String name;
