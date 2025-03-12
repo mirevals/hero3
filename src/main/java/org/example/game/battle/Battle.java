@@ -7,8 +7,8 @@ import org.example.game.person.Unit;
 import java.util.List;
 
 public class Battle {
-    private BattleField battleField;
-    private List<Unit> units;
+    private final BattleField battleField;
+    private final List<Unit> units;
 
     public Battle(BattleField battleField) {
         this.battleField = battleField;
@@ -101,6 +101,19 @@ public class Battle {
         if (battleField.canMoveTo(newX, newY)) {
             unit.setPosition(new Position(newX, newY));
             System.out.println(unit.getName() + " перемещается к врагу.");
+        } else {
+            // Если перемещение в предложенную позицию невозможно, попытаться двигаться в другом направлении
+            // Например, пробовать двигаться в диагональ или по осям
+            if (battleField.canMoveTo(unitPos.getX(), newY)) {
+                unit.setPosition(new Position(unitPos.getX(), newY));
+                System.out.println(unit.getName() + " перемещается по оси Y.");
+            } else if (battleField.canMoveTo(newX, unitPos.getY())) {
+                unit.setPosition(new Position(newX, unitPos.getY()));
+                System.out.println(unit.getName() + " перемещается по оси X.");
+            } else {
+                // Если все попытки неудачны, значит, юнит застрял
+                System.out.println(unit.getName() + " не может двигаться.");
+            }
         }
     }
 }

@@ -121,12 +121,21 @@ public class GameMap {
             if (!heroWon) {
                 System.out.println("Герой проиграл битву!");
                 endGame(); // Завершаем игру
+            } else {
+                // Если герои выиграли, удаляем врага с карты
+                removeEnemyFromMap(enemy);
             }
-
 
             return true;
         }
         return false;
+    }
+
+    private void removeEnemyFromMap(Enemy enemy) {
+        // Удаляем врага с карты, если он был побежден
+        mapManager.removeEnemy(enemy); // Предполагаем, что метод removeEnemy удаляет врага из карты
+        mapManager.setEnemyPosition(-1, -1);
+        System.out.println("Враг был удален с карты!");
     }
     private void endGame() {
         System.out.println("Игра завершена.");

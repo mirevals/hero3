@@ -1,5 +1,7 @@
 package org.example.game.map;
 
+import org.example.game.person.Enemy;
+
 public class MapManager {
     private final int width;
     private final int height;
@@ -145,5 +147,20 @@ public class MapManager {
     public void moveEnemy(int dx, int dy) {
         enemyX += dx;
         enemyY += dy;
+    }
+
+    public void removeEnemy(Enemy enemy) {
+        int enemyX = getEnemyX();
+        int enemyY = getEnemyY();
+
+        // Убираем символ врага с карты
+        if (enemyX >= 0 && enemyY >= 0 && enemyX < width && enemyY < height) {
+            map[enemyY][enemyX] = 'H'; // Или другой символ, обозначающий пустое место
+            System.out.println("Враг удален с позиции: (" + enemyX + ", " + enemyY + ")");
+        }
+    }
+    public void setEnemyPosition(int x, int y) {
+        this.enemyX = x;
+        this.enemyY = y;
     }
 }
