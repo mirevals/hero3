@@ -16,6 +16,7 @@ public class MapManager {
     private HeroCastle heroCastle;
     private EnemyCastle enemyCastle;
 
+
     // Координаты героя и врага
     private static int heroX;
     private static int heroY;
