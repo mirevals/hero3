@@ -35,14 +35,26 @@ public class MapManager {
     }
 
     private void placeObstaclesAndCastles() {
+        // Левый участок - собственная территория
         for (int y = 0; y < height; y++) {
             map[y][width / 3] = '#';  // Препятствия
+        }
+
+        // Правый участок - территория противника
+        for (int y = 0; y < height; y++) {
             map[y][2 * width / 3] = '#';  // Препятствия
         }
 
         // Размещение замков
         map[height / 4][width / 6] = 'C';  // Замок игрока (C)
         map[height / 4][5 * width / 6] = 'E';  // Замок противника (E)
+    }
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
     }
 
     private void placeRoads() {
@@ -82,16 +94,6 @@ public class MapManager {
         return map[y][x] != '#';  // Проверка на препятствие
     }
 
-    public int getMovementPenalty(int x, int y) {
-        if (map[y][x] == 'P') {
-            return 1;  // Минимальный штраф в области игрока
-        } else if (map[y][x] == 'E') {
-            return 1;  // Минимальный штраф в области противника
-        } else if (map[y][x] == ' ') {
-            return 3;  // Наибольший штраф на нейтральной территории
-        }
-        return Integer.MAX_VALUE;  // Невозможность перемещения по препятствиям
-    }
 
     public void printMap() {
         // Печать заголовков для территорий
@@ -110,15 +112,6 @@ public class MapManager {
 
     public char[][] getMap() {
         return map;
-    }
-
-    // Добавляем два метода для решения проблемы с getWidth и getHeight
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     // Геттеры для координат героя и врага
@@ -193,5 +186,46 @@ public class MapManager {
 
         System.out.println("Позиция замка игрока: X=" + playerCastle[0] + ", Y=" + playerCastle[1]);
         System.out.println("Позиция замка врага: X=" + enemyCastle[0] + ", Y=" + enemyCastle[1]);
+    }
+
+    public int getMovementPenalty(int x, int y) {
+        char terrain = getMap()[y][x];  // Получаем тип текущей клетки
+
+        // Если клетка - дорога, проверяем территорию
+        if (terrain == '.') {
+            // Если герой на своей территории, штраф не применяется
+            if (x < width / 3) {
+                return 0;  // Нет штрафа на дороге по своей территории
+            } else {
+                return -1;  // Штраф на дороге, если не на своей территории
+            }
+        }
+
+        // Геройская территория
+        if (x < width / 3) {
+            return 0;  // Нет штрафа на своей территории
+        }
+
+        // Вражеская территория
+        else if (x > 2 * width / 3) {
+            return 1;  // Минимальный штраф на территории врага
+        }
+
+        // Нейтральная территория
+        return 2;  // Штраф на нейтральной территории
+    }
+
+    // Новый метод для получения типа территории
+    public String getTerritoryType(int x, int y) {
+        // Геройская территория
+        if (x < width / 3) {
+            return "Геройская территория";
+        }
+        // Вражеская территория
+        else if (x > 2 * width / 3) {
+            return "Вражеская территория";
+        }
+        // Нейтральная территория
+        return "Нейтральная территория";
     }
 }

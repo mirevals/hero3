@@ -48,14 +48,6 @@ public class Character {
         return currentMoves;
     }
 
-    // Метод для перемещения героя
-    public void move(Position newPosition) {
-        if (currentMoves > 0) {
-            this.position = newPosition;
-            currentMoves--;  // Уменьшаем количество оставшихся перемещений
-        }
-    }
-
     // Метод для пополнения инвентаря героя
     public void addItemToInventory(String item) {
         inventory.add(item);
@@ -84,5 +76,16 @@ public class Character {
 
     public List<Unit> getUnits() {
         return units;
+    }
+
+    // Метод для установки количества оставшихся перемещений
+    public void setCurrentMoves(int currentMoves) {
+        if (currentMoves < 0) {
+            System.out.println("Ошибка: количество перемещений не может быть меньше 0.");
+        } else if (currentMoves > maxMoves) {
+            System.out.println("Ошибка: количество перемещений не может быть больше " + maxMoves);
+        } else {
+            this.currentMoves = currentMoves;
+        }
     }
 }

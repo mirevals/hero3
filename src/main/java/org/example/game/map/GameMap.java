@@ -56,28 +56,61 @@ public class GameMap {
     }
 
     public boolean moveHero(int dx, int dy, Character character, Enemy enemy) {
+        // Проверка на наличие оставшихся шагов
+        if (character.getCurrentMoves() <= 0) {
+            System.out.println("У героя не осталось шагов.");
+            return false;  // Если шагов нет, не даем двигаться
+        }
+
+        // Проверка на возможность движения (например, не блокирует ли что-то)
         if (!canMove(character)) {
             return false;
         }
 
+        // Рассчитываем новое положение
         int newX = mapManager.getHeroX() + dx;
         int newY = mapManager.getHeroY() + dy;
 
+        // Проверка на допустимость перемещения
         if (!isValidMove(newX, newY)) {
             return false;
         }
 
+        // Обработка входа в замок
         if (handleCastleEntry(character, newX, newY)) {
             return false;
         }
 
+        // Информация о типе территории
+        String terrainType = mapManager.getTerritoryType(newX, newY);
+        System.out.println("Герой шагает на территорию: " + terrainType);
+
+        // Вычисление штрафа за территорию
+        int penalty = mapManager.getMovementPenalty(newX, newY);
+        int remainingMoves = character.getCurrentMoves() - penalty;
+
+        // Проверка, хватит ли шагов для этого перемещения
+        if (remainingMoves < 0) {
+            System.out.println("Недостаточно шагов для перемещения на эту территорию.");
+            return false;  // Если не хватает шагов, не даем двигаться
+        }
+
+        // Обновляем количество оставшихся шагов
+        character.setCurrentMoves(remainingMoves);
+
+        // Обновляем позицию героя
         updateHeroPosition(newX, newY);
 
+        // Вывод оставшихся шагов
+        System.out.println("Оставшиеся шаги: " + character.getCurrentMoves());
+
+        // Проверка на бой
         return !checkForBattle(character, enemy, newX, newY);
     }
 
+
     private boolean canMove(Character character) {
-        return character.getCurrentMoves() > 0;
+        return character.getCurrentMoves() > 0; // Проверка на количество оставшихся шагов
     }
 
     private boolean isValidMove(int x, int y) {
