@@ -10,4 +10,5 @@ public class EnemyCastle extends Castle{
     public String getType() {
         return "Вражеский замок";  // Возвращаем строку с типом замка
     }
+
 }

@@ -1,4 +1,6 @@
 package org.example.game.build;
+
+import org.example.game.person.Character;
 import org.example.game.map.Position;
 
 import java.util.ArrayList;
@@ -7,9 +9,10 @@ import java.util.List;
 public abstract class Castle {
 
     private final String name;  // Название замка
-    private static Position position = null;  // Позиция замка на карте
+    private Position position = null;  // Позиция замка на карте
     private final List<Building> buildings;  // Список строений в замке
     private boolean isCaptured;  // Флаг для проверки, захвачен ли замок
+
 
     // Конструктор замка
     public Castle(String name, Position position) {
@@ -17,6 +20,12 @@ public abstract class Castle {
         this.position = position;
         this.buildings = new ArrayList<>();
         this.isCaptured = false;
+    }
+
+
+
+    public Position getPosition(){
+        return position;
     }
 
     // Метод для получения имени замка
@@ -42,6 +51,7 @@ public abstract class Castle {
     }
 
     public abstract String getType();
+
 
 
 }

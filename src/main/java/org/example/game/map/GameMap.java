@@ -12,19 +12,15 @@ import java.util.Scanner;
 public class GameMap {
 
     private final MapManager mapManager;
-    private final Hero hero;
-    private final Enemy enemy;
     private final Scanner scanner;
 
-    public GameMap(int width, int height, Hero hero, Enemy enemy) {
+    public GameMap(int width, int height) {
         this.mapManager = new MapManager(width, height);
-        this.hero = hero;
-        this.enemy = enemy;
         this.scanner = new Scanner(System.in);
     }
 
     public void startGame() {
-        CastleManager.enterCastle(hero, this, 'C');
+        CastleManager.enterCastle(this, 'C');
         printMap();
 
         while (true) {
@@ -163,7 +159,7 @@ public class GameMap {
         }
 
         // Обновляем позицию героя на новой клетке
-        mapManager.setHeroPosition(x, y);
+        hero.setHeroPosition(x, y);
 
         // Устанавливаем символ героя на новой позиции
         mapManager.getMap()[y][x] = 'H';
@@ -195,7 +191,7 @@ public class GameMap {
     private void removeEnemyFromMap(Enemy enemy) {
         // Удаляем врага с карты, если он был побежден
         mapManager.removeEnemy(enemy); // Предполагаем, что метод removeEnemy удаляет врага из карты
-        mapManager.setEnemyPosition(-1, -1);
+        enemy.setEnemyPosition(-1, -1);
         System.out.println("Враг был удален с карты!");
     }
 
@@ -208,7 +204,7 @@ public class GameMap {
         System.exit(0); // Завершаем выполнение программы
     }
 
-    public void exitCastle(Character character) {
+    public void exitCastle() {
         CastleManager.isInCastle = false;
         int[] heroCastlePos = findHeroCastlePosition();
         int[] enemyCastlePos = findEnemyCastlePosition();
@@ -228,7 +224,7 @@ public class GameMap {
 
                 if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
                     mapManager.getMap()[newY][castleX] = 'H'; // Размещаем героя в новой клетке
-                    mapManager.setHeroPosition(castleX, newY); // Обновляем позицию героя
+                    hero.setHeroPosition(castleX, newY); // Обновляем позицию героя
                     System.out.println("Вы покинули замок героя и переместились на клетку ниже.");
                 } else {
                     System.out.println("Вы не можете покинуть замок, нет свободной клетки ниже.");
@@ -247,7 +243,7 @@ public class GameMap {
 
                 if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
                     mapManager.getMap()[newY][castleX] = 'H'; // Размещаем героя в новой клетке
-                    mapManager.setHeroPosition(castleX, newY); // Обновляем позицию героя
+                    hero.setHeroPosition(castleX, newY); // Обновляем позицию героя
                     System.out.println("Вы покинули замок противника и переместились на клетку ниже.");
                 } else {
                     System.out.println("Вы не можете покинуть замок, нет свободной клетки ниже.");
@@ -306,12 +302,6 @@ public class GameMap {
 
     public int getEnemyY() {
         return mapManager.getEnemyY();
-    }
-
-    public void moveEnemy(int dx, int dy) {
-        if (canMoveEnemy(dx, dy)) {
-            mapManager.moveEnemy(dx, dy);
-        }
     }
 
     private boolean canMoveEnemy(int dx, int dy) {

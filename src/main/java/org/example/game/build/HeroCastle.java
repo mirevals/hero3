@@ -10,4 +10,5 @@ public class HeroCastle extends Castle {
     public String getType() {
         return "Героический замок";  // Возвращаем строку с типом замка
     }
+
 }
