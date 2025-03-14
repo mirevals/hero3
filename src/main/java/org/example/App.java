@@ -24,7 +24,7 @@ public class App {
 
         Position enemyStartPosition = new Position(MapManager.getHeroX(), MapManager.getHeroY());
         List<Unit> enemyUnits = new ArrayList<>();
-        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 10, 1, 5, 3, Team.ENEMY, heroStartPosition, "E"));
+        enemyUnits.add(new Unit(Unit.UnitType.WARRIOR, 10, 1, 5, 3, Team.ENEMY, heroStartPosition, "E"));
         Enemy enemy = new Enemy("Враг", 5, enemyStartPosition, enemyUnits, Team.ENEMY, 0);
 
 
