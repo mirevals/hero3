@@ -19,6 +19,7 @@ public class Unit {
     public enum UnitType {
         WARRIOR,
         ARCHER,
+        SPEARMAN,
         MAGE;  // Пример нескольких типов юнитов
     }
 
