@@ -16,13 +16,7 @@ public class App {
     public static void main(String[] args) {
 
 
-        Hero hero = new Hero("Герой", 15, Team.HERO, 1000);
-
-
-        Enemy enemy = new Enemy("Враг", 5, Team.ENEMY, 0);
-
-
-        GameMap gameMap = new GameMap(10, 10, hero, enemy);
+        GameMap gameMap = new GameMap(10, 10);
         gameMap.startGame();
     }
 }

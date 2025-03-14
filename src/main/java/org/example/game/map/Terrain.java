@@ -56,4 +56,16 @@ public class Terrain {
         return "Нейтральная территория";
     }
 
+    static void placeObstacles(char[][] map, int width, int height) {
+        // Левый участок - собственная территория
+        for (int y = 0; y < height; y++) {
+            map[y][width / 3] = '#';  // Препятствия
+        }
+
+        // Правый участок - территория противника
+        for (int y = 0; y < height; y++) {
+            map[y][2 * width / 3] = '#';  // Препятствия
+        }
+    }
+
 }
