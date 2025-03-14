@@ -6,4 +6,8 @@ public class EnemyCastle extends Castle{
     public EnemyCastle(int height, int width) {
         super("Замок врага", new Position(5 * width / 6, height / 4));
     }
+    @Override
+    public String getType() {
+        return "Вражеский замок";  // Возвращаем строку с типом замка
+    }
 }
