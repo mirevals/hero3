@@ -78,6 +78,7 @@ public class GameMap {
         // Проверка, хватает ли шагов на передвижение
         if (character.getCurrentMoves() < penalty) {
             System.out.println("Недостаточно шагов для перемещения на эту территорию.");
+            System.out.println("Недостаточно шагов для перемещения на эту территорию.");
             return false;  // Прерываем, если не хватает шагов
         }
 
