@@ -9,9 +9,11 @@ public class CastleManager {
 
     private final GameMap gameMap;  // Ссылка на объект GameMap
     public static boolean isInCastle = false;  // Флаг, находится ли герой в замке
+    private final char castleType;  // Тип замка (геройский или противника)
 
-    public CastleManager(GameMap gameMap) {
+    public CastleManager(GameMap gameMap, char castleType) {
         this.gameMap = gameMap;
+        this.castleType = castleType;
     }
 
     // Метод для обработки команд в замке
@@ -31,7 +33,6 @@ public class CastleManager {
                 case "q":
                     gameMap.exitCastle(character);  // Выход из замка через GameMap
                     // После выхода из замка печатаем карту и завершаем цикл
-                    gameMap.printMap();
                     return;  // Прерываем цикл, так как мы больше не в замке
                 case "h":
                     showHelp();  // Показать список команд
@@ -80,13 +81,13 @@ public class CastleManager {
     }
 
     // Включаем замок, флаг для того, чтобы начать обработку команд
-    public static void enterCastle(Character character, GameMap gameMap) {
-        // Создаем объект CastleManager
-        CastleManager castleManager = new CastleManager(gameMap);
+    public static void enterCastle(Character character, GameMap gameMap, char castleType) {
+        // Создаем объект CastleManager с типом замка
+        CastleManager castleManager = new CastleManager(gameMap, castleType);
 
         // Устанавливаем флаг нахождения в замке
         castleManager.isInCastle = true;
-        System.out.println("Вы вошли в замок!");
+        System.out.println("Вы вошли в " + (castleType == 'C' ? "замок героя!" : "замок противника!"));
 
         // Запуск обработки команд
         castleManager.processCastleCommands(character);

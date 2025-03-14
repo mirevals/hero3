@@ -15,7 +15,6 @@ public class Character {
     private int currentMoves;  // Текущее количество оставшихся перемещений
     private Position position;  // Позиция героя на карте
     private final List<String> inventory;  // Список предметов, которые собрал герой
-    private Unit unit;  // Юнит, принадлежащий герою
     private final Team team;
     private final List<Unit> units;
 
@@ -28,11 +27,6 @@ public class Character {
         this.inventory = new ArrayList<>();
         this.units = units;  // Список юнитов
         this.team = team;
-
-        // Присваиваем первому юниту из списка unit
-        if (!units.isEmpty()) {
-            this.unit = units.get(0);
-        }
     }
 
     // Метод для получения имени героя
@@ -82,16 +76,6 @@ public class Character {
     public void endTurn() {
         this.currentMoves = maxMoves;
         System.out.println(name + " завершил ход. Перемещения восстановлены.");
-    }
-
-    // Метод для получения юнита героя
-    public Unit getUnit() {
-        return unit;
-    }
-
-    // Метод для изменения юнита героя (например, если герой потерял своего юнита)
-    public void setUnit(Unit unit) {
-        this.unit = unit;
     }
 
     public int getMaxMoves() {

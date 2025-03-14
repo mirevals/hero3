@@ -40,8 +40,9 @@ public class MapManager {
             map[y][2 * width / 3] = '#';  // Препятствия
         }
 
-        map[height / 4][width / 6] = 'L';  // Замок игрока
-        map[height / 4][5 * width / 6] = 'L';  // Замок противника
+        // Размещение замков
+        map[height / 4][width / 6] = 'C';  // Замок игрока (C)
+        map[height / 4][5 * width / 6] = 'E';  // Замок противника (E)
     }
 
     private void placeRoads() {
@@ -52,14 +53,14 @@ public class MapManager {
 
         // Размещение дороги по горизонтали (не перекрывая замки)
         for (int x = startX; x <= endX; x++) {
-            if (map[startY][x] != 'L') {  // Если клетка не занята замком
+            if (map[startY][x] != 'C' && map[startY][x] != 'E') {  // Если клетка не занята замками
                 map[startY][x] = '.';  // Размещение дороги
             }
         }
 
         // Размещение дороги по вертикали (не перекрывая замки)
         for (int y = startY + 1; y < height; y++) {
-            if (map[y][endX] != 'L') {  // Если клетка не занята замком
+            if (map[y][endX] != 'C' && map[y][endX] != 'E') {  // Если клетка не занята замками
                 map[y][endX] = '.';  // Размещение дороги
             }
         }
@@ -155,12 +156,42 @@ public class MapManager {
 
         // Убираем символ врага с карты
         if (enemyX >= 0 && enemyY >= 0 && enemyX < width && enemyY < height) {
-            map[enemyY][enemyX] = 'H'; // Или другой символ, обозначающий пустое место
+            map[enemyY][enemyX] = ' '; // Убираем врага
             System.out.println("Враг удален с позиции: (" + enemyX + ", " + enemyY + ")");
         }
     }
+
     public void setEnemyPosition(int x, int y) {
         this.enemyX = x;
         this.enemyY = y;
+    }
+
+    // Методы для получения позиций замков
+    public int[] getPlayerCastlePosition() {
+        return new int[] { width / 6, height / 4 };  // Позиция замка игрока
+    }
+
+    public int[] getEnemyCastlePosition() {
+        return new int[] { 5 * width / 6, height / 4 };  // Позиция замка врага
+    }
+
+    // Методы для установки новых позиций замков
+    public void setPlayerCastlePosition(int x, int y) {
+        map[height / 4][width / 6] = ' ';  // Убираем старое местоположение
+        map[y][x] = 'C';  // Устанавливаем новый замок игрока
+    }
+
+    public void setEnemyCastlePosition(int x, int y) {
+        map[height / 4][5 * width / 6] = ' ';  // Убираем старое местоположение
+        map[y][x] = 'E';  // Устанавливаем новый замок врага
+    }
+
+    // Вывод позиций замков
+    public void printCastlePositions() {
+        int[] playerCastle = getPlayerCastlePosition();
+        int[] enemyCastle = getEnemyCastlePosition();
+
+        System.out.println("Позиция замка игрока: X=" + playerCastle[0] + ", Y=" + playerCastle[1]);
+        System.out.println("Позиция замка врага: X=" + enemyCastle[0] + ", Y=" + enemyCastle[1]);
     }
 }

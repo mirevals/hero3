@@ -85,11 +85,21 @@ public class GameMap {
     }
 
     private boolean handleCastleEntry(Character character, int x, int y) {
-        if (mapManager.getMap()[y][x] == 'L') {
-            System.out.println("Вы подошли к замку! Вход возможен.");
-            CastleManager.enterCastle(character, this);
+        char castleType = mapManager.getMap()[y][x];
+
+        if (castleType == 'C') {
+            // Вход в замок героя
+            System.out.println("Вы подошли к замку героя! Вход возможен.");
+            CastleManager.enterCastle(character, this, 'C'); // Входим в замок героя
+            return true;
+        } else if (castleType == 'E') {
+            // Вход в замок противника
+            System.out.println("Вы подошли к замку противника! Вход невозможен.");
+            CastleManager.enterCastle(character, this, 'E'); // Входим в замок героя
+
             return true;
         }
+
         return false;
     }
 
@@ -137,6 +147,7 @@ public class GameMap {
         mapManager.setEnemyPosition(-1, -1);
         System.out.println("Враг был удален с карты!");
     }
+
     private void endGame() {
         System.out.println("Игра завершена.");
         // Дополнительная логика завершения игры, например:
@@ -146,41 +157,80 @@ public class GameMap {
         System.exit(0); // Завершаем выполнение программы
     }
 
-
     public void exitCastle(Character character) {
         CastleManager.isInCastle = false;
-        int[] castlePos = findCastlePosition();
-        int castleX = castlePos[0];
-        int castleY = castlePos[1];
+        int[] heroCastlePos = findHeroCastlePosition();
+        int[] enemyCastlePos = findEnemyCastlePosition();
+        int castleX = -1, castleY = -1;
         int heroX = mapManager.getHeroX();
         int heroY = mapManager.getHeroY();
 
-        if (mapManager.getMap()[heroY][heroX] == 'H') {
-            mapManager.getMap()[heroY][heroX] = '.';
+        // Проверяем, находится ли герой в замке
+        if (mapManager.getMap()[heroY][heroX] == 'C') { // Замок героя
+            mapManager.getMap()[heroY][heroX] = '.'; // Освобождаем клетку, где был герой
 
-            int newY = castleY + 1;
-            if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
-                mapManager.getMap()[newY][castleX] = 'H';
-                mapManager.setHeroPosition(castleX, newY);
-                System.out.println("Вы покинули замок и переместились на клетку ниже.");
-            } else {
-                System.out.println("Вы не можете покинуть замок, нет свободной клетки ниже.");
+            // Если герой в замке героя, выходим из него
+            if (heroCastlePos[0] != -1 && heroCastlePos[1] != -1) {
+                castleX = heroCastlePos[0];
+                castleY = heroCastlePos[1];
+                int newY = castleY + 1; // Например, перемещение на клетку ниже
+
+                if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
+                    mapManager.getMap()[newY][castleX] = 'H'; // Размещаем героя в новой клетке
+                    mapManager.setHeroPosition(castleX, newY); // Обновляем позицию героя
+                    System.out.println("Вы покинули замок героя и переместились на клетку ниже.");
+                } else {
+                    System.out.println("Вы не можете покинуть замок, нет свободной клетки ниже.");
+                }
+
+                mapManager.getMap()[castleY][castleX] = 'С'; // Убираем замок с карты
             }
+        } else if (mapManager.getMap()[heroY][heroX] == 'E') { // Замок противника
+            mapManager.getMap()[heroY][heroX] = '.'; // Освобождаем клетку, где был герой
 
-            mapManager.getMap()[castleY][castleX] = 'L';
-            printMap();
+            // Если герой в замке противника, выходим из него
+            if (enemyCastlePos[0] != -1 && enemyCastlePos[1] != -1) {
+                castleX = enemyCastlePos[0];
+                castleY = enemyCastlePos[1];
+                int newY = castleY + 1; // Например, перемещение на клетку ниже
+
+                if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
+                    mapManager.getMap()[newY][castleX] = 'H'; // Размещаем героя в новой клетке
+                    mapManager.setHeroPosition(castleX, newY); // Обновляем позицию героя
+                    System.out.println("Вы покинули замок противника и переместились на клетку ниже.");
+                } else {
+                    System.out.println("Вы не можете покинуть замок, нет свободной клетки ниже.");
+                }
+
+                mapManager.getMap()[castleY][castleX] = 'E'; // Убираем замок противника с карты
+            }
+        } else {
+            System.out.println("Вы не находитесь в замке.");
         }
+
+        printMap(); // Печатаем карту один раз, после всех изменений
     }
 
-    private int[] findCastlePosition() {
+    private int[] findHeroCastlePosition() {
         for (int y = 0; y < mapManager.getHeight(); y++) {
             for (int x = 0; x < mapManager.getWidth(); x++) {
-                if (mapManager.getMap()[y][x] == 'L') {
+                if (mapManager.getMap()[y][x] == 'C') { // Замок героя
                     return new int[]{x, y};
                 }
             }
         }
-        return new int[]{-1, -1};
+        return new int[]{-1, -1}; // Если замок героя не найден
+    }
+
+    private int[] findEnemyCastlePosition() {
+        for (int y = 0; y < mapManager.getHeight(); y++) {
+            for (int x = 0; x < mapManager.getWidth(); x++) {
+                if (mapManager.getMap()[y][x] == 'E') { // Замок противника
+                    return new int[]{x, y};
+                }
+            }
+        }
+        return new int[]{-1, -1}; // Если замок противника не найден
     }
 
     public BattleField enterBattleField(Character hero, Enemy enemy) {
