@@ -43,7 +43,8 @@ public class MapManager {
 
         // Размещение препятствий и замков
         placeObstaclesAndCastles();
-        placeRoads();
+        Road road = new Road(width / 6, height / 4, 5 * width / 6, height / 4);
+        road.placeRoad(map);
         initializeCharacterPositions();
     }
 
@@ -78,36 +79,16 @@ public class MapManager {
         return this.height;
     }
 
-    private void placeRoads() {
-        int startX = width / 6;
-        int startY = height / 4;
-        int endX = 5 * width / 6;
-        int endY = height / 4;
-
-        // Размещение дороги по горизонтали (не перекрывая замки)
-        for (int x = startX; x <= endX; x++) {
-            if (map[startY][x] != 'C' && map[startY][x] != 'E') {  // Если клетка не занята замками
-                map[startY][x] = '.';  // Размещение дороги
-            }
-        }
-
-        // Размещение дороги по вертикали (не перекрывая замки)
-        for (int y = startY + 1; y < height; y++) {
-            if (map[y][endX] != 'C' && map[y][endX] != 'E') {  // Если клетка не занята замками
-                map[y][endX] = '.';  // Размещение дороги
-            }
-        }
-    }
 
     private void initializeCharacterPositions() {
         // Позиция героя
-        heroX = width / 6 + 1;
-        heroY = height / 4 + 1;
+        heroX = Hero.getHeroInitialPosition().getX();
+        heroY = Hero.getHeroInitialPosition().getY();
         map[heroY][heroX] = 'H';  // Размещение героя
 
         // Позиция противника
-        enemyX = 5 * width / 6 - 1;
-        enemyY = height / 4 + 1;
+        enemyX = Enemy.getEnemyInitialPosition().getX();
+        enemyY = Enemy.getEnemyInitialPosition().getY();
         map[enemyY][enemyX] = 'A';  // Размещение противника
     }
 
@@ -189,25 +170,6 @@ public class MapManager {
         return new int[] { 5 * width / 6, height / 4 };  // Позиция замка врага
     }
 
-    // Методы для установки новых позиций замков
-    public void setPlayerCastlePosition(int x, int y) {
-        map[height / 4][width / 6] = ' ';  // Убираем старое местоположение
-        map[y][x] = 'C';  // Устанавливаем новый замок игрока
-    }
-
-    public void setEnemyCastlePosition(int x, int y) {
-        map[height / 4][5 * width / 6] = ' ';  // Убираем старое местоположение
-        map[y][x] = 'E';  // Устанавливаем новый замок врага
-    }
-
-    // Вывод позиций замков
-    public void printCastlePositions() {
-        int[] playerCastle = getPlayerCastlePosition();
-        int[] enemyCastle = getEnemyCastlePosition();
-
-        System.out.println("Позиция замка игрока: X=" + playerCastle[0] + ", Y=" + playerCastle[1]);
-        System.out.println("Позиция замка врага: X=" + enemyCastle[0] + ", Y=" + enemyCastle[1]);
-    }
 
     public int getMovementPenalty(int x, int y) {
         char terrain = getMap()[y][x];  // Получаем тип текущей клетки

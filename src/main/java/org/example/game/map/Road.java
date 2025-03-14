@@ -1,21 +1,49 @@
 package org.example.game.map;
 
-public class Road extends Terrain {
+public class Road {
+    private int startX;
+    private int startY;
+    private int endX;
+    private int endY;
 
-    // Конструктор, который инициализирует тип местности как дорогу
-    public Road() {
-        super(TerrainType.ROAD);  // Вызов конструктора родительского класса Terrain с типом ROAD
+    public Road(int startX, int startY, int endX, int endY) {
+        this.startX = startX;
+        this.startY = startY;
+        this.endX = endX;
+        this.endY = endY;
     }
 
-    // Метод для получения штрафа при перемещении (для дороги он минимальный)
-    @Override
-    public int getMovementPenalty() {
-        return 0;  // Дорога имеет минимальный штраф к перемещению
+    // Метод для размещения дороги на карте
+    public void placeRoad(char[][] map) {
+        // Размещение дороги по горизонтали (не перекрывая замки)
+        for (int x = startX; x <= endX; x++) {
+            if (map[startY][x] != 'C' && map[startY][x] != 'E') {  // Если клетка не занята замками
+                map[startY][x] = '.';  // Размещение дороги
+            }
+        }
+
+        // Размещение дороги по вертикали (не перекрывая замки)
+        for (int y = startY + 1; y < map.length; y++) {
+            if (map[y][endX] != 'C' && map[y][endX] != 'E') {  // Если клетка не занята замками
+                map[y][endX] = '.';  // Размещение дороги
+            }
+        }
     }
 
-    // Метод для проверки, является ли местность проходимой (дорога всегда проходима)
-    @Override
-    public boolean isWalkable() {
-        return true;  // Дорога проходима
+    // Геттеры для начала и конца дороги
+    public int getStartX() {
+        return startX;
+    }
+
+    public int getStartY() {
+        return startY;
+    }
+
+    public int getEndX() {
+        return endX;
+    }
+
+    public int getEndY() {
+        return endY;
     }
 }

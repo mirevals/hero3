@@ -4,6 +4,6 @@ import org.example.game.map.Position;
 
 public class HeroCastle extends Castle {
     public HeroCastle(int height, int width) {
-        super("Замок героя", new Position(height / 4, width / 6));
+        super("Замок героя", new Position(width / 6, height / 4));
     }
 }

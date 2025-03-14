@@ -13,5 +13,12 @@ public class Hero extends Character {
         super(name, maxMoves, HeroCastle.getPosition(), team, gold);
     }
 
-    // Дополнительные методы или переопределения для класса Hero можно добавить здесь, если требуется
+
+    // Метод для получения начальной позиции героя
+    public static Position getHeroInitialPosition() {
+        // Логика для определения позиции героя на карте
+        int heroX = HeroCastle.getPosition().getX() / 6;
+        int heroY = HeroCastle.getPosition().getY() / 4;
+        return new Position(heroX, heroY);
+    }
 }
