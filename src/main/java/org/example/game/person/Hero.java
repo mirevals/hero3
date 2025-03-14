@@ -1,6 +1,7 @@
 package org.example.game.person;
 
 import org.example.game.map.Position;
+import org.example.game.build.HeroCastle;
 
 import java.util.List;
 
@@ -8,9 +9,16 @@ public class Hero extends Character {
 
 
 
-    public Hero(String name, int maxMoves, Position startPosition, List<Unit> units, Team team, int gold) {
-        super(name, maxMoves, startPosition, units, team, gold);
+    public Hero(String name, int maxMoves, Team team, int gold) {
+        super(name, maxMoves, HeroCastle.getPosition(), team, gold);
     }
 
-    // Дополнительные методы или переопределения для класса Hero можно добавить здесь, если требуется
+
+    // Метод для получения начальной позиции героя
+    public static Position getHeroInitialPosition() {
+        // Логика для определения позиции героя на карте
+        int heroX = HeroCastle.getPosition().getX() / 6;
+        int heroY = HeroCastle.getPosition().getY() / 4;
+        return new Position(heroX, heroY);
+    }
 }

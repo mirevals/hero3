@@ -83,7 +83,7 @@ public class GameMap {
         }
 
         // Информация о типе территории
-        String terrainType = mapManager.getTerritoryType(newX, newY);
+        String terrainType = Terrain.getTerritoryType(newX, newY);
         System.out.println("Герой шагает на территорию: " + terrainType);
 
         // Списываем штраф за территорию

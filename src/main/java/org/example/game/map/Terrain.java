@@ -42,4 +42,18 @@ public class Terrain {
     public boolean isWalkable() {
         return movementPenalty != Integer.MAX_VALUE;
     }
+
+    public static String getTerritoryType(int x, int width) {
+        // Геройская территория
+        if (x < width / 3) {
+            return "Геройская территория";
+        }
+        // Вражеская территория
+        else if (x > 2 * width / 3) {
+            return "Вражеская территория";
+        }
+        // Нейтральная территория
+        return "Нейтральная территория";
+    }
+
 }

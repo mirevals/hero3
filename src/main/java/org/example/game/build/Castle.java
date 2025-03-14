@@ -9,7 +9,7 @@ import java.util.List;
 public class Castle {
 
     private final String name;  // Название замка
-    private final Position position;  // Позиция замка на карте
+    private static Position position = null;  // Позиция замка на карте
     private final List<Building> buildings;  // Список строений в замке
     private boolean isCaptured;  // Флаг для проверки, захвачен ли замок
 
@@ -24,11 +24,6 @@ public class Castle {
     // Метод для получения имени замка
     public String getName() {
         return name;
-    }
-
-    // Метод для получения позиции замка
-    public Position getPosition() {
-        return position;
     }
 
     // Метод для добавления строения в замок
@@ -83,6 +78,10 @@ public class Castle {
     // Проверка на захваченный ли замок
     public boolean isCaptured() {
         return isCaptured;
+    }
+
+    public static Position getPosition(){
+        return position;
     }
 
 
