@@ -24,6 +24,7 @@ public class GameMap {
     }
 
     public void startGame() {
+        CastleManager.enterCastle(hero, this, 'C');
         printMap();
 
         while (true) {
