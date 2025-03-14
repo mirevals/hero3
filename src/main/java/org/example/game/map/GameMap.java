@@ -87,16 +87,16 @@ public class GameMap {
 
         // Вычисление штрафа за территорию
         int penalty = mapManager.getMovementPenalty(newX, newY);
-        int remainingMoves = character.getCurrentMoves() - penalty;
+        character.setCurrentMoves(character.getCurrentMoves() - penalty);
 
         // Проверка, хватит ли шагов для этого перемещения
-        if (remainingMoves < 0) {
+        if (character.getCurrentMoves() < 0) {
             System.out.println("Недостаточно шагов для перемещения на эту территорию.");
             return false;  // Если не хватает шагов, не даем двигаться
         }
 
         // Обновляем количество оставшихся шагов
-        character.setCurrentMoves(remainingMoves);
+        character.setCurrentMoves(character.getCurrentMoves());
 
         // Обновляем позицию героя
         updateHeroPosition(newX, newY);
@@ -167,6 +167,7 @@ public class GameMap {
             } else {
                 // Если герои выиграли, удаляем врага с карты
                 removeEnemyFromMap(enemy);
+                updateHeroPosition(x, y);
             }
 
             return true;
