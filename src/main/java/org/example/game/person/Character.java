@@ -21,13 +21,13 @@ public class Character {
     private int gold;
 
     // Конструктор героя
-    public Character(String name, int maxMoves, Position startPosition, List<Unit> units, Team team, int gold) {
+    public Character(String name, int maxMoves, Position startPosition, Team team, int gold) {
         this.name = name;
         this.maxMoves = maxMoves;
         this.currentMoves = maxMoves;
         this.position = startPosition;
         this.inventory = new ArrayList<>();
-        this.units = units;  // Список юнитов
+        this.units = new ArrayList<>();
         this.team = team;
         this.gold = gold;
     }

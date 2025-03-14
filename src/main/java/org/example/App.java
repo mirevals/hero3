@@ -16,16 +16,10 @@ public class App {
     public static void main(String[] args) {
 
 
-        Position heroStartPosition = new Position(MapManager.getHeroX(), MapManager.getHeroY());
-        List<Unit> heroUnits = new ArrayList<>();
-        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 100, 10, 5, 3, Team.HERO, heroStartPosition, "H"));
-        Hero hero = new Hero("Герой", 15, heroStartPosition, heroUnits, Team.HERO, 1000);
+        Hero hero = new Hero("Герой", 15, Team.HERO, 1000);
 
 
-        Position enemyStartPosition = new Position(MapManager.getHeroX(), MapManager.getHeroY());
-        List<Unit> enemyUnits = new ArrayList<>();
-        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 10, 1, 5, 3, Team.ENEMY, heroStartPosition, "E"));
-        Enemy enemy = new Enemy("Враг", 5, enemyStartPosition, enemyUnits, Team.ENEMY, 0);
+        Enemy enemy = new Enemy("Враг", 5, Team.ENEMY, 0);
 
 
         GameMap gameMap = new GameMap(10, 10, hero, enemy);

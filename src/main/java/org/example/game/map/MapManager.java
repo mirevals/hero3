@@ -1,5 +1,7 @@
 package org.example.game.map;
 
+import org.example.game.build.EnemyCastle;
+import org.example.game.build.HeroCastle;
 import org.example.game.person.Character;
 import org.example.game.person.Enemy;
 import org.example.game.person.Hero;
@@ -15,10 +17,19 @@ public class MapManager {
     private int enemyX;
     private int enemyY;
 
+    private final HeroCastle playerCastle;
+    private final EnemyCastle enemyCastle;
+
+
+
     public MapManager(int width, int height) {
         this.width = width;
         this.height = height;
         this.map = new char[height][width];
+
+        this.playerCastle = new HeroCastle(height, width);
+        this.enemyCastle = new EnemyCastle(height, width);
+
         initializeMap();
     }
 
@@ -46,11 +57,19 @@ public class MapManager {
         for (int y = 0; y < height; y++) {
             map[y][2 * width / 3] = '#';  // Препятствия
         }
+// Получаем позиции замков
+        Position playerCastlePos = HeroCastle.getPosition();
+        Position enemyCastlePos = EnemyCastle.getPosition();
 
         // Размещение замков
-        map[height / 4][width / 6] = 'C';  // Замок игрока (C)
-        map[height / 4][5 * width / 6] = 'E';  // Замок противника (E)
+        map[playerCastlePos.getY()][playerCastlePos.getX()] = 'C';  // Замок игрока (C)
+        map[enemyCastlePos.getY()][enemyCastlePos.getX()] = 'E';  // Замок противника (E)
     }
+
+
+
+
+
     public int getWidth() {
         return this.width;
     }

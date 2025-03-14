@@ -1,15 +1,14 @@
 package org.example.game.person;
 
 import org.example.game.Gold;
+import org.example.game.build.EnemyCastle;
 import org.example.game.map.Position;
 
 import java.util.List;
 
 public class Enemy extends Character {
 
-    public Enemy(String name, int maxMoves, Position startPosition, List<Unit> units, Team team, int gold) {
-        super(name, maxMoves, startPosition, units, team, gold);
+    public Enemy(String name, int maxMoves, Team team, int gold) {
+        super(name, maxMoves, EnemyCastle.getPosition(), team, gold);
     }
-
-    // Дополнительные методы или переопределения для класса Enemy можно добавить здесь, если требуется
 }
