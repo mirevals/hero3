@@ -3,6 +3,7 @@ package org.example.game.person;
 
 
 
+import org.example.game.Gold;
 import org.example.game.map.Position;
 
 import java.util.ArrayList;
@@ -17,9 +18,10 @@ public class Character {
     private final List<String> inventory;  // Список предметов, которые собрал герой
     private final Team team;
     private final List<Unit> units;
+    private int gold;
 
     // Конструктор героя
-    public Character(String name, int maxMoves, Position startPosition, List<Unit> units, Team team) {
+    public Character(String name, int maxMoves, Position startPosition, List<Unit> units, Team team, int gold) {
         this.name = name;
         this.maxMoves = maxMoves;
         this.currentMoves = maxMoves;
@@ -27,11 +29,20 @@ public class Character {
         this.inventory = new ArrayList<>();
         this.units = units;  // Список юнитов
         this.team = team;
+        this.gold = gold;
     }
 
     // Метод для получения имени героя
     public String getName() {
         return name;
+    }
+
+    public int getGold() {
+        return gold;
+    }
+
+    public void setGold (int gold){
+        this.gold = gold;
     }
 
     public Team getTeam() {

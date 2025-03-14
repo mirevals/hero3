@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.game.Gold;
 import org.example.game.map.GameMap;
 import org.example.game.map.MapManager;
 import org.example.game.map.Position;
@@ -17,14 +18,14 @@ public class App {
 
         Position heroStartPosition = new Position(MapManager.getHeroX(), MapManager.getHeroY());
         List<Unit> heroUnits = new ArrayList<>();
-        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 100, 10, 15, 3, Team.HERO, heroStartPosition, "H"));
-        Hero hero = new Hero("Герой", 15, heroStartPosition, heroUnits, Team.HERO);
+        heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 100, 10, 5, 3, Team.HERO, heroStartPosition, "H"));
+        Hero hero = new Hero("Герой", 15, heroStartPosition, heroUnits, Team.HERO, 1000);
 
 
         Position enemyStartPosition = new Position(MapManager.getHeroX(), MapManager.getHeroY());
         List<Unit> enemyUnits = new ArrayList<>();
         heroUnits.add(new Unit(Unit.UnitType.WARRIOR, 10, 1, 5, 3, Team.ENEMY, heroStartPosition, "E"));
-        Enemy enemy = new Enemy("Враг", 5, enemyStartPosition, enemyUnits, Team.ENEMY);
+        Enemy enemy = new Enemy("Враг", 5, enemyStartPosition, enemyUnits, Team.ENEMY, 0);
 
 
         GameMap gameMap = new GameMap(10, 10, hero, enemy);

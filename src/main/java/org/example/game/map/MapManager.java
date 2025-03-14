@@ -1,6 +1,8 @@
 package org.example.game.map;
 
+import org.example.game.person.Character;
 import org.example.game.person.Enemy;
+import org.example.game.person.Hero;
 
 public class MapManager {
     private final int width;
@@ -191,20 +193,16 @@ public class MapManager {
     public int getMovementPenalty(int x, int y) {
         char terrain = getMap()[y][x];  // Получаем тип текущей клетки
 
-        // Если клетка - дорога, проверяем территорию
-        if (terrain == '.') {
-            // Если герой на своей территории, штраф не применяется
-            if (x < width / 3) {
-                return 0;  // Нет штрафа на дороге по своей территории
-            } else {
-                return 1;  // Штраф на дороге, если не на своей территории
-            }
-        }
-
         // Геройская территория
         if (x < width / 3) {
             return 0;  // Нет штрафа на своей территории
         }
+        // Если клетка - дорога, проверяем территорию
+        if (terrain == '.') {
+            return 1;  // Штраф на дороге, если не на своей территории
+        }
+
+
 
         // Вражеская территория
         else if (x > 2 * width / 3) {

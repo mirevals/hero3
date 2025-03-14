@@ -56,47 +56,36 @@ public class GameMap {
     }
 
     public boolean moveHero(int dx, int dy, Character character, Enemy enemy) {
-        // Проверка на наличие оставшихся шагов
+        // Проверка на наличие оставшихся шагов перед движением
         if (character.getCurrentMoves() <= 0) {
-            System.out.println("У героя не осталось шагов.");
-            return false;  // Если шагов нет, не даем двигаться
+            if (!offerToBuySteps(character)) {
+                return false;  // Если не купил шаги, игра завершается
+            }
         }
 
-        // Проверка на возможность движения (например, не блокирует ли что-то)
-        if (!canMove(character)) {
-            return false;
-        }
-
-        // Рассчитываем новое положение
         int newX = mapManager.getHeroX() + dx;
         int newY = mapManager.getHeroY() + dy;
 
-        // Проверка на допустимость перемещения
-        if (!isValidMove(newX, newY)) {
-            return false;
+        // Проверка на возможность движения (например, блокируется ли что-то, валидность перемещения и замок)
+        if (!canMove(character) || !isValidMove(newX, newY) || handleCastleEntry(character, newX, newY)) {
+            return false; // Прерываем, если какие-то условия не выполнены
         }
 
-        // Обработка входа в замок
-        if (handleCastleEntry(character, newX, newY)) {
-            return false;
+        // Вычисление штрафа за территорию
+        int penalty = mapManager.getMovementPenalty(newX, newY);
+
+        // Проверка, хватает ли шагов на передвижение
+        if (character.getCurrentMoves() < penalty) {
+            System.out.println("Недостаточно шагов для перемещения на эту территорию.");
+            return false;  // Прерываем, если не хватает шагов
         }
 
         // Информация о типе территории
         String terrainType = mapManager.getTerritoryType(newX, newY);
         System.out.println("Герой шагает на территорию: " + terrainType);
 
-        // Вычисление штрафа за территорию
-        int penalty = mapManager.getMovementPenalty(newX, newY);
+        // Списываем штраф за территорию
         character.setCurrentMoves(character.getCurrentMoves() - penalty);
-
-        // Проверка, хватит ли шагов для этого перемещения
-        if (character.getCurrentMoves() < 0) {
-            System.out.println("Недостаточно шагов для перемещения на эту территорию.");
-            return false;  // Если не хватает шагов, не даем двигаться
-        }
-
-        // Обновляем количество оставшихся шагов
-        character.setCurrentMoves(character.getCurrentMoves());
 
         // Обновляем позицию героя
         updateHeroPosition(newX, newY);
@@ -108,6 +97,32 @@ public class GameMap {
         return !checkForBattle(character, enemy, newX, newY);
     }
 
+    private boolean offerToBuySteps(Character character) {
+        while (true) {  // Блокируем выполнение до тех пор, пока не будет принято решение
+            System.out.println("У героя не осталось шагов.");
+            System.out.println("Хотите купить 10 шагов за 50 золота? (y/n)");
+
+            String choice = scanner.nextLine();
+            if ("y".equalsIgnoreCase(choice)) {
+                if (character.getGold() >= 50) {
+                    character.setGold(character.getGold() - 50);
+                    character.setCurrentMoves(character.getCurrentMoves() + 10);
+                    System.out.println("Вы купили 10 шагов. Оставшееся золото: " + character.getGold());
+                    return true;
+                } else {
+                    System.out.println("Недостаточно золота!");
+                    endGame();
+                    return false;
+                }
+            } else if ("n".equalsIgnoreCase(choice)) {
+                System.out.println("Вы отказались от покупки шагов.");
+                endGame();
+                return false;
+            } else {
+                System.out.println("Некорректный выбор. Пожалуйста, введите 'y' или 'n'.");
+            }
+        }
+    }
 
     private boolean canMove(Character character) {
         return character.getCurrentMoves() > 0; // Проверка на количество оставшихся шагов
