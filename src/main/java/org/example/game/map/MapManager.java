@@ -161,15 +161,6 @@ public class MapManager {
         this.enemyY = y;
     }
 
-    // Методы для получения позиций замков
-    public int[] getPlayerCastlePosition() {
-        return new int[] { width / 6, height / 4 };  // Позиция замка игрока
-    }
-
-    public int[] getEnemyCastlePosition() {
-        return new int[] { 5 * width / 6, height / 4 };  // Позиция замка врага
-    }
-
 
     public int getMovementPenalty(int x, int y) {
         char terrain = getMap()[y][x];  // Получаем тип текущей клетки
@@ -192,19 +183,5 @@ public class MapManager {
 
         // Нейтральная территория
         return 2;  // Штраф на нейтральной территории
-    }
-
-    // Новый метод для получения типа территории
-    public String getTerritoryType(int x, int y) {
-        // Геройская территория
-        if (x < width / 3) {
-            return "Геройская территория";
-        }
-        // Вражеская территория
-        else if (x > 2 * width / 3) {
-            return "Вражеская территория";
-        }
-        // Нейтральная территория
-        return "Нейтральная территория";
     }
 }
