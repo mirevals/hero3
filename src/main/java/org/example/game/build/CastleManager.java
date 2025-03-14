@@ -9,11 +9,15 @@ public class CastleManager {
 
     private final GameMap gameMap;  // Ссылка на объект GameMap
     public static boolean isInCastle = false;  // Флаг, находится ли герой в замке
-    private final char castleType;  // Тип замка (геройский или противника)
+    private final String castleType;  // Тип замка (геройский или противника)
+    private final Shop shop;  // Магазин, который доступен в замке
+    private final Castle currentCastle; // Теперь знаем, с каким замком работаем
 
-    public CastleManager(GameMap gameMap, char castleType) {
+    public CastleManager(GameMap gameMap, Castle currentCastle) {
         this.gameMap = gameMap;
-        this.castleType = castleType;
+        this.castleType = currentCastle.getType();
+        this.shop = new Shop();
+        this.currentCastle = currentCastle;
     }
 
     // Метод для обработки команд в замке
@@ -24,6 +28,8 @@ public class CastleManager {
             System.out.println("q - выйти из замка");
             System.out.println("h - помощь (список команд)");
             System.out.println("v - взаимодействовать с NPC");
+            System.out.println("m - открыть магазин");
+            System.out.println("b - показать список построек");
 
             // Ввод команды
             Scanner scanner = new Scanner(System.in);
@@ -40,6 +46,11 @@ public class CastleManager {
                 case "v":
                     interactWithNPC();  // Взаимодействие с NPC
                     break;
+                case "m":
+                    openShop(character);  // Открытие магазина
+                case "b":
+                    currentCastle.showBuildings();
+                    break;
                 default:
                     System.out.println("Неизвестная команда. Введите 'h' для справки.");
             }
@@ -52,6 +63,8 @@ public class CastleManager {
         System.out.println("q - выйти из замка");
         System.out.println("h - показать список команд");
         System.out.println("v - взаимодействовать с NPC");
+        System.out.println("m - открыть магазин");
+        System.out.println("b - показать постройки");
     }
 
     // Взаимодействие с NPC
@@ -80,14 +93,32 @@ public class CastleManager {
         }
     }
 
+    // Открыть магазин
+    private void openShop(Character character) {
+        System.out.println("Добро пожаловать в магазин!");
+        shop.showAvailableBuildings();  // Показать доступные здания
+
+        // Возможность покупать здания
+        System.out.println("Введите название здания, которое вы хотите купить:");
+        Scanner scanner = new Scanner(System.in);
+        String buildingName = scanner.nextLine().trim();
+
+        Building purchasedBuilding = shop.buyBuilding(buildingName); // Покупка здания
+
+        if (purchasedBuilding != null) {
+            currentCastle.addBuilding(purchasedBuilding); // Добавляем в замок
+        }
+    }
+
+
     // Включаем замок, флаг для того, чтобы начать обработку команд
-    public static void enterCastle(Character character, GameMap gameMap, char castleType) {
+    public static void enterCastle(Character character, GameMap gameMap, Castle currentCastle) {
         // Создаем объект CastleManager с типом замка
-        CastleManager castleManager = new CastleManager(gameMap, castleType);
+        CastleManager castleManager = new CastleManager(gameMap, currentCastle);
 
         // Устанавливаем флаг нахождения в замке
         castleManager.isInCastle = true;
-        System.out.println("Вы вошли в " + (castleType == 'C' ? "замок героя!" : "замок противника!"));
+        System.out.println("Вы вошли в " + currentCastle.getName());
 
         // Запуск обработки команд
         castleManager.processCastleCommands(character);
