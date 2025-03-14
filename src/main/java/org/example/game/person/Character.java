@@ -89,6 +89,12 @@ public class Character {
         return units;
     }
 
+    // Метод для добавления юнита к герою
+    public void addUnit(Unit unit) {
+        this.units.add(unit);
+        System.out.println("Герой " + name + " получил нового юнита: " + unit.getName());
+    }
+
     // Метод для установки количества оставшихся перемещений
     public void setCurrentMoves(int currentMoves) {
         if (currentMoves < 0) {
