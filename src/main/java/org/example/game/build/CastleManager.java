@@ -1,6 +1,7 @@
 package org.example.game.build;
 
 import org.example.game.map.MapManager;
+import org.example.game.map.Position;
 import org.example.game.person.Character;
 import org.example.game.map.GameMap;
 import org.example.game.person.Enemy;
@@ -16,6 +17,9 @@ public class CastleManager {
     private static Hero selectedHero;
     private static boolean isFirstExit = true;
     static Enemy enemy;
+    private final HeroCastle heroCastle;
+    private final EnemyCastle enemyCastle;
+
     private static Scanner scanner = new Scanner(System.in);  // Один Scanner на всю программу
 
     MapManager mapManager;
@@ -25,6 +29,9 @@ public class CastleManager {
         this.mapManager = new MapManager(gameMap.getWidth(), gameMap.getHeight());
         this.castleType = castleType;
         this.shop = new Shop();
+        this.heroCastle = new HeroCastle(gameMap.getHeight(), gameMap.getWidth());
+        this.enemyCastle = new EnemyCastle(gameMap.getHeight(), gameMap.getWidth());
+
         enemy = new Enemy("Враг", 5, Team.ENEMY, 100, gameMap.getWidth(), gameMap.getHeight());
     }
 
@@ -43,7 +50,7 @@ public class CastleManager {
             switch (command) {
                 case "q":
                     exitCastle();
-                    return;
+                    break;
                 case "h":
                     chooseHero(scanner);
                     break;
@@ -82,16 +89,17 @@ public class CastleManager {
         System.out.println("3 - Герой 3");
 
         int heroChoice = scanner.nextInt();
+        scanner.nextLine();  // Очищаем оставшийся `\n`
 
         switch (heroChoice) {
             case 1:
-                selectedHero = new Hero("Герой 1", 5, Team.HERO, 100, gameMap.getWidth(), gameMap.getHeight());
+                selectedHero = new Hero("Герой 1", 15, Team.HERO, 1000, gameMap.getWidth(), gameMap.getHeight());
                 break;
             case 2:
-                selectedHero = new Hero("Герой 2", 4, Team.HERO, 80, gameMap.getWidth(), gameMap.getHeight());
+                selectedHero = new Hero("Герой 2", 14, Team.HERO, 800, gameMap.getWidth(), gameMap.getHeight());
                 break;
             case 3:
-                selectedHero = new Hero("Герой 3", 6, Team.HERO, 120, gameMap.getWidth(), gameMap.getHeight());
+                selectedHero = new Hero("Герой 3", 16, Team.HERO, 1200, gameMap.getWidth(), gameMap.getHeight());
                 break;
             default:
                 System.out.println("Некорректный выбор. Пожалуйста, выберите номер героя из списка.");
@@ -119,20 +127,27 @@ public class CastleManager {
 
     public void exitCastle() {
         isInCastle = false;
-        int[] heroCastlePos = gameMap.findHeroCastlePosition();
-        int[] enemyCastlePos = gameMap.findEnemyCastlePosition();
+        // Получаем позицию замка героя
+        Position heroCastlePos = heroCastle.getPosition();
+        int[] heroCastleP = {heroCastlePos.getX(), heroCastlePos.getY()};
+        // Получаем позицию вражеского замка (предполагается, что метод findEnemyCastlePosition() существует)
+        Position enemyCastlePos = enemyCastle.getPosition();
+        int[] enemyCastleP = {enemyCastlePos.getX(), enemyCastlePos.getY()};
+
         int castleX = -1, castleY = -1;
         int heroX = selectedHero.getHeroX();
         int heroY = selectedHero.getHeroY();
+
+        
 
         // Проверяем, находится ли герой в замке
         if (mapManager.getMap()[heroY][heroX] == 'C') { // Замок героя
             mapManager.getMap()[heroY][heroX] = '.'; // Освобождаем клетку, где был герой
 
             // Если герой в замке героя, выходим из него
-            if (heroCastlePos[0] != -1 && heroCastlePos[1] != -1) {
-                castleX = heroCastlePos[0];
-                castleY = heroCastlePos[1];
+            if (heroCastleP[0] != -1 && heroCastleP[1] != -1) {
+                castleX = heroCastleP[0];
+                castleY = heroCastleP[1];
                 int newY = castleY + 1; // Например, перемещение на клетку ниже
 
                 if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
@@ -149,9 +164,9 @@ public class CastleManager {
             mapManager.getMap()[heroY][heroX] = '.'; // Освобождаем клетку, где был герой
 
             // Если герой в замке противника, выходим из него
-            if (enemyCastlePos[0] != -1 && enemyCastlePos[1] != -1) {
-                castleX = enemyCastlePos[0];
-                castleY = enemyCastlePos[1];
+            if (enemyCastleP[0] != -1 && enemyCastleP[1] != -1) {
+                castleX = enemyCastleP[0];
+                castleY = enemyCastleP[1];
                 int newY = castleY + 1; // Например, перемещение на клетку ниже
 
                 if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
@@ -169,14 +184,15 @@ public class CastleManager {
         }
 
         // Если это первый выход из замка
-        if (isFirstExit) {
-            gameMap.startGame(); // Запуск игры, если это первый выход
-            isFirstExit = false; // После первого выхода флаг устанавливаем в false
-        }
+
 
         // Обновляем флаг нахождения в замке
 
 
+        if (isFirstExit) {
+            gameMap.startGame(); // Запуск игры, если это первый выход
+            isFirstExit = false; // После первого выхода флаг устанавливаем в false
+        }
         gameMap.printMap(); // Печатаем карту один раз, после всех изменений
     }
 }

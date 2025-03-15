@@ -132,14 +132,6 @@ public class MapManager {
         return map;
     }
 
-    public static int getHeroX() {
-        return heroX;
-    }
-
-    public static int getHeroY() {
-        return heroY;
-    }
-
     public int getEnemyX() {
         return enemyX;
     }
