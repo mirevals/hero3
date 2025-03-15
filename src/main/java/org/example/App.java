@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.game.Gold;
+import org.example.game.build.CastleManager;
 import org.example.game.map.GameMap;
 import org.example.game.map.MapManager;
 import org.example.game.map.Position;
@@ -16,7 +17,6 @@ public class App {
     public static void main(String[] args) {
 
 
-        GameMap gameMap = new GameMap(10, 10);
-        gameMap.startGame();
+        CastleManager.enterCastle(new GameMap(10, 10), 'C');
     }
 }

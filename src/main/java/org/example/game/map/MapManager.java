@@ -1,6 +1,7 @@
 package org.example.game.map;
 
 import org.example.game.build.Castle;
+import org.example.game.build.CastleManager;
 import org.example.game.build.EnemyCastle;
 import org.example.game.build.HeroCastle;
 import org.example.game.person.Character;
@@ -11,6 +12,8 @@ public class MapManager {
     private final int width;
     private final int height;
     private final char[][] map;
+    private Hero selectedHero; // Переменная для выбранного героя
+
 
 
     private HeroCastle heroCastle;
@@ -64,13 +67,13 @@ public class MapManager {
 
     private void initializeCharacterPositions() {
         // Позиция героя
-        heroX = Hero.getHeroInitialPosition().getX();
-        heroY = Hero.getHeroInitialPosition().getY();
+        heroX = width / 6;
+        heroY = height / 4;
         map[heroY][heroX] = 'H';  // Размещение героя
 
         // Позиция противника
-        enemyX = Enemy.getEnemyInitialPosition().getX();
-        enemyY = Enemy.getEnemyInitialPosition().getY();
+        enemyX = 5 * width / 6;
+        enemyY = height / 4;
         map[enemyY][enemyX] = 'A';  // Размещение противника
     }
 

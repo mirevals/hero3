@@ -1,33 +1,34 @@
 package org.example.game.build;
 
+import org.example.game.map.MapManager;
 import org.example.game.person.Character;
 import org.example.game.map.GameMap;
+import org.example.game.person.Enemy;
 import org.example.game.person.Hero;
 import org.example.game.person.Team;
 
 import java.util.Scanner;
-
 public class CastleManager {
+    private final GameMap gameMap;
+    public static boolean isInCastle;  // флаг, показывающий, находимся ли мы в замке
+    private final char castleType;
+    private final Shop shop;
+    private static Hero selectedHero;
+    private static boolean isFirstExit = true;
+    static Enemy enemy;
+    private static Scanner scanner = new Scanner(System.in);  // Один Scanner на всю программу
 
-    private final GameMap gameMap;  // Ссылка на объект GameMap
-    public static boolean isInCastle = false;  // Флаг, находится ли герой в замке
-    private final String castleType;  // Тип замка (геройский или противника)
-    private final Shop shop;  // Магазин, который доступен в замке
-    private final Castle currentCastle; // Теперь знаем, с каким замком работаем
+    MapManager mapManager;
 
-
-
-    public CastleManager(GameMap gameMap, Castle currentCastle) {
+    public CastleManager(GameMap gameMap, char castleType) {
         this.gameMap = gameMap;
-        this.castleType = currentCastle.getType();
+        this.mapManager = new MapManager(gameMap.getWidth(), gameMap.getHeight());
+        this.castleType = castleType;
         this.shop = new Shop();
-        this.currentCastle = currentCastle;
-
+        enemy = new Enemy("Враг", 5, Team.ENEMY, 100, gameMap.getWidth(), gameMap.getHeight());
     }
 
-    // Метод для обработки команд в замке
     public void processCastleCommands() {
-        // Цикл для нахождения в замке
         while (isInCastle) {
             System.out.println("Вы в замке. Доступные команды:");
             System.out.println("q - выйти из замка");
@@ -37,26 +38,17 @@ public class CastleManager {
             System.out.println("m - открыть магазин");
             System.out.println("b - показать список построек");
 
-
-            // Ввод команды
-            Scanner scanner = new Scanner(System.in);
             String command = scanner.nextLine().trim().toLowerCase();
 
             switch (command) {
                 case "q":
-                    gameMap.exitCastle();  // Выход из замка через GameMap
-                    // После выхода из замка печатаем карту и завершаем цикл
-                    return;  // Прерываем цикл, так как мы больше не в замке
-                case "hh":
-                    showHelp();  // Показать список команд
-                    break;
+                    exitCastle();
+                    return;
                 case "h":
-                    chooseHero();  // Взаимодействие с NPC
+                    chooseHero(scanner);
                     break;
                 case "m":
-                    openShop(character);  // Открытие магазина
-                case "b":
-                    currentCastle.showBuildings();
+                    openShop();
                     break;
                 default:
                     System.out.println("Неизвестная команда. Введите 'h' для справки.");
@@ -64,85 +56,127 @@ public class CastleManager {
         }
     }
 
-    // Открыть магазин
-    private void openShop(Character character) {
+    private void openShop() {
         System.out.println("Добро пожаловать в магазин!");
-        shop.showAvailableBuildings();  // Показать доступные здания
+        shop.showAvailableBuildings();
 
-        // Возможность покупать здания
         System.out.println("Введите название здания, которое вы хотите купить:");
-        Scanner scanner = new Scanner(System.in);
         String buildingName = scanner.nextLine().trim();
 
-        Building purchasedBuilding = shop.buyBuilding(buildingName); // Покупка здания
-
+        Building purchasedBuilding = shop.buyBuilding(buildingName);
 
         if (purchasedBuilding != null) {
-            currentCastle.addBuilding(purchasedBuilding); // Добавляем в замок
+            // Добавление здания в замок
         }
     }
 
+    private void chooseHero(Scanner scanner) {
+        if (selectedHero != null) {
+            System.out.println("Герой уже выбран: " + selectedHero.getName());
+            return;
+        }
 
-
-    // Показать помощь по командам
-    private void showHelp() {
-        System.out.println("Команды:");
-        System.out.println("q - выйти из замка");
-        System.out.println("h - показать список команд");
-        System.out.println("v - взаимодействовать с NPC");
-    }
-
-
-
-
-    // Метод для выбора героя
-    private void chooseHero() {
         System.out.println("Выберите героя:");
         System.out.println("1 - Герой 1");
         System.out.println("2 - Герой 2");
         System.out.println("3 - Герой 3");
 
-        // Считываем ввод пользователя
-        Scanner scanner = new Scanner(System.in);
         int heroChoice = scanner.nextInt();
-
-        Hero selectedHero = null;
 
         switch (heroChoice) {
             case 1:
-                selectedHero = new Hero("Герой 1", 5, Team.HERO, 100);  // Пример создания героя
-                System.out.println("Вы выбрали Героя 1.");
+                selectedHero = new Hero("Герой 1", 5, Team.HERO, 100, gameMap.getWidth(), gameMap.getHeight());
                 break;
             case 2:
-                selectedHero = new Hero("Герой 2", 4, Team.HERO, 80);   // Пример создания героя
-                System.out.println("Вы выбрали Героя 2.");
+                selectedHero = new Hero("Герой 2", 4, Team.HERO, 80, gameMap.getWidth(), gameMap.getHeight());
                 break;
             case 3:
-                selectedHero = new Hero("Герой 3", 6, Team.HERO, 120);  // Пример создания героя
-                System.out.println("Вы выбрали Героя 3.");
+                selectedHero = new Hero("Герой 3", 6, Team.HERO, 120, gameMap.getWidth(), gameMap.getHeight());
                 break;
             default:
                 System.out.println("Некорректный выбор. Пожалуйста, выберите номер героя из списка.");
                 return;
         }
 
-        // Здесь можно добавить логику для добавления выбранного героя в команду или в другие части игры
-        // Например, добавляем выбранного героя в команду
         System.out.println("Герой " + selectedHero.getName() + " был успешно выбран.");
-
-        processCastleCommands();
     }
 
-    // Включаем замок, флаг для того, чтобы начать обработку команд
-    public static void enterCastle(GameMap gameMap, Castle currentCastle) {
-        // Создаем объект CastleManager с типом замка
-        CastleManager castleManager = new CastleManager(gameMap, currentCastle);
+    public static Hero getSelectedHero() {
+        return selectedHero;
+    }
 
-        // Устанавливаем флаг нахождения в замке
+    public static Enemy getEnemy() {
+        return enemy;
+    }
+
+    public static void enterCastle(GameMap gameMap, char castleType) {
+        CastleManager castleManager = new CastleManager(gameMap, castleType);
         castleManager.isInCastle = true;
         System.out.println("Вы вошли в " + (castleType == 'C' ? "замок героя!" : "замок противника!"));
-
-        // Запуск обработки команд
         castleManager.processCastleCommands();
+    }
+
+
+    public void exitCastle() {
+        isInCastle = false;
+        int[] heroCastlePos = gameMap.findHeroCastlePosition();
+        int[] enemyCastlePos = gameMap.findEnemyCastlePosition();
+        int castleX = -1, castleY = -1;
+        int heroX = selectedHero.getHeroX();
+        int heroY = selectedHero.getHeroY();
+
+        // Проверяем, находится ли герой в замке
+        if (mapManager.getMap()[heroY][heroX] == 'C') { // Замок героя
+            mapManager.getMap()[heroY][heroX] = '.'; // Освобождаем клетку, где был герой
+
+            // Если герой в замке героя, выходим из него
+            if (heroCastlePos[0] != -1 && heroCastlePos[1] != -1) {
+                castleX = heroCastlePos[0];
+                castleY = heroCastlePos[1];
+                int newY = castleY + 1; // Например, перемещение на клетку ниже
+
+                if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
+                    mapManager.getMap()[newY][castleX] = 'H'; // Размещаем героя в новой клетке
+                    selectedHero.setHeroPosition(castleX, newY); // Обновляем позицию героя
+                    System.out.println("Вы покинули замок героя и переместились на клетку ниже.");
+                } else {
+                    System.out.println("Вы не можете покинуть замок, нет свободной клетки ниже.");
+                }
+
+                mapManager.getMap()[castleY][castleX] = 'С'; // Убираем замок с карты
+            }
+        } else if (mapManager.getMap()[heroY][heroX] == 'E') { // Замок противника
+            mapManager.getMap()[heroY][heroX] = '.'; // Освобождаем клетку, где был герой
+
+            // Если герой в замке противника, выходим из него
+            if (enemyCastlePos[0] != -1 && enemyCastlePos[1] != -1) {
+                castleX = enemyCastlePos[0];
+                castleY = enemyCastlePos[1];
+                int newY = castleY + 1; // Например, перемещение на клетку ниже
+
+                if (newY < mapManager.getHeight() && mapManager.isWalkable(castleX, newY)) {
+                    mapManager.getMap()[newY][castleX] = 'H'; // Размещаем героя в новой клетке
+                    selectedHero.setHeroPosition(castleX, newY); // Обновляем позицию героя
+                    System.out.println("Вы покинули замок противника и переместились на клетку ниже.");
+                } else {
+                    System.out.println("Вы не можете покинуть замок, нет свободной клетки ниже.");
+                }
+
+                mapManager.getMap()[castleY][castleX] = 'E'; // Убираем замок противника с карты
+            }
+        } else {
+            System.out.println("Вы не находитесь в замке.");
+        }
+
+        // Если это первый выход из замка
+        if (isFirstExit) {
+            gameMap.startGame(); // Запуск игры, если это первый выход
+            isFirstExit = false; // После первого выхода флаг устанавливаем в false
+        }
+
+        // Обновляем флаг нахождения в замке
+
+
+        gameMap.printMap(); // Печатаем карту один раз, после всех изменений
     }
 }
