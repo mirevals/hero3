@@ -22,8 +22,6 @@ public class GameMap {
     Enemy enemy = CastleManager.getEnemy();
 
     public void startGame() {
-        CastleManager.enterCastle(this, 'C');
-
         printMap();
 
         while (true) {
@@ -38,10 +36,10 @@ public class GameMap {
             String command = scanner.nextLine();
 
             switch (command) {
-                case "w": moveHero(0, -1, CastleManager.getSelectedHero(), enemy); break;
-                case "s": moveHero(0, 1, CastleManager.getSelectedHero(), enemy); break;
-                case "a": moveHero(-1, 0, CastleManager.getSelectedHero(), enemy); break;
-                case "d": moveHero(1, 0, CastleManager.getSelectedHero(), enemy); break;
+                case "w": moveHero(0, -1, CastleManager.getSelectedHero(), CastleManager.getEnemy()); break;
+                case "s": moveHero(0, 1, CastleManager.getSelectedHero(), CastleManager.getEnemy()); break;
+                case "a": moveHero(-1, 0, CastleManager.getSelectedHero(), CastleManager.getEnemy()); break;
+                case "d": moveHero(1, 0, CastleManager.getSelectedHero(), CastleManager.getEnemy()); break;
                 case "q":
                     System.out.println("Выход из игры.");
                     scanner.close();
@@ -63,8 +61,8 @@ public class GameMap {
             }
         }
 
-        int newX = mapManager.getHeroX() + dx;
-        int newY = mapManager.getHeroY() + dy;
+        int newX = CastleManager.getSelectedHero().getHeroX() + dx;
+        int newY = CastleManager.getSelectedHero().getHeroY() + dy;
 
         // Проверка на возможность движения (например, блокируется ли что-то, валидность перемещения и замок)
         if (!canMove(character) || !isValidMove(newX, newY) || handleCastleEntry(character, newX, newY)) {
@@ -97,7 +95,6 @@ public class GameMap {
         // Проверка на бой
         return !checkForBattle(character, enemy, newX, newY);
     }
-
     private boolean offerToBuySteps(Character character) {
         while (true) {  // Блокируем выполнение до тех пор, пока не будет принято решение
             System.out.println("У героя не осталось шагов.");
@@ -107,7 +104,14 @@ public class GameMap {
             if ("y".equalsIgnoreCase(choice)) {
                 if (character.getGold() >= 50) {
                     character.setGold(character.getGold() - 50);
-                    character.setCurrentMoves(character.getCurrentMoves() + 10);
+                    int newMoves = character.getCurrentMoves() + 10;
+
+                    // Ограничиваем количество перемещений максимальным значением
+                    if (newMoves > character.getMaxMoves()) {
+                        newMoves = character.getMaxMoves();
+                    }
+
+                    character.setCurrentMoves(newMoves);
                     System.out.println("Вы купили 10 шагов. Оставшееся золото: " + character.getGold());
                     return true;
                 } else {
@@ -126,7 +130,7 @@ public class GameMap {
     }
 
     private boolean canMove(Character character) {
-        return character.getCurrentMoves() > 0; // Проверка на количество оставшихся шагов
+        return character.getCurrentMoves() > 0;
     }
 
     private boolean isValidMove(int x, int y) {
@@ -153,8 +157,8 @@ public class GameMap {
     }
 
     private void updateHeroPosition(int x, int y) {
-        int oldX = mapManager.getHeroX();
-        int oldY = mapManager.getHeroY();
+        int oldX = CastleManager.getSelectedHero().getHeroX();
+        int oldY = CastleManager.getSelectedHero().getHeroY();
 
         // Заменяем старую позицию героя на пустое место или точку в зависимости от текущего содержимого
         if (mapManager.getMap()[oldY][oldX] == 'H') {
@@ -207,27 +211,6 @@ public class GameMap {
         System.exit(0); // Завершаем выполнение программы
     }
 
-    public int[] findHeroCastlePosition() {
-        for (int y = 0; y < mapManager.getHeight(); y++) {
-            for (int x = 0; x < mapManager.getWidth(); x++) {
-                if (mapManager.getMap()[y][x] == 'C') { // Замок героя
-                    return new int[]{x, y};
-                }
-            }
-        }
-        return new int[]{-1, -1}; // Если замок героя не найден
-    }
-
-    public int[] findEnemyCastlePosition() {
-        for (int y = 0; y < mapManager.getHeight(); y++) {
-            for (int x = 0; x < mapManager.getWidth(); x++) {
-                if (mapManager.getMap()[y][x] == 'E') { // Замок противника
-                    return new int[]{x, y};
-                }
-            }
-        }
-        return new int[]{-1, -1}; // Если замок противника не найден
-    }
 
     public BattleField enterBattleField(Character hero, Enemy enemy) {
         return new BattleField(hero.getUnits(), enemy.getUnits());
@@ -237,27 +220,6 @@ public class GameMap {
         mapManager.printMap();
     }
 
-    public int getHeroX() {
-        return mapManager.getHeroX();
-    }
-
-    public int getHeroY() {
-        return mapManager.getHeroY();
-    }
-
-    public int getEnemyX() {
-        return mapManager.getEnemyX();
-    }
-
-    public int getEnemyY() {
-        return mapManager.getEnemyY();
-    }
-
-    private boolean canMoveEnemy(int dx, int dy) {
-        int newX = mapManager.getEnemyX() + dx;
-        int newY = mapManager.getEnemyY() + dy;
-        return isValidMove(newX, newY);
-    }
 
     public int getWidth() {
         return mapManager.getWidth();
