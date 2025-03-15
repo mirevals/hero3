@@ -14,7 +14,7 @@ public class Character {
     private final String name;  // Имя героя
     private final int maxMoves;  // Максимальное количество перемещений за ход
     private int currentMoves;  // Текущее количество оставшихся перемещений
-    private Position position;  // Позиция героя на карте
+    Position position;  // Позиция героя на карте
     private final List<String> inventory;  // Список предметов, которые собрал герой
     private final Team team;
     private final List<Unit> units;
