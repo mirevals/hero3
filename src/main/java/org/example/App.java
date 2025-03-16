@@ -13,10 +13,12 @@ import org.example.game.person.Unit;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.example.game.build.CastleManager.CastleType.HERO;
+
 public class App {
     public static void main(String[] args) {
 
 
-        CastleManager.enterCastle(new GameMap(10, 10), 'C');
+        CastleManager.enterCastle(10, 10, HERO);
     }
 }
