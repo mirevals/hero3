@@ -105,4 +105,18 @@ public class Character {
             this.currentMoves = currentMoves;
         }
     }
+
+    // Получение координаты X героя
+    public int getX() {
+        return position.getX();  // Предполагаем, что в классе Position есть метод getX()
+    }
+
+    // Получение координаты Y героя
+    public int getY() {
+        return position.getY();  // Предполагаем, что в классе Position есть метод getY()
+    }
+
+    public void setPosition(int x, int y) {
+        this.position = new Position(x, y);  // Создаем новый объект Position и присваиваем его позиции героя
+    }
 }
