@@ -8,17 +8,4 @@ public class Hero extends Character {
         super(name, maxMoves, new Position(width / 6, height / 4), team, gold);
     }
 
-    // Метод для установки новой позиции героя
-    public void setHeroPosition(int x, int y) {
-        // Обновляем позицию героя
-        this.position = new Position(x, y);
-    }
-
-    public int getHeroX() {
-        return position.getX(); // Получаем координату x
-    }
-
-    public int getHeroY() {
-        return position.getY(); // Получаем координату y
-    }
 }

@@ -19,17 +19,6 @@ public class MapManager {
     private final int width;
     private final int height;
     private final char[][] map;
-    private Hero selectedHero; // Переменная для выбранного героя
-
-
-
-    private HeroCastle heroCastle;
-    private EnemyCastle enemyCastle;
-
-    private Hero hero;
-    private Enemy enemy;
-
-
 
     // Координаты героя и врага
     private static int heroX;
@@ -38,23 +27,16 @@ public class MapManager {
     private int enemyY;
 
 
-    public MapManager(int width, int height, Hero hero, Enemy enemy) {
+    public MapManager(int width, int height, HeroCastle heroCastle, EnemyCastle enemyCastle, Hero hero, Enemy enemy) {
         this.scanner = new Scanner(System.in);
-
-        this.hero = hero;
-        this.enemy = enemy;
         this.width = width;
         this.height = height;
         this.map = new char[height][width];
 
-        // Создаем замки
-        heroCastle = new HeroCastle(height, width);
-        enemyCastle = new EnemyCastle(height, width);
-
-        initializeMap();
+        initializeMap(heroCastle, enemyCastle, hero, enemy);
     }
 
-    private void initializeMap() {
+    private void initializeMap(HeroCastle heroCastle, EnemyCastle enemyCastle, Hero hero, Enemy enemy) {
         // Заполняем карту символами для замков, препятствий и дорог
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -64,13 +46,13 @@ public class MapManager {
 
         // Размещение препятствий, замков, дорог
         Terrain.placeObstacles(map, width, height);
-        placeCastles();
+        placeCastles(heroCastle, enemyCastle);
         Road road = new Road(width / 6, height / 4, 5 * width / 6, height / 4);
         road.placeRoad(map);
-        initializeCharacterPositions();
+        initializeCharacterPositions(hero, enemy);
     }
 
-    private void placeCastles() {
+    private void placeCastles(HeroCastle heroCastle, EnemyCastle enemyCastle) {
         // Получаем позиции замков
         Position heroCastlePos = heroCastle.getPosition();
         Position enemyCastlePos = enemyCastle.getPosition();
@@ -80,15 +62,15 @@ public class MapManager {
         map[enemyCastlePos.getY()][enemyCastlePos.getX()] = 'E';  // Замок противника
     }
 
-    private void initializeCharacterPositions() {
+    private void initializeCharacterPositions(Hero hero, Enemy enemy) {
         // Позиция героя
-        heroX = hero.getHeroX();
-        heroY = hero.getHeroY();
+        heroX = hero.getX();
+        heroY = hero.getY();
         map[heroY][heroX] = 'H';  // Размещение героя
 
         // Позиция противника
-        enemyX = enemy.getEnemyX();
-        enemyY = enemy.getEnemyY();
+        enemyX = enemy.getX();
+        enemyY = enemy.getY();
         map[enemyY][enemyX] = 'A';  // Размещение противника
     }
 
@@ -112,8 +94,8 @@ public class MapManager {
     }
 
     public void removeEnemy(Enemy enemy) {
-        int enemyX = getEnemyX();
-        int enemyY = getEnemyY();
+        int enemyX = enemy.getX();
+        int enemyY = enemy.getY();
 
         // Убираем символ врага с карты
         if (enemyX >= 0 && enemyY >= 0 && enemyX < width && enemyY < height) {
@@ -143,7 +125,7 @@ public class MapManager {
         return 2;  // Штраф на нейтральной территории
     }
 
-    public void startGame(Hero hero, Enemy enemy) {
+    public void startGame(Character character, Hero hero, Enemy enemy, Castle.CastleType castleType) {
         printMap();
 
         while (true) {
@@ -158,10 +140,10 @@ public class MapManager {
             String command = scanner.nextLine();
 
             switch (command) {
-                case "w": moveHero(0, -1, hero); break;
-                case "s": moveHero(0, 1, hero); break;
-                case "a": moveHero(-1, 0, hero); break;
-                case "d": moveHero(1, 0, hero); break;
+                case "w": moveHero(0, -1, character, hero, enemy, castleType); break;
+                case "s": moveHero(0, 1, character, hero, enemy, castleType); break;
+                case "a": moveHero(-1, 0, character, hero, enemy, castleType); break;
+                case "d": moveHero(1, 0, character, hero, enemy, castleType); break;
                 case "q":
                     System.out.println("Выход из игры.");
                     scanner.close();
@@ -175,7 +157,7 @@ public class MapManager {
         }
     }
 
-    public boolean moveHero(int dx, int dy, Character character) {
+    public boolean moveHero(int dx, int dy, Character character, Hero hero, Enemy enemy, Castle.CastleType castleType) {
         // Проверка на наличие оставшихся шагов перед движением
         if (character.getCurrentMoves() <= 0) {
             if (!offerToBuySteps(character)) {
@@ -187,7 +169,7 @@ public class MapManager {
         int newY = character.getY() + dy;
 
         // Проверка на возможность движения (например, блокируется ли что-то, валидность перемещения и замок)
-        if (!canMove(character) || !isValidMove(newX, newY) || handleCastleEntry(character, newX, newY)) {
+        if (!canMove(character) || !isValidMove(newX, newY) || handleCastleEntry(newX, newY, castleType)) {
             return false; // Прерываем, если какие-то условия не выполнены
         }
 
@@ -215,7 +197,7 @@ public class MapManager {
         System.out.println("Оставшиеся шаги: " + character.getCurrentMoves());
 
         // Проверка на бой
-        return !checkForBattle(this.hero, this.enemy, newX, newY);
+        return !checkForBattle(hero, enemy, newX, newY);
     }
 
 
@@ -263,18 +245,17 @@ public class MapManager {
         return x >= 0 && x < getWidth() && y >= 0 && y < getHeight() && isWalkable(x, y);
     }
 
-    private boolean handleCastleEntry(Character character, int x, int y) {
-        char castleType = getMap()[y][x];
+    private boolean handleCastleEntry(int x, int y, Castle.CastleType castleType) {
 
-        if (castleType == 'C') {
+        if (castleType == Castle.CastleType.HERO) {
             // Вход в замок героя
             System.out.println("Вы подошли к замку героя! Вход возможен.");
-            CastleManager.enterCastle( this.width, this.height, CastleManager.CastleType.HERO); // Входим в замок героя
+            CastleManager.enterCastle(castleType);
             return true;
-        } else if (castleType == 'E') {
+        } else if (castleType == Castle.CastleType.ENEMY) {
             // Вход в замок противника
             System.out.println("Вы подошли к замку противника! Вход невозможен.");
-            CastleManager.enterCastle(this.width, this.height, CastleManager.CastleType.ENEMY); // Входим в замок героя
+            CastleManager.enterCastle(castleType);
 
             return true;
         }
@@ -300,7 +281,6 @@ public class MapManager {
 
     private boolean checkForBattle(Hero hero, Enemy enemy, int x, int y) {
         if (x == getEnemyX() && y == getEnemyY()) {
-            // Создаем поле боя с юнитами героя и врага
             BattleField battleField = new BattleField(hero.getUnits(), enemy.getUnits());
             Battle battle = new Battle(battleField);
 

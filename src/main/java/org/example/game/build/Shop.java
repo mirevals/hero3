@@ -7,28 +7,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Shop {
-    private List<Building> availableBuildings;
+    // Статический список зданий, доступных для покупки
+    public static List<Building> availableBuildings;
 
-    public Shop() {
+    static {
         availableBuildings = new ArrayList<>();
-        availableBuildings.add(new GuardPost()); // Добавляем сторожевой пост в магазин
+        availableBuildings.add(new GuardPost());
+        availableBuildings.add(new Tavern(CastleManager.player)); // Например, предполагаем, что Tavern инициализируется с player
     }
 
-    public void showAvailableBuildings() {
+    public static void showAvailableBuildings() {
         System.out.println("Доступные здания для покупки:");
-        for (Building building : availableBuildings) {
-            System.out.println("- " + building.getName());
+        for (int i = 0; i < availableBuildings.size(); i++) {
+            Building building = availableBuildings.get(i);
+            System.out.println((i + 1) + ". " + building.getName());
         }
-    }
-
-    public Building buyBuilding(String buildingName) {
-        for (Building building : availableBuildings) {
-            if (building.getName().equalsIgnoreCase(buildingName)) {
-                System.out.println("Вы купили здание: " + building.getName());
-                return building;
-            }
-        }
-        System.out.println("Здание с именем " + buildingName + " не найдено.");
-        return null;
     }
 }

@@ -8,18 +8,22 @@ import java.util.List;
 
 public abstract class Castle {
 
+    private List<Building> constructedBuildings;
     private final String name;  // Название замка
     private Position position = null;  // Позиция замка на карте
-    private final List<Building> buildings;  // Список строений в замке
     private boolean isCaptured;  // Флаг для проверки, захвачен ли замок
 
+
+    public enum CastleType {
+        HERO, ENEMY
+    }
 
     // Конструктор замка
     public Castle(String name, Position position) {
         this.name = name;
         this.position = position;
-        this.buildings = new ArrayList<>();
         this.isCaptured = false;
+        constructedBuildings = new ArrayList<>();
     }
 
 
@@ -33,25 +37,30 @@ public abstract class Castle {
         return name;
     }
 
-    // Метод добавления и получения списка построек
-    public void addBuilding(Building building) {
-        buildings.add(building);
-        System.out.println("В " + name + " добавлено строение: " + building.getName());
-    }
 
-    public void showBuildings() {
-        System.out.println("Постройки в " + name + ":");
-        if (buildings.isEmpty()) {
+
+    public abstract CastleType getType();
+
+
+    public void showConstructedBuildings() {
+        if (constructedBuildings.isEmpty()) {
             System.out.println("Нет построек.");
         } else {
-            for (Building building : buildings) {
-                System.out.println("- " + building.getName());
+            int index = 1; // Начинаем с 1
+            for (Building building : constructedBuildings) {
+                System.out.println(index + ". " + building.getName());  // Выводим номер и название здания
+                index++;  // Увеличиваем номер для следующего здания
             }
         }
     }
 
-    public abstract String getType();
 
+    public void addBuilding(Building building) {
+        constructedBuildings.add(building);
+    }
 
-
+    // Получить список построек
+    public List<Building> getConstructedBuildings() {
+        return constructedBuildings;
+    }
 }
