@@ -119,4 +119,5 @@ public class Character {
     public void setPosition(int x, int y) {
         this.position = new Position(x, y);  // Создаем новый объект Position и присваиваем его позиции героя
     }
+
 }

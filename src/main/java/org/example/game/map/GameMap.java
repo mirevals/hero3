@@ -11,26 +11,13 @@ import java.util.Scanner;
 
 public class GameMap {
 
-    private final Scanner scanner;
-
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
     public GameMap(int width, int height) {
-        this.scanner = new Scanner(System.in);
         this.width = width;
         this.height = height;
 
     }
-
-
-
-    Enemy enemy = CastleManager.getEnemy();
-
-
-
-
-
-
     public int getWidth(){
         return this.width;
     }

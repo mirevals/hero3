@@ -16,13 +16,4 @@ public class Enemy extends Character {
     public void setEnemyPosition(int x, int y) {
         this.position = new Position(x, y);
     }
-
-
-    public int getEnemyX() {
-        return position.getX();
-    }
-
-    public int getEnemyY() {
-        return position.getY();
-    }
 }
