@@ -22,8 +22,10 @@ public class CastleManager {
     private static boolean isFirstHero = true;
     static boolean isTavernNotBuild = true;
 
-    static Hero hero;
-    static Character character = hero;
+    private Hero hero;
+    private Character character;
+
+
     static Enemy enemy;
 
     private static HeroCastle heroCastle;
@@ -56,11 +58,7 @@ public class CastleManager {
         this.storage = new Storage();
     }
 
-    public Hero getHero() {
-        return hero;
-    }
-
-    public void processCastleCommands(Castle castle, Hero hero, Enemy enemy, Character character) {
+    public void processCastleCommands(Castle castle, Enemy enemy) {
         while (isInCastle) {
             if (isTavernNotBuild) {
                 handleTavernNotBuilt(castle);
@@ -69,7 +67,7 @@ public class CastleManager {
             } else {
                 showCastleCommands();
                 String command = scanner.nextLine().trim().toLowerCase();
-                processCastleAction(command, castle, hero, enemy, character);
+                processCastleAction(command, castle, enemy);
             }
         }
     }
@@ -108,10 +106,10 @@ public class CastleManager {
         System.out.println("b - показать список построек");
     }
 
-    private void processCastleAction(String command, Castle castle, Hero hero, Enemy enemy, Character character) {
+    private void processCastleAction(String command, Castle castle, Enemy enemy) {
         switch (command) {
             case "q":
-                exitCastle(character, hero, enemy, castle);  // Выход из замка
+                exitCastle(enemy, castle);  // Выход из замка
                 break;
             case "m":
                 openShop(scanner, castle);
@@ -204,10 +202,10 @@ public class CastleManager {
         scanner.nextLine();
 
         if (Tavern.buyHero(heroChoice, player)) {
-            CastleManager.hero = Tavern.createHero(heroChoice, gameMap.getWidth(), gameMap.getHeight());
+            hero = Tavern.getHero(player);
             if (hero != null) {
                 System.out.println("Герой " + hero.getName() + " был успешно создан.");
-                CastleManager.character = hero;
+                character = hero;
                 isFirstHero = false;
             }
         } else {
@@ -232,10 +230,10 @@ public class CastleManager {
 
         // Используем синглтон для получения экземпляра CastleManager
         CastleManager manager = CastleManager.getInstance(gameMap, castle, player);
-        manager.processCastleCommands(castle, hero, enemy, character);
+        manager.processCastleCommands(castle, enemy);
     }
 
-    public void exitCastle(Character character, Hero hero, Enemy enemy, Castle castle) {
+    public void exitCastle(Enemy enemy, Castle castle) {
         Position castlePos = (castle.getType() == Castle.CastleType.HERO) ? heroCastle.getPosition() : enemyCastle.getPosition();
         char castleSymbol = (castle.getType() == Castle.CastleType.HERO) ? 'C' : 'E';
         char characterSymbol = (castle.getType() == Castle.CastleType.HERO) ? 'H' : 'A';
