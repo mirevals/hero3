@@ -3,28 +3,24 @@ import org.example.game.person.Hero;
 import org.example.game.person.Unit;
 import org.example.game.person.Unit.UnitType;
 
+import java.util.List;
+
 public class GuardPost extends Building {
-    private static final int SPEARMAN_COST = 50; // Стоимость копейщика
 
     public GuardPost() {
         super("Сторожевой пост", true);
     }
 
-    public void buyUnit(Hero hero) {
-        if (!canRecruitUnits()) {
-            System.out.println(getName() + " не может нанимать юнитов.");
-            return;
+    // Метод для вывода доступных юнитов с номерами и стоимостью
+    public static void displayAvailableUnits(List<Unit> buyUnit) {
+        System.out.println("Доступные юниты для найма:");
+        for (int i = 0; i < buyUnit.size(); i++) {
+            Unit unit = buyUnit.get(i);
+            System.out.println(i + 1 + ". " + unit.getType() + " - Стоимость: " + unit.getCost());
         }
+    }
 
-        if (hero.getGold() < SPEARMAN_COST) {
-            System.out.println("Недостаточно золота для найма копейщика.");
-            return;
-        }
+    public void buyUnit(List<Unit> buyUnit, List<Unit> unitsHero, Hero hero) {
 
-        Unit spearman = new Unit(UnitType.SPEARMAN, 100, 15, 3, 1, hero.getTeam(), hero.getPosition(), "S");
-        hero.addUnit(spearman); // Используем метод добавления юнита
-        hero.setGold(hero.getGold() - SPEARMAN_COST);
-
-        System.out.println("Герой " + hero.getName() + " нанял копейщика. Остаток золота: " + hero.getGold());
     }
 }
