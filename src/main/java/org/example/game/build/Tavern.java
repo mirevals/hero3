@@ -9,8 +9,6 @@ import java.util.Map;
 
 public class Tavern extends Building {
     private static final Map<Integer, Integer> heroPrices = new HashMap<>();
-    private static final Map<Integer, Hero> heroes = new HashMap<>();
-    private static final Map<Player, Hero> purchasedHeroes = new HashMap<>();
 
     static {
         // Инициализация цен для каждого героя
@@ -18,22 +16,13 @@ public class Tavern extends Building {
         heroPrices.put(2, 250);
         heroPrices.put(3, 300);
 
-        // Инициализация статических героев
-        heroes.put(1, new Hero("Герой 1", 15, Team.HERO, 1000, 0, 0));
-        heroes.put(2, new Hero("Герой 2", 14, Team.HERO, 800, 0, 0));
-        heroes.put(3, new Hero("Герой 3", 16, Team.HERO, 1200, 0, 0));
     }
 
-    public Tavern(Player player) {
+    public Tavern() {
         super("Таверна", false);
     }
 
-    public static boolean buyHero(int heroChoice, Player player) {
-        if (purchasedHeroes.containsKey(player)) {
-            System.out.println("Вы уже купили героя: " + purchasedHeroes.get(player).getName());
-            return false;
-        }
-
+    public static boolean buyHero(int heroChoice, Hero hero, Player player) {
         int priceOfHero = heroPrices.getOrDefault(heroChoice, -1);
         if (priceOfHero == -1) {
             System.out.println("Некорректный выбор героя.");
@@ -41,8 +30,45 @@ public class Tavern extends Building {
         }
         if (player.hasEnoughGold(priceOfHero)) {
             player.spendGold(priceOfHero);
-            Hero hero = heroes.get(heroChoice);
-            purchasedHeroes.put(player, hero);
+
+            // Обновляем переданный объект героя
+            switch (heroChoice) {
+                case 1 -> {
+                    hero.setName("Герой 1");
+                    hero.setMaxMoves(15);
+                    hero.setTeam(Team.HERO);
+                    hero.setGold(1000);
+                    hero.setHealth(1000);
+                    hero.setAttack(10);
+                    hero.setDefense(10);
+                    hero.setAttackRange(1);
+                }
+                case 2 -> {
+                    hero.setName("Герой 2");
+                    hero.setMaxMoves(15);
+                    hero.setTeam(Team.HERO);
+                    hero.setGold(1000);
+                    hero.setHealth(1000);
+                    hero.setAttack(10);
+                    hero.setDefense(10);
+                    hero.setAttackRange(1);
+                }
+                case 3 -> {
+                    hero.setName("Герой 3");
+                    hero.setMaxMoves(15);
+                    hero.setTeam(Team.HERO);
+                    hero.setGold(1000);
+                    hero.setHealth(1000);
+                    hero.setAttack(10);
+                    hero.setDefense(10);
+                    hero.setAttackRange(1);
+                }
+                default -> {
+                    System.out.println("Некорректный выбор героя.");
+                    return false;
+                }
+            }
+
             System.out.println("Вы успешно купили героя: " + hero.getName() + " за " + priceOfHero + " золота!");
             return true;
         } else {
@@ -50,11 +76,6 @@ public class Tavern extends Building {
             return false;
         }
     }
-
-    public static Hero getHero(Player player) {
-        return purchasedHeroes.get(player);
-    }
-
     public static void showTavernInfo() {
         System.out.println("Добро пожаловать в таверну!");
         for (Map.Entry<Integer, Integer> entry : heroPrices.entrySet()) {

@@ -9,11 +9,8 @@ import java.util.List;
 public class Enemy extends Character {
 
 
-    public Enemy(String name, int maxMoves, Team team, int gold, int width, int height) {
-        super(name, maxMoves, new Position(5 * width / 6, height / 4), team, gold);
-    }
-
-    public void setEnemyPosition(int x, int y) {
-        this.position = new Position(x, y);
+    public Enemy(String name, int maxMoves, Team team, int gold, int width, int height,
+                 int health, int attack, int defense, int attackRange) {
+        super(name, maxMoves, new Position(5 * width / 6, height / 4), team, gold, health, attack, defense, attackRange);
     }
 }

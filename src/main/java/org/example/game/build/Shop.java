@@ -1,5 +1,7 @@
 package org.example.game.build;
 
+import org.example.App;
+import org.example.game.Player;
 import org.example.game.build.GuardPost;
 import org.example.game.build.Building;
 
@@ -13,7 +15,7 @@ public class Shop {
     static {
         availableBuildings = new ArrayList<>();
         availableBuildings.add(new GuardPost());
-        availableBuildings.add(new Tavern(CastleManager.player)); // Например, предполагаем, что Tavern инициализируется с player
+        availableBuildings.add(new Tavern());
     }
 
     public static void showAvailableBuildings() {
