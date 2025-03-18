@@ -7,6 +7,7 @@ import org.example.game.build.EnemyCastle;
 import org.example.game.build.HeroCastle;
 import org.example.game.map.GameMap;
 import org.example.game.map.MapManager;
+import org.example.game.map.Road;
 import org.example.game.person.Enemy;
 import org.example.game.person.Hero;
 import org.example.game.person.Team;
@@ -29,7 +30,9 @@ public class App {
 
         EnemyCastle enemyCastle = new EnemyCastle(gameMap.getHeight(), gameMap.getWidth());
 
-        MapManager mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap);
+        Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);
+
+        MapManager mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road);
 
         CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager);
     }

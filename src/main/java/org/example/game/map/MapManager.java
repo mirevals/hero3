@@ -18,18 +18,17 @@ public class MapManager {
 
 
 
-    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap) {
+    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road) {
         this.scanner = new Scanner(System.in);
 
-        initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap);
+        initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap, road);
     }
 
-    private void initializeMap(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap) {
+    private void initializeMap(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road) {
 
         // Размещение препятствий, замков, дорог
         Terrain.placeObstacles(gameMap.getMap(), gameMap.getWidth(), gameMap.getHeight());
         placeCastles(heroCastle, enemyCastle, gameMap);
-        Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);
         road.placeRoad(gameMap.getMap());
         initializeCharacterPositions(enemy, hero, gameMap);
     }
@@ -43,7 +42,8 @@ public class MapManager {
     }
 
     public boolean isWalkable(int x, int y, GameMap gameMap) {
-        return gameMap.getMap()[y][x] != '#';  // Проверка на препятствие
+        char cell = gameMap.getMap()[y][x];
+        return cell != '#' && cell != ' ';  // Проверка на препятствие и пустую клетку
     }
 
     public void removeEnemy(Enemy enemy, GameMap gameMap) {
@@ -63,16 +63,11 @@ public class MapManager {
         if (x < gameMap.getWidth() / 3) {
             return 0;  // Нет штрафа на своей территории
         }
-        // Если клетка - дорога, проверяем территорию
-        if (terrain == '.') {
-            return 1;  // Штраф на дороге, если не на своей территории
-        }
 
         // Вражеская территория
         else if (x > 2 * gameMap.getWidth() / 3) {
             return 1;  // Минимальный штраф на территории врага
         }
-
         // Нейтральная территория
         return 2;  // Штраф на нейтральной территории
     }
@@ -220,7 +215,7 @@ public class MapManager {
         int oldY = character.getY();
 
         // Убираем героя с предыдущей клетки
-        map[oldY][oldX] = ' '; // Здесь можно оставить '.' или ' ' в зависимости от логики игры
+        map[oldY][oldX] = '.';
 
         // Обновляем позицию персонажа
         character.setPosition(x, y);
