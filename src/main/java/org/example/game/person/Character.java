@@ -60,6 +60,8 @@ public class Character {
     public void setDefense(int defense) { this.defense = defense; }
     public void setAttackRange(int attackRange) { this.attackRange = attackRange; }
 
+
+
     // Метод для установки количества оставшихся перемещений
     public void setCurrentMoves(int currentMoves) {
         if (currentMoves < 0) {
@@ -70,6 +72,9 @@ public class Character {
             this.currentMoves = currentMoves;
         }
     }
+
+
+
 
     // Инвентарь
     public void addItemToInventory(String item) {

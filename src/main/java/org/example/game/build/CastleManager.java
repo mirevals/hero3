@@ -181,7 +181,7 @@ public class CastleManager {
             if (buildingChoice == 1) {
                 openTavern(scanner, hero, player );
             } else if (buildingChoice == 2) {
-                openGuardPost(buyUnit);
+                openGuardPost(buyUnit, hero, player);
             } else {
                 Storage.useBuilding(buildingChoice, castle);
                 if (Storage.useBuilding) {
@@ -193,9 +193,22 @@ public class CastleManager {
         }
     }
 
-    private static void openGuardPost(List<Unit> buyUnit) {
+    private static void openGuardPost(List<Unit> buyUnit, Hero hero, Player player) {
         System.out.println("Добро пожаловать в Пост!");
         GuardPost.displayAvailableUnits(buyUnit);
+
+        System.out.println("Введите номер юнита, которого хотите купить:");
+        int heroChoice = scanner.nextInt();
+        scanner.nextLine();
+
+        if (GuardPost.buyUnit(heroChoice, hero, player, buyUnit)) {
+            if (!hero.getUnits().isEmpty()) {
+                System.out.println("Юниты " + hero.getName() + " был успешно добавлены.");
+                isNoUnitsBuy = false;
+            }
+        } else {
+            System.out.println("Не удалось купить героя.");
+        }
     }
 
     private static void openTavern(Scanner scanner, Hero hero, Player player) {
