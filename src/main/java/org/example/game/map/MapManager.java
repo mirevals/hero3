@@ -1,11 +1,9 @@
 package org.example.game.map;
 
+import org.example.game.Player;
 import org.example.game.battle.Battle;
 import org.example.game.battle.BattleField;
-import org.example.game.build.Castle;
-import org.example.game.build.CastleManager;
-import org.example.game.build.EnemyCastle;
-import org.example.game.build.HeroCastle;
+import org.example.game.build.*;
 import org.example.game.person.Character;
 import org.example.game.person.Enemy;
 import org.example.game.person.Hero;
@@ -16,99 +14,53 @@ public class MapManager {
 
     private final Scanner scanner;
 
-    private final int width;
-    private final int height;
-    private final char[][] map;
-
-    // Координаты героя и врага
-    private static int heroX;
-    private static int heroY;
-    private int enemyX;
-    private int enemyY;
 
 
-    public MapManager(int width, int height, HeroCastle heroCastle, EnemyCastle enemyCastle, Hero hero, Enemy enemy) {
+
+
+    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap) {
         this.scanner = new Scanner(System.in);
-        this.width = width;
-        this.height = height;
-        this.map = new char[height][width];
 
-        initializeMap(heroCastle, enemyCastle, hero, enemy);
+        initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap);
     }
 
-    private void initializeMap(HeroCastle heroCastle, EnemyCastle enemyCastle, Hero hero, Enemy enemy) {
-        // Заполняем карту символами для замков, препятствий и дорог
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                map[y][x] = ' ';  // Все клетки сначала пустые
-            }
-        }
+    private void initializeMap(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap) {
 
         // Размещение препятствий, замков, дорог
-        Terrain.placeObstacles(map, width, height);
-        placeCastles(heroCastle, enemyCastle);
-        Road road = new Road(width / 6, height / 4, 5 * width / 6, height / 4);
-        road.placeRoad(map);
-        initializeCharacterPositions(hero, enemy);
+        Terrain.placeObstacles(gameMap.getMap(), gameMap.getWidth(), gameMap.getHeight());
+        placeCastles(heroCastle, enemyCastle, gameMap);
+        Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);
+        road.placeRoad(gameMap.getMap());
+        initializeCharacterPositions(enemy, hero, gameMap);
     }
 
-    private void placeCastles(HeroCastle heroCastle, EnemyCastle enemyCastle) {
-        // Получаем позиции замков
-        Position heroCastlePos = heroCastle.getPosition();
-        Position enemyCastlePos = enemyCastle.getPosition();
-
-        // Размещение замков на карте
-        map[heroCastlePos.getY()][heroCastlePos.getX()] = 'C';  // Замок игрока
-        map[enemyCastlePos.getY()][enemyCastlePos.getX()] = 'E';  // Замок противника
+    private void placeCastles(HeroCastle heroCastle, EnemyCastle enemyCastle, GameMap gameMap) {
+        gameMap.setCellValue(enemyCastle.getPosition().getX(), enemyCastle.getPosition().getY(), 'E');
     }
 
-    private void initializeCharacterPositions(Hero hero, Enemy enemy) {
-        // Позиция героя
-        heroX = hero.getX();
-        heroY = hero.getY();
-        map[heroY][heroX] = 'H';  // Размещение героя
-
-        // Позиция противника
-        enemyX = enemy.getX();
-        enemyY = enemy.getY();
-        map[enemyY][enemyX] = 'A';  // Размещение противника
+    private void initializeCharacterPositions(Enemy enemy, Hero hero, GameMap gameMap) {
+        gameMap.setCellValue(enemy.getX(), enemy.getY(), 'A');
     }
 
-    public boolean isWalkable(int x, int y) {
-        return map[y][x] != '#';  // Проверка на препятствие
+    public boolean isWalkable(int x, int y, GameMap gameMap) {
+        return gameMap.getMap()[y][x] != '#';  // Проверка на препятствие
     }
 
-    public void printMap() {
-        // Печать заголовков для территорий
-        System.out.println("Геройская территория: Левый участок");
-        System.out.println("Нейтральная территория: Центральный участок");
-        System.out.println("Вражеская территория: Правый участок");
+    public void removeEnemy(Enemy enemy, GameMap gameMap) {
 
-        // Печать карты
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                System.out.print(map[y][x] + " ");
-            }
-            System.out.println();
-        }
-    }
-
-    public void removeEnemy(Enemy enemy) {
-        int enemyX = enemy.getX();
-        int enemyY = enemy.getY();
 
         // Убираем символ врага с карты
-        if (enemyX >= 0 && enemyY >= 0 && enemyX < width && enemyY < height) {
-            map[enemyY][enemyX] = ' '; // Убираем врага
-            System.out.println("Враг удален с позиции: (" + enemyX + ", " + enemyY + ")");
+        if (enemy.getX() >= 0 && enemy.getY() >= 0 && enemy.getX() < gameMap.getWidth() && enemy.getY() < gameMap.getHeight()) {
+            gameMap.setCellValue(enemy.getY(), enemy.getX(), ' ');
+            System.out.println("Враг удален с позиции: (" + enemy.getX() + ", " + enemy.getY() + ")");
         }
     }
 
-    public int getMovementPenalty(int x, int y) {
-        char terrain = getMap()[y][x];  // Получаем тип текущей клетки
+    public int getMovementPenalty(int x, int y, GameMap gameMap) {
+        char terrain = gameMap.getMap()[y][x];  // Получаем тип текущей клетки
 
         // Геройская территория
-        if (x < width / 3) {
+        if (x < gameMap.getWidth() / 3) {
             return 0;  // Нет штрафа на своей территории
         }
         // Если клетка - дорога, проверяем территорию
@@ -117,7 +69,7 @@ public class MapManager {
         }
 
         // Вражеская территория
-        else if (x > 2 * width / 3) {
+        else if (x > 2 * gameMap.getWidth() / 3) {
             return 1;  // Минимальный штраф на территории врага
         }
 
@@ -125,8 +77,8 @@ public class MapManager {
         return 2;  // Штраф на нейтральной территории
     }
 
-    public void startGame(Character character, Hero hero, Enemy enemy, Castle.CastleType castleType) {
-        printMap();
+    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager) {
+        gameMap.printMap();
 
         while (true) {
             System.out.println("\nКоманды: ");
@@ -140,10 +92,10 @@ public class MapManager {
             String command = scanner.nextLine();
 
             switch (command) {
-                case "w": moveHero(0, -1, character, hero, enemy, castleType); break;
-                case "s": moveHero(0, 1, character, hero, enemy, castleType); break;
-                case "a": moveHero(-1, 0, character, hero, enemy, castleType); break;
-                case "d": moveHero(1, 0, character, hero, enemy, castleType); break;
+                case "w": moveHero(0, -1, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager); break;
+                case "s": moveHero(0, 1, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager); break;
+                case "a": moveHero(-1, 0, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager); break;
+                case "d": moveHero(1, 0, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager); break;
                 case "q":
                     System.out.println("Выход из игры.");
                     scanner.close();
@@ -153,34 +105,31 @@ public class MapManager {
                     continue;
             }
 
-            printMap();
+            gameMap.printMap();
         }
     }
 
-    public boolean moveHero(int dx, int dy, Character character, Hero hero, Enemy enemy, Castle.CastleType castleType) {
+    public void moveHero(int dx, int dy, Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager) {
         // Проверка на наличие оставшихся шагов перед движением
-        if (character.getCurrentMoves() <= 0) {
-            if (!offerToBuySteps(character)) {
-                return false;  // Если не купил шаги, игра завершается
+        if (hero.getCurrentMoves() <= 0) {
+            if (!offerToBuySteps(hero)) {
+                return;  // Если не купил шаги, игра завершается
             }
         }
 
-        int newX = character.getX() + dx;
-        int newY = character.getY() + dy;
+        int newX = hero.getX() + dx;
+        int newY = hero.getY() + dy;
 
-        // Проверка на возможность движения (например, блокируется ли что-то, валидность перемещения и замок)
-        if (!canMove(character) || !isValidMove(newX, newY) || handleCastleEntry(newX, newY, castleType)) {
-            return false; // Прерываем, если какие-то условия не выполнены
+        // Проверка на возможность движения
+        if (!canMove(hero) || !isValidMove(newX, newY, gameMap) || handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager)) {
+            return;
         }
 
-        // Вычисление штрафа за территорию
-        int penalty = getMovementPenalty(newX, newY);
-
-        // Проверка, хватает ли шагов на передвижение
-        if (character.getCurrentMoves() < penalty) {
+        // Проверяем, хватает ли шагов
+        int penalty = getMovementPenalty(newX, newY, gameMap);
+        if (hero.getCurrentMoves() < penalty && offerToBuySteps(hero)) {
             System.out.println("Недостаточно шагов для перемещения на эту территорию.");
-            System.out.println("Недостаточно шагов для перемещения на эту территорию.");
-            return false;  // Прерываем, если не хватает шагов
+            return;
         }
 
         // Информация о типе территории
@@ -188,16 +137,16 @@ public class MapManager {
         System.out.println("Герой шагает на территорию: " + terrainType);
 
         // Списываем штраф за территорию
-        character.setCurrentMoves(character.getCurrentMoves() - penalty);
+        hero.setCurrentMoves(hero.getCurrentMoves() - penalty);
 
-        // Обновляем позицию героя
-        updateCharacterPosition(character ,newX, newY);
+        // Обновляем позицию героя и карту
+        updateCharacterPosition(hero, newX, newY, gameMap);
 
         // Вывод оставшихся шагов
-        System.out.println("Оставшиеся шаги: " + character.getCurrentMoves());
+        System.out.println("Оставшиеся шаги: " + hero.getCurrentMoves());
 
         // Проверка на бой
-        return !checkForBattle(hero, enemy, newX, newY);
+        checkForBattle(hero, enemy, newX, newY, gameMap);
     }
 
 
@@ -241,46 +190,47 @@ public class MapManager {
         return character.getCurrentMoves() > 0;
     }
 
-    private boolean isValidMove(int x, int y) {
-        return x >= 0 && x < getWidth() && y >= 0 && y < getHeight() && isWalkable(x, y);
+    private boolean isValidMove(int x, int y, GameMap gameMap) {
+        return x >= 0 && x < gameMap.getWidth() && y >= 0 && y < gameMap.getHeight() && isWalkable(x, y, gameMap);
     }
 
-    private boolean handleCastleEntry(int x, int y, Castle.CastleType castleType) {
+    private boolean handleCastleEntry(int x, int y, Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager) {
+        // Получаем символ на позиции (x, y) карты
+        char mapSymbol = gameMap.getMap()[y][x];
 
-        if (castleType == Castle.CastleType.HERO) {
+        if (mapSymbol == 'C') {
             // Вход в замок героя
             System.out.println("Вы подошли к замку героя! Вход возможен.");
-            CastleManager.enterCastle(castleType);
+            CastleManager.enterCastle(castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager);
             return true;
-        } else if (castleType == Castle.CastleType.ENEMY) {
+        } else if (mapSymbol == 'E') {
             // Вход в замок противника
             System.out.println("Вы подошли к замку противника! Вход невозможен.");
-            CastleManager.enterCastle(castleType);
-
+            CastleManager.enterCastle(castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager);
             return true;
         }
 
+        // Если ни в один из замков не подошли
         return false;
     }
 
-    private void updateCharacterPosition(Character character, int x, int y) {
+    private void updateCharacterPosition(Character character, int x, int y, GameMap gameMap) {
+        char[][] map = gameMap.getMap();
         int oldX = character.getX();
         int oldY = character.getY();
 
-        // Заменяем старую позицию героя на пустое место или точку в зависимости от текущего содержимого
-        if (getMap()[oldY][oldX] == 'H') {
-            getMap()[oldY][oldX] = getMap()[oldY][oldX] == '.' ? '.' : ' ';  // Если это точка, оставляем точку, иначе заменяем на пустое место
-        }
+        // Убираем героя с предыдущей клетки
+        map[oldY][oldX] = ' '; // Здесь можно оставить '.' или ' ' в зависимости от логики игры
 
-        // Обновляем позицию героя на новой клетке
+        // Обновляем позицию персонажа
         character.setPosition(x, y);
 
-        // Устанавливаем символ героя на новой позиции
-        getMap()[y][x] = 'H';
+        // Ставим героя на новую позицию
+        map[y][x] = 'H';
     }
 
-    private boolean checkForBattle(Hero hero, Enemy enemy, int x, int y) {
-        if (x == getEnemyX() && y == getEnemyY()) {
+    private void checkForBattle(Hero hero, Enemy enemy, int x, int y, GameMap gameMap) {
+        if (x == enemy.getX() && y == enemy.getY()) {
             BattleField battleField = new BattleField(hero.getUnits(), enemy.getUnits());
             Battle battle = new Battle(battleField);
 
@@ -292,19 +242,17 @@ public class MapManager {
                 endGame(); // Завершаем игру
             } else {
                 // Если герои выиграли, удаляем врага с карты
-                removeEnemyFromMap(enemy);
-                updateCharacterPosition(hero, x, y);
+                removeEnemyFromMap(enemy, gameMap);
+                updateCharacterPosition(hero, x, y, gameMap);
             }
 
-            return true;
         }
-        return false;
     }
 
-    private void removeEnemyFromMap(Enemy enemy) {
+    private void removeEnemyFromMap(Enemy enemy, GameMap gameMap) {
         // Удаляем врага с карты, если он был побежден
-        removeEnemy(enemy); // Предполагаем, что метод removeEnemy удаляет врага из карты
-        enemy.setEnemyPosition(-1, -1);
+        removeEnemy(enemy, gameMap); // Предполагаем, что метод removeEnemy удаляет врага из карты
+        enemy.setPosition(-1, -1);
         System.out.println("Враг был удален с карты!");
     }
 
@@ -322,24 +270,5 @@ public class MapManager {
         return new BattleField(hero.getUnits(), enemy.getUnits());
     }
 
-    public char[][] getMap() {
-        return map;
-    }
-
-    public int getEnemyX() {
-        return enemyX;
-    }
-
-    public int getEnemyY() {
-        return enemyY;
-    }
-
-    public int getWidth() {
-        return this.width;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
 
 }

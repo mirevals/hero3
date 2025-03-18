@@ -7,61 +7,79 @@ import org.example.game.person.Team;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Tavern extends Building  {
-    private static final Map<Integer, Integer> heroPrices = new HashMap<>();  // Карта с ценами для каждого героя
-    // Инициализация цен для каждого героя
+public class Tavern extends Building {
+    private static final Map<Integer, Integer> heroPrices = new HashMap<>();
+
     static {
         // Инициализация цен для каждого героя
-        heroPrices.put(1, 200);  // Цена для героя 1
-        heroPrices.put(2, 250);  // Цена для героя 2
-        heroPrices.put(3, 300);  // Цена для героя 3
+        heroPrices.put(1, 200);
+        heroPrices.put(2, 250);
+        heroPrices.put(3, 300);
+
     }
 
-    public Tavern(Player player) {
+    public Tavern() {
         super("Таверна", false);
-
     }
 
-
-
-    public static boolean buyHero(int heroChoice, Player player) {
+    public static boolean buyHero(int heroChoice, Hero hero, Player player) {
         int priceOfHero = heroPrices.getOrDefault(heroChoice, -1);
-
         if (priceOfHero == -1) {
             System.out.println("Некорректный выбор героя.");
             return false;
         }
-
         if (player.hasEnoughGold(priceOfHero)) {
             player.spendGold(priceOfHero);
-            System.out.println("Вы успешно купили героя за " + priceOfHero + " золота!");
-            return true;  // Покупка успешна
+
+            // Обновляем переданный объект героя
+            switch (heroChoice) {
+                case 1 -> {
+                    hero.setName("Герой 1");
+                    hero.setMaxMoves(15);
+                    hero.setTeam(Team.HERO);
+                    hero.setGold(1000);
+                    hero.setHealth(1000);
+                    hero.setAttack(10);
+                    hero.setDefense(10);
+                    hero.setAttackRange(1);
+                }
+                case 2 -> {
+                    hero.setName("Герой 2");
+                    hero.setMaxMoves(15);
+                    hero.setTeam(Team.HERO);
+                    hero.setGold(1000);
+                    hero.setHealth(1000);
+                    hero.setAttack(10);
+                    hero.setDefense(10);
+                    hero.setAttackRange(1);
+                }
+                case 3 -> {
+                    hero.setName("Герой 3");
+                    hero.setMaxMoves(15);
+                    hero.setTeam(Team.HERO);
+                    hero.setGold(1000);
+                    hero.setHealth(1000);
+                    hero.setAttack(10);
+                    hero.setDefense(10);
+                    hero.setAttackRange(1);
+                }
+                default -> {
+                    System.out.println("Некорректный выбор героя.");
+                    return false;
+                }
+            }
+
+            System.out.println("Вы успешно купили героя: " + hero.getName() + " за " + priceOfHero + " золота!");
+            return true;
         } else {
             System.out.println("У вас недостаточно золота для покупки героя.");
-            return false;  // Покупка не удалась
+            return false;
         }
     }
-
-    // Метод для создания героя
-    public static Hero createHero(int heroChoice, int mapWidth, int mapHeight) {
-        switch (heroChoice) {
-            case 1:
-                return new Hero("Герой 1", 15, Team.HERO, 1000, mapWidth, mapHeight);
-            case 2:
-                return new Hero("Герой 2", 14, Team.HERO, 800, mapWidth, mapHeight);
-            case 3:
-                return new Hero("Герой 3", 16, Team.HERO, 1200, mapWidth, mapHeight);
-            default:
-                System.out.println("Некорректный выбор героя.");
-                return null;
-        }
-    }
-
     public static void showTavernInfo() {
         System.out.println("Добро пожаловать в таверну!");
-        for (int i = 1; i <= 3; i++) {
-            int price = heroPrices.get(i);
-            System.out.println("Герой " + i + ": Цена - " + price + " золота.");
+        for (Map.Entry<Integer, Integer> entry : heroPrices.entrySet()) {
+            System.out.println("Герой " + entry.getKey() + ": Цена - " + entry.getValue() + " золота.");
         }
     }
 }
