@@ -22,13 +22,13 @@ public class Character {
     private int attackRange; // Дальность атаки
 
     // Конструктор героя
-    public Character(String name, int maxMoves, Position startPosition, Team team, int gold, int health, int attack, int defense, int attackRange) {
+    public Character(String name, int maxMoves, Position startPosition, Team team, int gold, int health, int attack, int defense, int attackRange, List<Unit> units) {
         this.name = name;
         this.maxMoves = maxMoves;
         this.currentMoves = maxMoves;
         this.position = startPosition;
         this.inventory = new ArrayList<>();
-        this.units = new ArrayList<>();
+        this.units = units;
         this.team = team;
         this.gold = gold;
         this.health = health;

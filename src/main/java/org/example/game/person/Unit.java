@@ -13,7 +13,10 @@ public class Unit {
     private final Team team;  // Команда, к которой принадлежит юнит
     private int stackSize;  // Количество юнитов в стеке
     private Position position;  // Позиция юнита на карте
-    private String symbol;
+    private char symbol;
+    private final int cost;
+
+
 
 
     public enum UnitType {
@@ -26,7 +29,7 @@ public class Unit {
     private final UnitType unitType;  // Тип юнита
 
     // Конструктор юнита
-    public Unit(UnitType unitType, int health, int damage, int moveRange, int attackRange, Team team, Position position, String symbol) {
+    public Unit(UnitType unitType, int health, int damage, int moveRange, int attackRange, Team team, char symbol, int cost) {
         this.unitType = unitType;
         this.name = unitType.name();  // Имя юнита по умолчанию — это его тип
         this.health = health;
@@ -36,7 +39,8 @@ public class Unit {
         this.team = team;
         this.stackSize = 1;  // Изначально один юнит в стеке
         this.position = position != null ? position : new Position(0, 0);  // Используем переданную позицию или (0, 0) по умолчанию
-        this.symbol = symbol != null ? symbol : getDefaultSymbol();
+        this.symbol = symbol;
+        this.cost = cost;
     }
 
 
@@ -87,7 +91,7 @@ public class Unit {
     }
 
     // Метод для получения символа юнита
-    public String getSymbol() {
+    public char getSymbol() {
         return symbol;
     }
 
@@ -152,5 +156,13 @@ public class Unit {
         } else {
             System.out.println("Невозможно объединить юнитов разных типов.");
         }
+    }
+
+    public UnitType  getType() {
+        return this.unitType;
+    }
+
+    public int getCost() {
+        return this.cost;
     }
 }

@@ -7,7 +7,9 @@ import org.example.game.build.*;
 import org.example.game.person.Character;
 import org.example.game.person.Enemy;
 import org.example.game.person.Hero;
+import org.example.game.person.Unit;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class MapManager {
@@ -72,7 +74,7 @@ public class MapManager {
         return 2;  // Штраф на нейтральной территории
     }
 
-    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager) {
+    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit) {
         gameMap.printMap();
 
         while (true) {
@@ -87,10 +89,10 @@ public class MapManager {
             String command = scanner.nextLine();
 
             switch (command) {
-                case "w": moveHero(0, -1, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager); break;
-                case "s": moveHero(0, 1, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager); break;
-                case "a": moveHero(-1, 0, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager); break;
-                case "d": moveHero(1, 0, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager); break;
+                case "w": moveHero(0, -1, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit); break;
+                case "s": moveHero(0, 1, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit); break;
+                case "a": moveHero(-1, 0, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit); break;
+                case "d": moveHero(1, 0, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit); break;
                 case "q":
                     System.out.println("Выход из игры.");
                     scanner.close();
@@ -104,7 +106,7 @@ public class MapManager {
         }
     }
 
-    public void moveHero(int dx, int dy, Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager) {
+    public void moveHero(int dx, int dy, Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit) {
         // Проверка на наличие оставшихся шагов перед движением
         if (hero.getCurrentMoves() <= 0) {
             if (!offerToBuySteps(hero)) {
@@ -116,7 +118,7 @@ public class MapManager {
         int newY = hero.getY() + dy;
 
         // Проверка на возможность движения
-        if (!canMove(hero) || !isValidMove(newX, newY, gameMap) || handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager)) {
+        if (!canMove(hero) || !isValidMove(newX, newY, gameMap) || handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit)) {
             return;
         }
 
@@ -189,19 +191,19 @@ public class MapManager {
         return x >= 0 && x < gameMap.getWidth() && y >= 0 && y < gameMap.getHeight() && isWalkable(x, y, gameMap);
     }
 
-    private boolean handleCastleEntry(int x, int y, Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager) {
+    private boolean handleCastleEntry(int x, int y, Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit) {
         // Получаем символ на позиции (x, y) карты
         char mapSymbol = gameMap.getMap()[y][x];
 
         if (mapSymbol == 'C') {
             // Вход в замок героя
             System.out.println("Вы подошли к замку героя! Вход возможен.");
-            CastleManager.enterCastle(castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager);
+            CastleManager.enterCastle(castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
             return true;
         } else if (mapSymbol == 'E') {
             // Вход в замок противника
             System.out.println("Вы подошли к замку противника! Вход невозможен.");
-            CastleManager.enterCastle(castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager);
+            CastleManager.enterCastle(castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
             return true;
         }
 
