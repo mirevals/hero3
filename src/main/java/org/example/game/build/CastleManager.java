@@ -199,13 +199,15 @@ public class CastleManager {
 
         Position castlePos = castle.getPosition();
         char castleSymbol = (castle.getType() == Castle.CastleType.HERO) ? 'C' : 'E';
+        char castleSymbolenemy = 'E';
+
         char heroSymbol = 'H';
 
         char[][] map = gameMap.getMap();
 
         // Определяем новую позицию для выхода (всегда вниз)
-        int newX = castlePos.getX();
-        int newY = castlePos.getY() + 1;
+        int newX = castlePos.getX() + 1;
+        int newY = castlePos.getY();
 
         if (mapManager.isWalkable(newX, newY, gameMap)) {
             map[newY][newX] = heroSymbol;
@@ -219,6 +221,7 @@ public class CastleManager {
 
         // Восстанавливаем символ замка
         map[castlePos.getY()][castlePos.getX()] = castleSymbol;
+        map[enemyCastle.getPosition().getY()][enemyCastle.getPosition().getX()] = castleSymbolenemy;
 
         if (isFirstExit) {
             mapManager.startGame(hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager);
