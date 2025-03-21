@@ -10,4 +10,9 @@ public class Hero extends Character {
                 int health, int attack, int defense, int attackRange, List<Unit> units) {
         super(name, maxMoves, new Position(width / 6, height / 4), team, gold, health, attack, defense, attackRange, units);
     }
+
+    @Override
+    public CharacterType getType() {
+        return CharacterType.HERO;
+    }
 }

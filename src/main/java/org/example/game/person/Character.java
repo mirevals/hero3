@@ -1,12 +1,13 @@
 package org.example.game.person;
 
 import org.example.game.Gold;
+import org.example.game.build.Castle;
 import org.example.game.map.Position;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Character {
+public abstract class Character {
 
     private String name;  // Имя героя
     private int maxMoves;  // Максимальное количество перемещений за ход
@@ -125,4 +126,9 @@ public class Character {
             System.out.println("Ошибка: количество золота должно быть положительным.");
         }
     }
+    public enum CharacterType {
+        HERO, ENEMY
+    }
+
+    public abstract CharacterType getType();
 }
