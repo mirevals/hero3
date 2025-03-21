@@ -1,6 +1,8 @@
 package org.example;
 
 import org.example.game.Player;
+import org.example.game.battle.Battle;
+import org.example.game.battle.BattleField;
 import org.example.game.build.*;
 import org.example.game.map.GameMap;
 import org.example.game.map.MapManager;
@@ -39,7 +41,8 @@ public class App {
         List<Unit> buyUnit = new ArrayList<>();
         buyUnit.add(warrior);
 
-
+        unitsHero.add(warrior);
+        unitsHero.add(warrior);
 
 
         Hero hero = new Hero("Герой 1", 10, Team.HERO, 1000, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 3,  unitsHero);
@@ -58,10 +61,20 @@ public class App {
 
 
 
+        List<Unit> allUnits = new ArrayList<>();
+        allUnits.addAll(unitsHero);
+        allUnits.addAll(unitsEnemy);
+
+
+        BattleField battleField = new BattleField(allUnits);
+        //Battle.autoFight(battleField, allUnits);
         Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);
 
         MapManager mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road);
 
-        CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero);
+        CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits);
+
+
+
     }
 }
