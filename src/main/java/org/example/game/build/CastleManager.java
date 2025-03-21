@@ -252,31 +252,43 @@ public class CastleManager {
             return;
         }
 
-        Position castlePos = castle.getPosition();
-        char castleSymbol = (castle.getType() == Castle.CastleType.HERO) ? 'C' : 'E';
-        char castleSymbolenemy = 'E';
+        // Определяем направление выхода в зависимости от типа замка
+        Castle.CastleType castleType = castle.getType();
+        int direction;
 
+        Position heroPos = hero.getPosition();
+        Position heroCastlePos = heroCastle.getPosition();
+        Position enemyCastlePos = enemyCastle.getPosition();
+
+        // Определяем направление выхода
+        if (heroPos.equals(heroCastlePos)) {
+            direction = 1; // Выход вниз из замка героя
+        } else if (heroPos.equals(enemyCastlePos)) {
+            direction = -1; // Выход вверх из замка противника
+        } else {
+            System.out.println("Ошибка: герой не находится в замке.");
+            return;
+        }
+
+        int newX = heroPos.getX() + direction;
+        int newY = heroPos.getY();
         char heroSymbol = 'H';
-
         char[][] map = gameMap.getMap();
 
-        // Определяем новую позицию для выхода (всегда вниз)
-        int newX = castlePos.getX() + 1;
-        int newY = castlePos.getY();
 
         if (mapManager.isWalkable(newX, newY, gameMap)) {
             map[newY][newX] = heroSymbol;
             hero.setPosition(newX, newY);
             gameMap.setCellValue(newX, newY, heroSymbol);
-            System.out.println("Вы покинули " + (castle.getType() == Castle.CastleType.HERO ? "замок героя" : "замок противника") + " и переместились на клетку ниже.");
+            System.out.println("Вы покинули " + (castleType == Castle.CastleType.HERO ? "замок героя" : "замок противника") + " и переместились " + (direction == 1 ? "вниз." : "вверх."));
         } else {
-            System.out.println("Вы не можете покинуть замок, нет свободной клетки ниже.");
+            System.out.println("Вы не можете покинуть замок, нет свободной клетки " + (direction == 1 ? "внизу." : "вверху."));
             return;
         }
 
         // Восстанавливаем символ замка
-        map[castlePos.getY()][castlePos.getX()] = castleSymbol;
-        map[enemyCastle.getPosition().getY()][enemyCastle.getPosition().getX()] = castleSymbolenemy;
+        map[heroCastle.getPosition().getY()][heroCastle.getPosition().getX()] = 'C';
+        map[enemyCastle.getPosition().getY()][enemyCastle.getPosition().getX()] = 'E';
 
         if (isFirstExit) {
             mapManager.startGame(hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
@@ -286,5 +298,4 @@ public class CastleManager {
             isInCastle = false;
         }
     }
-
 }

@@ -198,11 +198,13 @@ public class MapManager {
         if (mapSymbol == 'C') {
             // Вход в замок героя
             System.out.println("Вы подошли к замку героя! Вход возможен.");
+            hero.setPosition(heroCastle.getPosition().getX(), heroCastle.getPosition().getY());
             CastleManager.enterCastle(castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
             return true;
         } else if (mapSymbol == 'E') {
             // Вход в замок противника
             System.out.println("Вы подошли к замку противника! Вход невозможен.");
+            hero.setPosition(enemyCastle.getPosition().getX(), enemyCastle.getPosition().getY());
             CastleManager.enterCastle(castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
             return true;
         }
