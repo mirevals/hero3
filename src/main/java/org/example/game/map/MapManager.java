@@ -81,7 +81,7 @@ public class MapManager {
         return 2;  // Штраф на нейтральной территории
     }
 
-    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit) {
+    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, BattleField battleField, List<Unit> allUnits) {
         gameMap.printMap();
         Scanner scanner = new Scanner(System.in);
 
@@ -138,7 +138,7 @@ public class MapManager {
                 }
 
                 // Перемещаем героя
-                moveHero(dx, dy, steps, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero);
+                moveHero(dx, dy, steps, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits);
 
                 gameMap.printMap();
                 // Завершаем ход героя и переходим к ходу врага
@@ -146,7 +146,7 @@ public class MapManager {
 
                 System.out.println("\nХод врага:");
 
-                enemyMove(hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
+                enemyMove(hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits);
 
                 gameMap.printMap();
                 // Завершаем ход врага и переходим к ходу героя
@@ -154,9 +154,9 @@ public class MapManager {
         }
     }
 
-    public void enemyMove(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit) {
+    public void enemyMove(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, BattleField battleField, List<Unit> allUnits) {
         if (isFirstEnemyMove) {
-            CastleManager.exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, enemy);
+            CastleManager.exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, enemy, battleField, allUnits);
             isFirstEnemyMove = false;
             secondStepEnemy += 1;
         }
@@ -237,7 +237,7 @@ public class MapManager {
         isHeroTurn = true;
     }
 
-    public void moveHero(int directionX, int directionY, int distance, Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character) {
+    public void moveHero(int directionX, int directionY, int distance, Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnits) {
         // Проверка на наличие оставшихся шагов перед движением
         if (hero.getCurrentMoves() <= 0) {
             if (!offerToBuySteps(hero)) {
@@ -261,12 +261,12 @@ public class MapManager {
 
             if (isCastleHeroOnPosition(newX, newY, heroCastle)) {
                 System.out.println("На пути замок героев.");
-                if (handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character)) {
+                if (handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnits)) {
                     break;  // Если вход в замок успешен, останавливаем движение
                 }
             } else if (isCastleEnemyOnPosition(newX, newY, enemyCastle)) {
                 System.out.println("На пути замок врагов.");
-                if (handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character)) {
+                if (handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character,  battleField, allUnits)) {
                     break;  // Если вход в замок успешен, останавливаем движение
                 }
             }
@@ -320,7 +320,7 @@ public class MapManager {
         System.out.println("Оставшиеся шаги: " + hero.getCurrentMoves());
 
         // Проверка на бой
-        checkForBattle(hero, enemy, newX, newY, gameMap, enemyCastle);
+        checkForBattle(hero, enemy, newX, newY, gameMap, enemyCastle, battleField, allUnits);
         isHeroTurn = false;
     }
 
@@ -406,7 +406,7 @@ public class MapManager {
         return x >= 0 && x < gameMap.getWidth() && y >= 0 && y < gameMap.getHeight() && isWalkable(x, y, gameMap);
     }
 
-    private boolean handleCastleEntry(int x, int y, Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character) {
+    private boolean handleCastleEntry(int x, int y, Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnit) {
         // Получаем символ на позиции (x, y) карты
         char mapSymbol = gameMap.getMap()[y][x];
 
@@ -414,7 +414,7 @@ public class MapManager {
             // Вход в замок героя
             System.out.println("Вы подошли к замку героя! Вход возможен.");
             hero.setPosition(heroCastle.getPosition().getX(), heroCastle.getPosition().getY());
-            CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character);
+            CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnit);
             return true;
         } else if (x == enemyCastle.getPosition().getX() && y == enemyCastle.getPosition().getY()) {
             if (enemy.isDead()){
@@ -422,11 +422,9 @@ public class MapManager {
                 endGame();
             }
             if (enemy.getX() == enemyCastle.getPosition().getX() && enemy.getY() == enemyCastle.getPosition().getY()){
-                BattleField battleField = new BattleField(hero.getUnits(), enemy.getUnits());
-                Battle battle = new Battle(battleField);
 
                 // Запускаем бой
-                boolean heroWon = battle.autoFight();
+                boolean heroWon = Battle.autoFight(battleField, allUnit);
 
                 if (!heroWon) {
                     System.out.println("Герой проиграл битву!");
@@ -445,7 +443,7 @@ public class MapManager {
             // Вход в замок противника
             System.out.println("Вы подошли к замку противника! Вход возможен.");
             hero.setPosition(enemyCastle.getPosition().getX(), enemyCastle.getPosition().getY());
-            CastleManager.enterCastle(enemyCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character);
+            CastleManager.enterCastle(enemyCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnit);
             return true;
         }
 
@@ -494,13 +492,11 @@ public class MapManager {
         }
     }
 
-    private void checkForBattle(Hero hero, Enemy enemy, int x, int y, GameMap gameMap, EnemyCastle enemyCastle) {
+    private void checkForBattle(Hero hero, Enemy enemy, int x, int y, GameMap gameMap, EnemyCastle enemyCastle, BattleField battleField, List<Unit> allUnit) {
         if (!enemy.isDead() && x == enemy.getX() && y == enemy.getY() && enemy.getY() != enemyCastle.getPosition().getY() && enemy.getX() != enemyCastle.getPosition().getX()) {
-            BattleField battleField = new BattleField(hero.getUnits(), enemy.getUnits());
-            Battle battle = new Battle(battleField);
 
             // Запускаем бой
-            boolean heroWon = battle.autoFight();
+            boolean heroWon = Battle.autoFight(battleField, allUnit);
 
             if (!heroWon) {
                 System.out.println("Герой проиграл битву!");
@@ -532,10 +528,6 @@ public class MapManager {
         System.exit(0); // Завершаем выполнение программы
     }
 
-
-    public BattleField enterBattleField(Character hero, Enemy enemy) {
-        return new BattleField(hero.getUnits(), enemy.getUnits());
-    }
 
 
 }

@@ -1,6 +1,7 @@
 package org.example.game.build;
 
 import org.example.game.Player;
+import org.example.game.battle.BattleField;
 import org.example.game.map.MapManager;
 import org.example.game.map.Position;
 import org.example.game.person.*;
@@ -23,7 +24,7 @@ public class CastleManager {
     private static Scanner scanner = new Scanner(System.in);  // Один Scanner на всю программу
 
 
-    public static void processCastleCommands(Castle castle, Hero hero, Enemy enemy, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character) {
+    public static void processCastleCommands(Castle castle, Hero hero, Enemy enemy, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnits) {
         while (isInCastle) {
             if (isTavernNotBuild) {
                 handleTavernNotBuilt(castle);
@@ -36,7 +37,7 @@ public class CastleManager {
             } else {
                 showCastleCommands();
                 String command = scanner.nextLine().trim().toLowerCase();
-                processCastleAction(command, castle, enemy, hero, player, enemyCastle, heroCastle ,gameMap, mapManager, buyUnit, character);
+                processCastleAction(command, castle, enemy, hero, player, enemyCastle, heroCastle ,gameMap, mapManager, buyUnit, character, battleField, allUnits);
             }
         }
     }
@@ -100,10 +101,10 @@ public class CastleManager {
         System.out.println("b - показать список построек");
     }
 
-    private static void processCastleAction(String command, Castle castle, Enemy enemy, Hero hero, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character) {
+    private static void processCastleAction(String command, Castle castle, Enemy enemy, Hero hero, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnits) {
         switch (command) {
             case "q":
-                exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, character);  // Выход из замка
+                exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, character, battleField, allUnits);  // Выход из замка
                 break;
             case "m":
                 openShop(scanner, castle);
@@ -232,7 +233,7 @@ public class CastleManager {
 
 
 
-    public static void enterCastle(Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character) {
+    public static void enterCastle(Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnits) {
         isInCastle = true;
         String castleName = (castle.getType() == Castle.CastleType.HERO) ? "замок героя!" : "замок противника!";
         System.out.println("Вы вошли в " + castleName);
@@ -243,10 +244,10 @@ public class CastleManager {
             return;
         }
 
-        processCastleCommands(castle, hero, enemy, player,enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character);
+        processCastleCommands(castle, hero, enemy, player,enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnits);
     }
 
-    public static void exitCastle(Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, Hero hero, Player player, GameMap gameMap, Castle castle, MapManager mapManager, List<Unit> buyUnit, Character character) {
+    public static void exitCastle(Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, Hero hero, Player player, GameMap gameMap, Castle castle, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnits) {
         if (!isInCastle) {
             System.out.println("Вы не находитесь в замке.");
             return;
@@ -325,7 +326,7 @@ public class CastleManager {
         map[enemyCastle.getPosition().getY()][enemyCastle.getPosition().getX()] = 'E';
 
         if (isFirstExit) {
-            mapManager.startGame(hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
+            mapManager.startGame(hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits);
             isFirstExit = false;
         } else {
             isInCastle = false;

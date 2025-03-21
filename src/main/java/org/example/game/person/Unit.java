@@ -66,19 +66,6 @@ public class Unit {
         System.out.println(name + " перемещается на " + moveRange + " клеток.");
     }
 
-    // Метод для атаки
-    public void attack(Unit target) {
-        // Проверка, что цель не принадлежит той же команде
-        if (this.team == target.getTeam()) {
-            System.out.println(name + " не может атаковать юнитов своей команды.");
-            return;  // Прекращаем выполнение метода, если цель из той же команды
-        }
-
-        // Логика атаки
-        System.out.println(name + " атакует " + target.getName() + " с урона: " + getTotalDamage());
-        // Уменьшаем здоровье цели
-        target.takeDamage(getTotalDamage());
-    }
 
     // Получение дефолтного символа по типу юнита
     private String getDefaultSymbol() {
@@ -139,11 +126,26 @@ public class Unit {
         return position;
     }
 
+    public void attack(Unit target) {
+        // Проверка, что цель не принадлежит той же команде
+        if (this.team == target.getTeam()) {
+            System.out.println(name + " не может атаковать юнитов своей команды.");
+            return;  // Прекращаем выполнение метода, если цель из той же команды
+        }
+
+        // Логика атаки
+        System.out.println(name + " атакует " + target.getName() + " с урона: " + getTotalDamage());
+        // Уменьшаем здоровье цели
+        target.takeDamage(getTotalDamage());
+    }
+
     public void takeDamage(int damage) {
         health -= damage;
         if (health <= 0) {
-            health = 0; // чтобы здоровье не стало отрицательным
+            health = 0; // Чтобы здоровье не стало отрицательным
             System.out.println(name + " был уничтожен.");
+        } else {
+            System.out.println(name + " получил " + damage + " урона, осталось здоровья: " + health);
         }
     }
 
