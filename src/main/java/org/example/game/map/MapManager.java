@@ -212,6 +212,25 @@ public class MapManager {
             CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
             return true;
         } else if (mapSymbol == 'E') {
+            if (enemy.getX() == enemyCastle.getPosition().getX() && enemy.getY() == enemyCastle.getPosition().getY()){
+                BattleField battleField = new BattleField(hero.getUnits(), enemy.getUnits());
+                Battle battle = new Battle(battleField);
+
+                // Запускаем бой
+                boolean heroWon = battle.autoFight();
+
+                if (!heroWon) {
+                    System.out.println("Герой проиграл битву!");
+                    endGame(); // Завершаем игру
+                } else {
+                    // Если герои выиграли, удаляем врага с карты
+                    removeEnemyFromMap(enemy, gameMap);
+                    System.out.println("Герой выйграл битву и захватил замок!");
+                    endGame(); // Завершаем игру
+
+                }
+
+            }
             // Вход в замок противника
             System.out.println("Вы подошли к замку противника! Вход возможен.");
             hero.setPosition(enemyCastle.getPosition().getX(), enemyCastle.getPosition().getY());
