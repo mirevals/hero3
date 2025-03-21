@@ -107,4 +107,22 @@ public class Character {
     public int getX() { return position.getX(); }
     public int getY() { return position.getY(); }
     public void setPosition(int x, int y) { this.position = new Position(x, y); }
+
+    public void die() {
+        this.health = 0;
+        System.out.println(name + " умер.");
+    }
+
+    public boolean isDead() {
+        return health <= 0;
+    }
+
+    public void addGold(int amount) {
+        if (amount >= 0) {
+            this.gold += amount;
+            System.out.println(amount + " золота добавлено герою " + name + ". Текущее количество золота: " + gold);
+        } else {
+            System.out.println("Ошибка: количество золота должно быть положительным.");
+        }
+    }
 }

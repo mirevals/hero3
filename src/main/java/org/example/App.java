@@ -42,7 +42,7 @@ public class App {
 
 
 
-        Hero hero = new Hero("Герой 1", 10, Team.HERO, 1000, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 1,  unitsHero);
+        Hero hero = new Hero("Герой 1", 10, Team.HERO, 1000, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 3,  unitsHero);
 
         Enemy enemy = new Enemy("Враг", 5, Team.ENEMY, 100, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 1,  unitsEnemy);
 
@@ -55,6 +55,7 @@ public class App {
 
         enemyCastle.addBuilding(building1);
         enemyCastle.addBuilding(building2);
+
 
 
         Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);

@@ -41,7 +41,7 @@ public class Tavern extends Building {
                     hero.setHealth(1000);
                     hero.setAttack(10);
                     hero.setDefense(10);
-                    hero.setAttackRange(1);
+                    hero.setAttackRange(3);
                 }
                 case 2 -> {
                     hero.setName("Герой 2");
