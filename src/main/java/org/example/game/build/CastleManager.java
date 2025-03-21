@@ -23,7 +23,7 @@ public class CastleManager {
     private static Scanner scanner = new Scanner(System.in);  // Один Scanner на всю программу
 
 
-    public static void processCastleCommands(Castle castle, Hero hero, Enemy enemy, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit) {
+    public static void processCastleCommands(Castle castle, Hero hero, Enemy enemy, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character) {
         while (isInCastle) {
             if (isTavernNotBuild) {
                 handleTavernNotBuilt(castle);
@@ -36,7 +36,7 @@ public class CastleManager {
             } else {
                 showCastleCommands();
                 String command = scanner.nextLine().trim().toLowerCase();
-                processCastleAction(command, castle, enemy, hero, player, enemyCastle, heroCastle ,gameMap, mapManager, buyUnit);
+                processCastleAction(command, castle, enemy, hero, player, enemyCastle, heroCastle ,gameMap, mapManager, buyUnit, character);
             }
         }
     }
@@ -100,10 +100,10 @@ public class CastleManager {
         System.out.println("b - показать список построек");
     }
 
-    private static void processCastleAction(String command, Castle castle, Enemy enemy, Hero hero, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit) {
+    private static void processCastleAction(String command, Castle castle, Enemy enemy, Hero hero, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character) {
         switch (command) {
             case "q":
-                exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit);  // Выход из замка
+                exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, character);  // Выход из замка
                 break;
             case "m":
                 openShop(scanner, castle);
@@ -232,7 +232,7 @@ public class CastleManager {
 
 
 
-    public static void enterCastle(Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit) {
+    public static void enterCastle(Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character) {
         isInCastle = true;
         String castleName = (castle.getType() == Castle.CastleType.HERO) ? "замок героя!" : "замок противника!";
         System.out.println("Вы вошли в " + castleName);
@@ -243,44 +243,78 @@ public class CastleManager {
             return;
         }
 
-        processCastleCommands(castle, hero, enemy, player,enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
+        processCastleCommands(castle, hero, enemy, player,enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character);
     }
 
-    public static void exitCastle(Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, Hero hero, Player player, GameMap gameMap, Castle castle, MapManager mapManager, List<Unit> buyUnit) {
+    public static void exitCastle(Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, Hero hero, Player player, GameMap gameMap, Castle castle, MapManager mapManager, List<Unit> buyUnit, Character character) {
         if (!isInCastle) {
             System.out.println("Вы не находитесь в замке.");
             return;
         }
+        Character.CharacterType characterType = character.getType();
 
-        // Определяем направление выхода в зависимости от типа замка
-        Castle.CastleType castleType = castle.getType();
-        int direction;
-
-        Position heroPos = hero.getPosition();
+        Position characterPos = character.getPosition();
         Position heroCastlePos = heroCastle.getPosition();
         Position enemyCastlePos = enemyCastle.getPosition();
 
+        // Определяем направление выхода в зависимости от типа замка
+       // Castle.CastleType  = castle.getType();
+        int direction;
+
+        Castle currentCastle = null;
+      // Position heroPos = hero.getPosition();
+      //  Position heroCastlePos = heroCastle.getPosition();
+      //  Position enemyCastlePos = enemyCastle.getPosition();
+
+        // Определяем, в каком замке находится персонаж
+        if (characterType == Character.CharacterType.HERO) {
+            // Если герой находится в замке героя
+            if (characterPos.equals(heroCastlePos)) {
+                currentCastle = heroCastle;
+            }
+            // Если герой находится в замке врага
+            else if (characterPos.equals(enemyCastlePos)) {
+                currentCastle = enemyCastle;
+            } else {
+                System.out.println("Ошибка: герой не находится в замке.");
+                return;
+            }
+        }
+        else if (characterType == Character.CharacterType.ENEMY) {
+            // Если враг находится в замке противника
+            if (characterPos.equals(enemyCastlePos)) {
+                currentCastle = enemyCastle;
+            }
+            // Если враг находится в замке героя
+            else if (characterPos.equals(heroCastlePos)) {
+                currentCastle = heroCastle;
+            } else {
+                System.out.println("Ошибка: враг не находится в замке.");
+                return;
+            }
+        }
+
         // Определяем направление выхода
-        if (heroPos.equals(heroCastlePos)) {
-            direction = 1; // Выход вниз из замка героя
-        } else if (heroPos.equals(enemyCastlePos)) {
+        if (currentCastle == heroCastle) {
+            direction = 1;
+        } else if (currentCastle == enemyCastle) {
             direction = -1; // Выход вверх из замка противника
         } else {
             System.out.println("Ошибка: герой не находится в замке.");
             return;
         }
 
-        int newX = heroPos.getX() + direction;
-        int newY = heroPos.getY();
-        char heroSymbol = 'H';
+        int newX = characterPos.getX() + direction;
+        int newY = characterPos.getY();
+        char heroSymbol = character.getType() == Character.CharacterType.HERO ? 'H' : 'A';
         char[][] map = gameMap.getMap();
 
 
         if (mapManager.isWalkable(newX, newY, gameMap)) {
             map[newY][newX] = heroSymbol;
-            hero.setPosition(newX, newY);
+            character.setPosition(newX, newY);
             gameMap.setCellValue(newX, newY, heroSymbol);
-            System.out.println("Вы покинули " + (castleType == Castle.CastleType.HERO ? "замок героя" : "замок противника") + " и переместились " + (direction == 1 ? "вниз." : "вверх."));
+            System.out.println("Вы покинули " + (currentCastle.getType() == Castle.CastleType.HERO ? "замок героя" : "замок противника") + " и переместились " + (direction == 1 ? "вправо." : "влево."));
         } else {
             System.out.println("Вы не можете покинуть замок, нет свободной клетки " + (direction == 1 ? "внизу." : "вверху."));
             return;
@@ -294,7 +328,6 @@ public class CastleManager {
             mapManager.startGame(hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
             isFirstExit = false;
         } else {
-            gameMap.printMap();
             isInCastle = false;
         }
     }

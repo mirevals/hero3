@@ -13,4 +13,9 @@ public class Enemy extends Character {
                  int health, int attack, int defense, int attackRange, List<Unit> units) {
         super(name, maxMoves, new Position(5 * width / 6, height / 4), team, gold, health, attack, defense, attackRange, units);
     }
+
+    @Override
+    public CharacterType getType() {
+        return CharacterType.ENEMY;
+    }
 }

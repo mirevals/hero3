@@ -62,6 +62,6 @@ public class App {
 
         MapManager mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road);
 
-        CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit);
+        CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero);
     }
 }
