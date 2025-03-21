@@ -54,6 +54,7 @@ public class App {
         Building building2 = availableBuildings.get(1);
 
         enemyCastle.addBuilding(building1);
+        enemyCastle.addBuilding(building2);
 
 
         Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);

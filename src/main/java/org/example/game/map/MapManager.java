@@ -17,6 +17,8 @@ public class MapManager {
     private final Scanner scanner;
 
 
+    private static boolean first = true;
+    char lastwas;
 
 
 
@@ -45,7 +47,7 @@ public class MapManager {
 
     public boolean isWalkable(int x, int y, GameMap gameMap) {
         char cell = gameMap.getMap()[y][x];
-        return cell != '#' && cell != ' ';  // Проверка на препятствие и пустую клетку
+        return cell != '#';
     }
 
     public void removeEnemy(Enemy enemy, GameMap gameMap) {
@@ -61,6 +63,9 @@ public class MapManager {
     public int getMovementPenalty(int x, int y, GameMap gameMap) {
         char terrain = gameMap.getMap()[y][x];  // Получаем тип текущей клетки
 
+        if (terrain == '.') {
+            return 0;
+        }
         // Геройская территория
         if (x < gameMap.getWidth() / 3) {
             return 0;  // Нет штрафа на своей территории
@@ -114,6 +119,9 @@ public class MapManager {
             }
         }
 
+
+
+
         int newX = hero.getX() + dx;
         int newY = hero.getY() + dy;
 
@@ -138,6 +146,8 @@ public class MapManager {
 
         // Обновляем позицию героя и карту
         updateCharacterPosition(hero, newX, newY, gameMap);
+
+
 
         // Вывод оставшихся шагов
         System.out.println("Оставшиеся шаги: " + hero.getCurrentMoves());
@@ -218,14 +228,27 @@ public class MapManager {
         int oldX = character.getX();
         int oldY = character.getY();
 
-        // Убираем героя с предыдущей клетки
-        map[oldY][oldX] = '.';
+        // Проверяем, что было на предыдущей клетке
+        if (lastwas == '.') {
+            gameMap.setCellValue(oldX, oldY, '.');
+            lastwas = '.';
+        } else if (first) {
+            first = false;
+            gameMap.setCellValue(oldX, oldY, '.');
+            lastwas = '.';
+        } else if (map[x][y] == '.' && lastwas == ' ') {
+            gameMap.setCellValue(oldX, oldY, ' ');
+            lastwas = '.';
+        } else {
+            gameMap.setCellValue(oldX, oldY, '.');
+            lastwas = ' ';
+        }
 
         // Обновляем позицию персонажа
         character.setPosition(x, y);
 
         // Ставим героя на новую позицию
-        map[y][x] = 'H';
+        gameMap.setCellValue(x, y, 'H');
     }
 
     private void checkForBattle(Hero hero, Enemy enemy, int x, int y, GameMap gameMap) {
