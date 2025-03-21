@@ -13,8 +13,6 @@ public class EnemyCastle extends Castle{
         super("Замок врага", new Position(5 * width / 6, height / 4));
     }
 
-
-
     @Override
     public CastleType getType() {
         return CastleType.ENEMY;
