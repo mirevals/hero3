@@ -60,6 +60,8 @@ public class Character {
     public void setDefense(int defense) { this.defense = defense; }
     public void setAttackRange(int attackRange) { this.attackRange = attackRange; }
 
+
+
     // Метод для установки количества оставшихся перемещений
     public void setCurrentMoves(int currentMoves) {
         if (currentMoves < 0) {
@@ -70,6 +72,9 @@ public class Character {
             this.currentMoves = currentMoves;
         }
     }
+
+
+
 
     // Инвентарь
     public void addItemToInventory(String item) {
@@ -102,4 +107,22 @@ public class Character {
     public int getX() { return position.getX(); }
     public int getY() { return position.getY(); }
     public void setPosition(int x, int y) { this.position = new Position(x, y); }
+
+    public void die() {
+        this.health = 0;
+        System.out.println(name + " умер.");
+    }
+
+    public boolean isDead() {
+        return health <= 0;
+    }
+
+    public void addGold(int amount) {
+        if (amount >= 0) {
+            this.gold += amount;
+            System.out.println(amount + " золота добавлено герою " + name + ". Текущее количество золота: " + gold);
+        } else {
+            System.out.println("Ошибка: количество золота должно быть положительным.");
+        }
+    }
 }

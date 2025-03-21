@@ -1,10 +1,7 @@
 package org.example;
 
 import org.example.game.Player;
-import org.example.game.build.Castle;
-import org.example.game.build.CastleManager;
-import org.example.game.build.EnemyCastle;
-import org.example.game.build.HeroCastle;
+import org.example.game.build.*;
 import org.example.game.map.GameMap;
 import org.example.game.map.MapManager;
 import org.example.game.map.Road;
@@ -16,6 +13,7 @@ import org.example.game.person.Unit;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.example.game.build.Shop.availableBuildings;
 
 
 public class App {
@@ -36,6 +34,7 @@ public class App {
         // Создаем юнита и добавляем его в список юнитов врага
         Unit enemyUnit = new Unit(Unit.UnitType.WARRIOR, 100, 100, 1, 10, Team.ENEMY, 'A', 100);
         List<Unit> unitsEnemy = new ArrayList<>();
+        unitsEnemy.add(enemyUnit);
 
         List<Unit> buyUnit = new ArrayList<>();
         buyUnit.add(warrior);
@@ -43,13 +42,21 @@ public class App {
 
 
 
-        Hero hero = new Hero("Герой 1", 10, Team.HERO, 1000, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 1,  unitsHero);
+        Hero hero = new Hero("Герой 1", 10, Team.HERO, 1000, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 3,  unitsHero);
 
         Enemy enemy = new Enemy("Враг", 5, Team.ENEMY, 100, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 1,  unitsEnemy);
 
         HeroCastle heroCastle = new HeroCastle(gameMap.getHeight(), gameMap.getWidth());
 
         EnemyCastle enemyCastle = new EnemyCastle(gameMap.getHeight(), gameMap.getWidth());
+
+        Building building1 = availableBuildings.get(0);
+        Building building2 = availableBuildings.get(1);
+
+        enemyCastle.addBuilding(building1);
+        enemyCastle.addBuilding(building2);
+
+
 
         Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);
 
