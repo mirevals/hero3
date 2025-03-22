@@ -273,6 +273,9 @@ public class MapManager {
 
             if (isEnemyOnPosition(newX, newY, enemy)) {
                 System.out.println("На пути обнаружен враг. Останавливаемся.");
+
+                checkForBattle(hero, enemy, newX, newY, gameMap, enemyCastle, battleField, allUnits);
+
                 break; // Остановить движение на враге
             }
 
@@ -319,8 +322,6 @@ public class MapManager {
         // Вывод оставшихся шагов
         System.out.println("Оставшиеся шаги: " + hero.getCurrentMoves());
 
-        // Проверка на бой
-        checkForBattle(hero, enemy, newX, newY, gameMap, enemyCastle, battleField, allUnits);
         isHeroTurn = false;
     }
 
@@ -493,7 +494,7 @@ public class MapManager {
     }
 
     private void checkForBattle(Hero hero, Enemy enemy, int x, int y, GameMap gameMap, EnemyCastle enemyCastle, BattleField battleField, List<Unit> allUnit) {
-        if (!enemy.isDead() && x == enemy.getX() && y == enemy.getY() && enemy.getY() != enemyCastle.getPosition().getY() && enemy.getX() != enemyCastle.getPosition().getX()) {
+
 
             // Запускаем бой
             boolean heroWon = Battle.autoFight(battleField, allUnit);
@@ -509,7 +510,7 @@ public class MapManager {
                 hero.addGold(500);
             }
 
-        }
+
     }
 
     private void removeEnemyFromMap(Enemy enemy, GameMap gameMap) {
