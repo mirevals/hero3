@@ -38,11 +38,12 @@ public class App {
         List<Unit> unitsEnemy = new ArrayList<>();
         unitsEnemy.add(enemyUnit);
 
+
         List<Unit> buyUnit = new ArrayList<>();
         buyUnit.add(warrior);
 
         unitsHero.add(warrior);
-        unitsHero.add(warrior);
+
 
 
         Hero hero = new Hero("Герой 1", 10, Team.HERO, 1000, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 3,  unitsHero);
@@ -72,10 +73,10 @@ public class App {
 
         MapManager mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road);
 
-        CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits);
+        //CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits);
 
 
-        //Battle.autoFight(battleField, allUnits);
+        Battle.autoFight(battleField, allUnits);
 
     }
 }
