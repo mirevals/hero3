@@ -4,13 +4,13 @@ import org.example.game.Player;
 import org.example.game.battle.Battle;
 import org.example.game.battle.BattleField;
 import org.example.game.build.*;
+import org.example.game.person.*;
 import org.example.game.person.Character;
-import org.example.game.person.Enemy;
-import org.example.game.person.Hero;
-import org.example.game.person.Unit;
-
+import java.util.Random;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.example.game.person.Carriage.Direction.*;
 
 public class MapManager {
 
@@ -24,23 +24,28 @@ public class MapManager {
 
 
 
-    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road) {
+    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage) {
         this.scanner = new Scanner(System.in);
 
-        initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap, road);
+        initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
     }
 
-    private void initializeMap(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road) {
+    private void initializeMap(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage) {
 
         // Размещение препятствий, замков, дорог
         Terrain.placeObstacles(gameMap.getMap(), gameMap.getWidth(), gameMap.getHeight());
         placeCastles(heroCastle, enemyCastle, gameMap);
+        placeCarriage(carriage, gameMap);
         road.placeRoad(gameMap.getMap());
         initializeCharacterPositions(enemy, hero, gameMap);
     }
 
     private void placeCastles(HeroCastle heroCastle, EnemyCastle enemyCastle, GameMap gameMap) {
         gameMap.setCellValue(enemyCastle.getPosition().getX(), enemyCastle.getPosition().getY(), 'E');
+    }
+
+    private void placeCarriage(Carriage carriage, GameMap gameMap) {
+        gameMap.setCellValue(carriage.getPosition().getX(), carriage.getPosition().getY(), 'D');
     }
 
     private void initializeCharacterPositions(Enemy enemy, Hero hero, GameMap gameMap) {
@@ -81,7 +86,10 @@ public class MapManager {
         return 2;  // Штраф на нейтральной территории
     }
 
-    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, BattleField battleField, List<Unit> allUnits) {
+    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player,
+                          EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap,
+                          MapManager mapManager, List<Unit> buyUnit, BattleField battleField,
+                          List<Unit> allUnits, Carriage carriage) {
         gameMap.printMap();
         Scanner scanner = new Scanner(System.in);
 
@@ -138,7 +146,7 @@ public class MapManager {
                 }
 
                 // Перемещаем героя
-                moveHero(dx, dy, steps, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits);
+                moveHero(dx, dy, steps, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
                 gameMap.printMap();
                 // Завершаем ход героя и переходим к ходу врага
@@ -146,17 +154,47 @@ public class MapManager {
 
                 System.out.println("\nХод врага:");
 
-                enemyMove(hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits);
+                enemyMove(hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits, carriage);
 
+
+                moveCarriage(carriage, gameMap, hero);
                 gameMap.printMap();
                 // Завершаем ход врага и переходим к ходу героя
 
         }
     }
 
-    public void enemyMove(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, BattleField battleField, List<Unit> allUnits) {
+
+
+    public void moveCarriage(Carriage carriage, GameMap gameMap, Hero hero) {
+        int x = carriage.getPosition().getX();
+        int y = carriage.getPosition().getY();
+
+        // Генерация случайной скорости: 1 или 2
+        int speed = new Random().nextBoolean() ? 1 : 2;
+
+        // Вычисляем новые координаты
+        switch (carriage.getDirection()) {
+            case LEFT -> x -= speed;
+            case RIGHT -> x += speed;
+            case UP -> y -= speed;
+            case DOWN -> y += speed;
+        }
+
+        // Проверяем, не вышла ли карета за пределы карты
+        char[][] map = gameMap.getMap();
+        if (x < 0 || x >= map[0].length || y < 0 || y >= map.length) {
+            System.out.println("Карета достигла края карты и не может двигаться дальше.");
+            return; // Прекращаем движение
+        }
+
+        // Применяем перемещение через метод обновления
+        updateCarriagePosition(carriage, x, y, gameMap, hero);
+    }
+
+    public void enemyMove(Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, BattleField battleField, List<Unit> allUnits, Carriage carriage) {
         if (isFirstEnemyMove) {
-            CastleManager.exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, enemy, battleField, allUnits);
+            CastleManager.exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, enemy, battleField, allUnits, carriage);
             isFirstEnemyMove = false;
             secondStepEnemy += 1;
         }
@@ -237,7 +275,13 @@ public class MapManager {
         isHeroTurn = true;
     }
 
-    public void moveHero(int directionX, int directionY, int distance, Hero hero, Enemy enemy, Castle castle, Player player, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnits) {
+    public void moveHero(int directionX, int directionY, int distance,
+                         Hero hero, Enemy enemy, Castle castle,
+                         Player player, EnemyCastle enemyCastle,
+                         HeroCastle heroCastle, GameMap gameMap,
+                         MapManager mapManager, List<Unit> buyUnit,
+                         Character character, BattleField battleField,
+                         List<Unit> allUnits, Carriage carriage) {
         // Проверка на наличие оставшихся шагов перед движением
         if (hero.getCurrentMoves() <= 0) {
             if (!offerToBuySteps(hero)) {
@@ -261,12 +305,16 @@ public class MapManager {
 
             if (isCastleHeroOnPosition(newX, newY, heroCastle)) {
                 System.out.println("На пути замок героев.");
-                if (handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnits)) {
+                if (handleCastleEntry(newX, newY, castle, hero, player, enemy,
+                        enemyCastle, heroCastle, gameMap, mapManager, buyUnit,
+                        character, battleField, allUnits, carriage)) {
                     break;  // Если вход в замок успешен, останавливаем движение
                 }
             } else if (isCastleEnemyOnPosition(newX, newY, enemyCastle)) {
                 System.out.println("На пути замок врагов.");
-                if (handleCastleEntry(newX, newY, castle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character,  battleField, allUnits)) {
+                if (handleCastleEntry(newX, newY, castle, hero, player,
+                        enemy, enemyCastle, heroCastle, gameMap,
+                        mapManager, buyUnit, character,  battleField, allUnits, carriage)) {
                     break;  // Если вход в замок успешен, останавливаем движение
                 }
             }
@@ -407,7 +455,7 @@ public class MapManager {
         return x >= 0 && x < gameMap.getWidth() && y >= 0 && y < gameMap.getHeight() && isWalkable(x, y, gameMap);
     }
 
-    private boolean handleCastleEntry(int x, int y, Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnit) {
+    private boolean handleCastleEntry(int x, int y, Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnit, Carriage carriage) {
         // Получаем символ на позиции (x, y) карты
         char mapSymbol = gameMap.getMap()[y][x];
 
@@ -415,7 +463,7 @@ public class MapManager {
             // Вход в замок героя
             System.out.println("Вы подошли к замку героя! Вход возможен.");
             hero.setPosition(heroCastle.getPosition().getX(), heroCastle.getPosition().getY());
-            CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnit);
+            CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnit, carriage);
             return true;
         } else if (x == enemyCastle.getPosition().getX() && y == enemyCastle.getPosition().getY()) {
             if (enemy.isDead()){
@@ -444,7 +492,10 @@ public class MapManager {
             // Вход в замок противника
             System.out.println("Вы подошли к замку противника! Вход возможен.");
             hero.setPosition(enemyCastle.getPosition().getX(), enemyCastle.getPosition().getY());
-            CastleManager.enterCastle(enemyCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnit);
+            CastleManager.enterCastle(enemyCastle, hero, player,
+                    enemy, enemyCastle, heroCastle, gameMap,
+                    mapManager, buyUnit, character,
+                    battleField, allUnit, carriage);
             return true;
         }
 
@@ -452,6 +503,82 @@ public class MapManager {
         return false;
     }
 
+    private void updateCarriagePosition(Carriage carriage, int x, int y, GameMap gameMap, Character character) {
+        char[][] map = gameMap.getMap();
+        int oldX = carriage.getPosition().getX();
+        int oldY = carriage.getPosition().getY();
+
+        int damage = 10;
+        int halfDamage = damage / 2;
+
+        // === 1. Проверка клетки позади (до перемещения)
+        int backX = oldX;
+        int backY = oldY;
+
+        switch (carriage.getDirection()) {
+            case LEFT -> backX += 1;
+            case RIGHT -> backX -= 1;
+            case UP -> backY += 1;
+            case DOWN -> backY -= 1;
+        }
+
+        // Если на "задней" клетке стоит герой — наносим половину урона
+        if (character.getX() == backX && character.getY() == backY) {
+            character.setHealth(character.getHealth() - halfDamage);
+            System.out.println("Карета проехала мимо " + character.getName() + " и нанесла " + halfDamage + " урона!");
+            System.out.println("Здоровье героя: " + character.getHealth());
+        }
+
+        // === 2. Проверка: если на новой клетке находится герой — полный урон, не двигаемся
+        if (map[y][x] == 'H' && character.getX() == x && character.getY() == y) {
+            character.setHealth(character.getHealth() - damage);
+            System.out.println("Карета столкнулась с " + character.getName() + " и нанесла " + damage + " урона!");
+            System.out.println("Здоровье героя: " + character.getHealth());
+            return;
+        }
+
+        // === 3. Проверка на границы карты и изменение направления
+        if (x < 1 || x >= map[0].length-1 || y < 0 || y >= map.length-1) {
+            // Карета достигла края, меняем направление
+            switch (carriage.getDirection()) {
+                case LEFT -> carriage.setDirection(Carriage.Direction.RIGHT);
+                case RIGHT -> carriage.setDirection(Carriage.Direction.LEFT);
+                case UP -> carriage.setDirection(Carriage.Direction.DOWN);
+                case DOWN -> carriage.setDirection(Carriage.Direction.UP);
+            }
+
+            // Обновляем новые координаты после поворота
+            x = oldX;
+            y = oldY;
+        }
+
+        // === 4. Перемещаем карету
+        carriage.setPosition(x, y);
+        gameMap.setCellValue(x, y, 'D');
+
+        // === 5. Проверка: если на предыдущей позиции кареты стоял герой — половина урона
+        if (character.getX() == oldX && character.getY() == oldY) {
+            character.setHealth(character.getHealth() - halfDamage);
+            System.out.println("Карета уехала от " + character.getName() + " и нанесла " + halfDamage + " урона при отъезде!");
+            System.out.println("Здоровье героя: " + character.getHealth());
+        }
+
+        // === 6. Обновляем старую позицию на карте
+        if (lastwas == ' ') {
+            gameMap.setCellValue(oldX, oldY, ' ');
+            lastwas = ' ';
+        } else if (first) {
+            first = false;
+            gameMap.setCellValue(oldX, oldY, ' ');
+            lastwas = ' ';
+        } else if (map[y][x] == '.' && lastwas == ' ') {
+            gameMap.setCellValue(oldX, oldY, ' ');
+            lastwas = ' ';
+        } else {
+            gameMap.setCellValue(oldX, oldY, ' ');
+            lastwas = ' ';
+        }
+    }
     private void updateCharacterPosition(Character character, int x, int y, GameMap gameMap) {
         if (character.getType() == Character.CharacterType.HERO) {
             char[][] map = gameMap.getMap();

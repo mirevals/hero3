@@ -6,11 +6,9 @@ import org.example.game.battle.BattleField;
 import org.example.game.build.*;
 import org.example.game.map.GameMap;
 import org.example.game.map.MapManager;
+import org.example.game.map.Position;
 import org.example.game.map.Road;
-import org.example.game.person.Enemy;
-import org.example.game.person.Hero;
-import org.example.game.person.Team;
-import org.example.game.person.Unit;
+import org.example.game.person.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +42,8 @@ public class App {
 
         unitsHero.add(warrior);
 
+        Carriage carriage = new Carriage(new Position(5, 0), 1, 10, Carriage.Direction.DOWN);
+
 
 
         Hero hero = new Hero("Герой 1", 10, Team.HERO, 1000, gameMap.getWidth(), gameMap.getHeight(), 100, 100, 100, 3,  unitsHero);
@@ -71,12 +71,15 @@ public class App {
 
         Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);
 
-        MapManager mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road);
+        MapManager mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
 
-        //CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits);
+        CastleManager.enterCastle(heroCastle, hero, player,
+                enemy, enemyCastle, heroCastle, gameMap,
+                mapManager, buyUnit, hero, battleField,
+                allUnits, carriage);
 
 
-        Battle.autoFight(battleField, allUnits);
+        //Battle.autoFight(battleField, allUnits);
 
     }
 }
