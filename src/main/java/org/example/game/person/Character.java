@@ -109,6 +109,14 @@ public abstract class Character {
     public int getY() { return position.getY(); }
     public void setPosition(int x, int y) { this.position = new Position(x, y); }
 
+    public void setX(int x) {
+        this.position = new Position(x, this.position.getY());
+    }
+
+    public void setY(int y) {
+        this.position = new Position(this.position.getX(), y);
+    }
+
     public void die() {
         this.health = 0;
         System.out.println(name + " умер.");
@@ -131,4 +139,19 @@ public abstract class Character {
     }
 
     public abstract CharacterType getType();
+
+    // Метод для получения урона
+    public void takeDamage(int damage) {
+        // Вычисляем фактический урон с учетом защиты
+        int finalDamage = damage;
+
+        // Уменьшаем здоровье на полученный урон
+        this.health -= finalDamage;
+        // Если здоровье персонажа стало меньше или равно нулю, он умирает
+        if (this.health <= 0) {
+            this.die();
+        }
+
+        System.out.println(name + " получил урон: " + finalDamage + ". Текущее здоровье: " + this.health);
+    }
 }

@@ -40,7 +40,7 @@ public class Battle {
                     battleField.printField();
 
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(5);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }

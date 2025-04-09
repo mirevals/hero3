@@ -13,6 +13,10 @@ public abstract class Castle {
     private Position position = null;  // Позиция замка на карте
     private boolean isCaptured;  // Флаг для проверки, захвачен ли замок
 
+    public void setPosition(Position position) {
+        this.position = position;
+    }
+
 
     public enum CastleType {
         HERO, ENEMY
@@ -63,4 +67,14 @@ public abstract class Castle {
     public List<Building> getConstructedBuildings() {
         return constructedBuildings;
     }
+
+    public int getX() {
+        return position.getX();
+    }
+
+    public int getY() {
+        return position.getY();
+    }
+
+
 }
