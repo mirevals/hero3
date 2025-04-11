@@ -19,7 +19,7 @@ import java.util.List;
 
 import static org.example.game.build.Shop.availableBuildings;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+//2. Корректность завершения игры победой бота всеми способами
 public class FinishEnemyTest {
 
 
@@ -98,7 +98,10 @@ public class FinishEnemyTest {
         Road road = new Road(2, 2, 8, 2);
         mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
     }
-
+    /**
+     * Тест проверяет, что бот побеждает, когда все юниты игрока уничтожены.
+     * Проверяется, что список юнитов героя пуст, что свидетельствует о победе бота.
+     */
     @Test
     public void testVictoryWhenAllEnemiesDefeated() {
         hero.getUnits().clear();
@@ -108,14 +111,20 @@ public class FinishEnemyTest {
         assertTrue(isVictory, "Игрок должен проиграть, когда все юниты мертвы");
     }
 
-
+    /**
+     * Тест проверяет, что враг побеждает в автоматическом бою.
+     * Используется метод autoFight для симуляции боя, и проверяется, что враг выиграл.
+     */
     @Test
     public void testHeroWinsAutoFight() {
         boolean heroWon = Battle.autoFight(battleField, allUnits);
 
         Assertions.assertFalse(heroWon, "Враг должен победить в этом бою");
     }
-
+    /**
+     * Тест проверяет, что игра завершается смертью героя.
+     * Проверяется, что после смерти героя его статус изменяется на "мертв".
+     */
     @Test
     public void testVictoryWhenHeroDie() {
         hero.die();

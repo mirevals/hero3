@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
+//6. Корректность возможности перемещения (нельзя быть на клетке с
+//другим существом, нельзя выйти за пределы поля и тд)
 public class RightMoveTest {
 
     GameMap gameMap;
@@ -95,6 +96,11 @@ public class RightMoveTest {
         Road road = new Road(2, 2, 8, 2);
         mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
     }
+
+    /**
+     * Тест проверяет, что герой может перемещаться вправо, если на пути нет препятствий.
+     * После выполнения движения, проверяется, что герой переместился на одну клетку вправо.
+     */
     @Test
     public void testMoveHeroWithValidMove() {
         // Устанавливаем начальные позиции героя
@@ -113,7 +119,10 @@ public class RightMoveTest {
         assertEquals(4, hero.getX(), "Герой должен был двигаться вправо.");
         assertEquals(3, hero.getY(), "Герой должен был двигаться вправо.");
     }
-
+    /**
+     * Тест проверяет, что если на пути героя есть препятствие, то герой не может двигаться в этом направлении.
+     * После попытки движения вправо на клетку с препятствием, герой остается на месте.
+     */
     @Test
     public void testMoveHeroWithObstacle() {
         // Устанавливаем начальные позиции героя
@@ -134,7 +143,10 @@ public class RightMoveTest {
     }
 
 
-
+    /**
+     * Тест проверяет, что герой не может выйти за пределы карты.
+     * При попытке перемещения за границы карты, герой остается на своей текущей позиции.
+     */
     @Test
     public void testMoveHeroOutOfBounds() {
         // Устанавливаем начальные позиции героя
@@ -154,6 +166,11 @@ public class RightMoveTest {
         assertEquals(3, hero.getY(), "Герой не должен был выйти за пределы карты.");
     }
 
+
+    /**
+     * Тест проверяет, что герой не может пройти в клетку, занятую врагом, если враг находится в пределах дальности хода.
+     * После попытки перемещения в клетку с врагом, герой должен остановиться на его клетке.
+     */
     @Test
     public void testMoveHeroToEnemyPosition() {
         // Устанавливаем начальные позиции героя и врага
@@ -170,6 +187,11 @@ public class RightMoveTest {
         assertEquals(5, hero.getY(), "Герой должен был остановиться на враге.");
     }
 
+
+    /**
+     * Тест проверяет, что герой может переместиться к замку героев.
+     * После перемещения проверяется, что герой достиг замка, а его позиция обновилась.
+     */
     @Test
     public void testMoveHeroToHeroCastle() {
         // Устанавливаем начальные позиции героя и замка

@@ -142,8 +142,7 @@ public class Unit {
     public void takeDamage(int damage) {
         health -= damage;
         if (health <= 0) {
-            health = 0; // Чтобы здоровье не стало отрицательным
-            System.out.println(name + " был уничтожен.");
+            die();  // Вызов метода die
         } else {
             System.out.println(name + " получил " + damage + " урона, осталось здоровья: " + health);
         }
@@ -166,5 +165,15 @@ public class Unit {
 
     public int getCost() {
         return this.cost;
+    }
+
+    public void die() {
+        System.out.println(name + " погиб.");
+        this.stackSize = 0;
+        this.health = 0;
+    }
+
+    public boolean isDead() {
+        return health <= 0 || stackSize <= 0;
     }
 }

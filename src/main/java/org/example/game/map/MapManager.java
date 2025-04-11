@@ -640,7 +640,7 @@ public class MapManager {
 
     }
 
-    private void removeEnemyFromMap(Enemy enemy, GameMap gameMap) {
+    public void removeEnemyFromMap(Enemy enemy, GameMap gameMap) {
         // Удаляем врага с карты, если он был побежден
         removeEnemy(enemy, gameMap); // Предполагаем, что метод removeEnemy удаляет врага из карты
         enemy.setPosition(-1, -1);

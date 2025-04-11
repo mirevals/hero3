@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.example.game.build.Shop.availableBuildings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+//4. Корректность дальности атаки
 public class RightDoAttackTest {
 
     GameMap gameMap;
@@ -82,7 +82,10 @@ public class RightDoAttackTest {
 
     }
 
-
+    /**
+     * Тест проверяет, что герой останавливается на враге, если тот находится в пределах его дальности атаки.
+     * Герой должен двигаться к врагу и остановиться, когда враг окажется в радиусе действия героя.
+     */
     @Test
     public void testHeroStopsWhenEnemyInRange() {
 
@@ -102,7 +105,13 @@ public class RightDoAttackTest {
         assertEquals(5, hero.getY(), "Герой должен был остановиться на враге.");
     }
 
+//5. Корректность совершения атаки
 
+    /**
+     * Тест проверяет корректность механизма получения урона героями и врагами.
+     * Герой и враг должны потерять здоровье на определенное количество единиц урона.
+     * После получения урона, их здоровье должно уменьшиться на соответствующую величину.
+     */
     @Test
     public void testTakeDamage() {
         Unit heroUnit = new Unit(Unit.UnitType.WARRIOR, 100, 100, 1, 10, Team.HERO, 'W', 100);
