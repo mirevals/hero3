@@ -79,7 +79,9 @@ public class App {
                 allUnits, carriage);
 
 
-        //Battle.autoFight(battleField, allUnits);
+
 
     }
 }
+
+//Battle.autoFight(battleField, allUnits);

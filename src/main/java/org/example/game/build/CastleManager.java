@@ -16,10 +16,10 @@ import static org.example.game.build.Shop.availableBuildings;
 public class CastleManager {
     public static boolean isInCastle;  // флаг, показывающий, находимся ли мы в замке
     private static boolean isFirstExit = true;
-    private static boolean isFirstHero = true;
-    private static boolean isNoGuardPost = true;
-    private static boolean isNoUnitsBuy = true;
-    static boolean isTavernNotBuild = true;
+    public static boolean isFirstHero = true;
+    public static boolean isNoGuardPost = true;
+    public static boolean isNoUnitsBuy = true;
+    public static boolean isTavernNotBuild = true;
 
     private static Scanner scanner = new Scanner(System.in);  // Один Scanner на всю программу
 
