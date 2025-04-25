@@ -8,12 +8,47 @@ import org.example.game.person.*;
 import org.example.game.map.GameMap;
 import org.example.game.person.Character;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import static org.example.game.build.Shop.availableBuildings;
 
 public class CastleManager {
+
+    private static final Logger LOGGER = Logger.getLogger(CastleManager.class.getName());
+
+    static {
+        try {
+            FileHandler fileHandler = new FileHandler("castle-access.log", true);
+            fileHandler.setLevel(Level.SEVERE);
+            fileHandler.setFormatter(new SimpleFormatter());
+            LOGGER.addHandler(fileHandler);
+            LOGGER.setUseParentHandlers(false); // отключаем консольный вывод
+        } catch (IOException e) {
+            throw new RuntimeException("Не удалось создать лог-файл", e);
+        }
+    }
+
+    public static Object logCastlePosition(Object castleInstance) {
+        try {
+            Field positionField = castleInstance.getClass().getSuperclass().getDeclaredField("position");
+            positionField.setAccessible(true);
+            Object value = positionField.get(castleInstance);
+            LOGGER.severe("Доступ к приватному полю 'position': " + value);
+            return value;
+        } catch (Exception e) {
+            LOGGER.severe("Ошибка при доступе к полю 'position': " + e.getMessage());
+            return null;
+        }
+    }
+
     public static boolean isInCastle;  // флаг, показывающий, находимся ли мы в замке
     private static boolean isFirstExit = true;
     public static boolean isFirstHero = true;
@@ -130,14 +165,30 @@ public class CastleManager {
         System.out.println("Добро пожаловать в магазин!");
         Shop.showAvailableBuildings();
 
-        System.out.println("Введите номер здания, которое вы хотите купить:");
-        int buildingChoice = scanner.nextInt();
-        scanner.nextLine();
+        while (true) {
+            System.out.println("Введите номер здания, которое вы хотите купить (или 0 для выхода):");
+            try {
+                int buildingChoice = scanner.nextInt();
+                scanner.nextLine(); // очистка буфера
 
-        Building purchasedBuilding = buyBuilding(buildingChoice, castle);
+                if (buildingChoice == 0) {
+                    System.out.println("Выход из магазина.");
+                    break;
+                }
 
-        if (purchasedBuilding != null) {
-            System.out.println("Здание " + purchasedBuilding.getName() + " добавлено в ваш замок.");
+                Building purchasedBuilding = buyBuilding(buildingChoice, castle);
+                if (purchasedBuilding != null) {
+                    System.out.println("Здание " + purchasedBuilding.getName() + " добавлено в ваш замок.");
+                    break; // покупка завершена — выходим
+                } else {
+                    System.out.println("Невозможно купить здание. Попробуйте снова.");
+                }
+
+            } catch (InputMismatchException e) {
+                scanner.nextLine(); // очистка некорректного ввода
+                LOGGER.log(Level.WARNING, "Ошибка ввода: ожидалось число для выбора здания.", e);
+                System.out.println("Некорректный ввод. Пожалуйста, введите номер здания.");
+            }
         }
     }
 

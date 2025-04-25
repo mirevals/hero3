@@ -1,7 +1,7 @@
-package org.example.game;
+package org.example.game.battle;
 
 
-import org.example.game.battle.BattleField;
+import org.example.game.Player;
 import org.example.game.build.EnemyCastle;
 import org.example.game.build.HeroCastle;
 import org.example.game.map.GameMap;
@@ -9,7 +9,6 @@ import org.example.game.map.MapManager;
 import org.example.game.map.Position;
 import org.example.game.map.Road;
 import org.example.game.person.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

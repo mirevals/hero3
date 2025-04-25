@@ -1,7 +1,5 @@
-package org.example.game;
+package org.example.game.map;
 
-import org.example.game.battle.BattleField;
-import org.example.game.map.GameMap;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
