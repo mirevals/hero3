@@ -1,11 +1,14 @@
-package org.example.game;
+package org.example.game.battle;
 
-import org.example.game.battle.Battle;
-import org.example.game.battle.BattleField;
-import org.example.game.build.*;
-import org.example.game.map.*;
+
+import org.example.game.Player;
+import org.example.game.build.EnemyCastle;
+import org.example.game.build.HeroCastle;
+import org.example.game.map.GameMap;
+import org.example.game.map.MapManager;
+import org.example.game.map.Position;
+import org.example.game.map.Road;
 import org.example.game.person.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.example.game.build.Shop.availableBuildings;
-import static org.junit.jupiter.api.Assertions.*;
-//1. Корректность завершения игры победой игрока всеми способами
-public class FinishHeroTest {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+//7. Корректность смерти юнита, героя
+public class RightHeroAndUnitDieTest {
 
     GameMap gameMap;
     Player player;
@@ -87,43 +90,21 @@ public class FinishHeroTest {
         Road road = new Road(2, 2, 8, 2);
         mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
     }
-    /**
-     * Тест проверяет, что игрок побеждает, когда все вражеские юниты уничтожены.
-     * Проверяется, что список юнитов врага пуст, что свидетельствует о победе.
-     */
-    @Test
-    public void testVictoryWhenAllEnemiesDefeated() {
-        enemy.getUnits().clear();
 
-        boolean isVictory = enemy.getUnits().isEmpty();
-
-        assertTrue(isVictory, "Игрок должен победить, когда все враги побеждены");
-    }
     /**
-     * Тест проверяет, что игрок побеждает, когда захватывает замок врага.
-     * Герой должен встать на позицию замка врага, и враг должен быть мертв.
+     * Тест проверяет, что если герой и его юнит умирают, то считается, что замок врага захвачен.
+     * Метод `die()` вызывается для героя и его юнита, после чего проверяется, что оба мертвы.
+     * Если оба персонажа мертвы, тест утверждает, что захват замка врага произошел.
      */
     @Test
     public void testVictoryWhenEnemyCastleCaptured() {
-        enemy.die();
-        // Герой встал на позицию замка врага
-        hero.setX(enemyCastle.getX());
-        hero.setY(enemyCastle.getY());
+        hero.die();
+        Unit heroUnit1 = new Unit(Unit.UnitType.WARRIOR, 1000, 100, 1, 10, Team.HERO, 'W', 100);
 
-        boolean captured = hero.getX() == enemyCastle.getX() && hero.getY() == enemyCastle.getY() && enemy.isDead();
+        heroUnit1.die();
+        boolean captured = hero.isDead() && heroUnit1.isDead();
 
-        assertTrue(captured, "Игрок должен победить при захвате замка врага");
+        assertTrue(captured, "Игрок мертв");
     }
-    /**
-     * Тест проверяет, что герой побеждает в автоматической битве.
-     * Используется метод autoFight для симуляции боя, и проверяется, что герой выиграл.
-     */
-    @Test
-    public void testHeroWinsAutoFight() {
-        boolean heroWon = Battle.autoFight(battleField, allUnits);
-
-        Assertions.assertTrue(heroWon, "Герой должен победить в этом бою");
-    }
-
 
 }

@@ -1,6 +1,7 @@
-package org.example.game;
+package org.example.game.person;
 
 
+import org.example.game.Player;
 import org.example.game.battle.Battle;
 import org.example.game.battle.BattleField;
 import org.example.game.build.EnemyCastle;
@@ -9,18 +10,42 @@ import org.example.game.map.GameMap;
 import org.example.game.map.MapManager;
 import org.example.game.map.Position;
 import org.example.game.map.Road;
-import org.example.game.person.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import static org.example.game.build.Shop.availableBuildings;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 //2. Корректность завершения игры победой бота всеми способами
 public class FinishEnemyTest {
+
+    private static final Logger logger = Logger.getLogger(FinishEnemyTest.class.getName());
+
+    static {
+        try {
+            // Лог-файл
+            FileHandler fileHandler = new FileHandler("game-test.log", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(fileHandler);
+
+            // Консольный лог
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(consoleHandler);
+
+            logger.setUseParentHandlers(false); // отключаем стандартный консольный вывод, чтобы не было дубликатов
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     GameMap gameMap;
@@ -109,6 +134,8 @@ public class FinishEnemyTest {
         boolean isVictory = hero.getUnits().isEmpty();
 
         assertTrue(isVictory, "Игрок должен проиграть, когда все юниты мертвы");
+
+        logger.info("testVictoryWhenAllEnemiesDefeated успешно пройден.");
     }
 
     /**
@@ -118,18 +145,17 @@ public class FinishEnemyTest {
     @Test
     public void testHeroWinsAutoFight() {
         boolean heroWon = Battle.autoFight(battleField, allUnits);
-
         Assertions.assertFalse(heroWon, "Враг должен победить в этом бою");
+
+        logger.info("testHeroWinsAutoFight успешно пройден.");
     }
-    /**
-     * Тест проверяет, что игра завершается смертью героя.
-     * Проверяется, что после смерти героя его статус изменяется на "мертв".
-     */
+
     @Test
     public void testVictoryWhenHeroDie() {
         hero.die();
         boolean captured = hero.isDead();
-
         assertTrue(captured, "Игрок мертв");
+
+        logger.info("testVictoryWhenHeroDie успешно пройден.");
     }
 }

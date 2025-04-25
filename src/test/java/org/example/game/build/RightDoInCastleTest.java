@@ -1,9 +1,7 @@
-package org.example.game;
+package org.example.game.build;
 
+import org.example.game.Player;
 import org.example.game.battle.BattleField;
-import org.example.game.build.CastleManager;
-import org.example.game.build.EnemyCastle;
-import org.example.game.build.HeroCastle;
 import org.example.game.map.GameMap;
 import org.example.game.map.MapManager;
 import org.example.game.map.Position;

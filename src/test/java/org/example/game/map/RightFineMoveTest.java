@@ -1,6 +1,5 @@
-package org.example.game;
+package org.example.game.map;
 
-import org.example.game.map.GameMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 //3. Корректность штрафов перемещения

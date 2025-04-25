@@ -73,6 +73,11 @@ public class App {
 
         MapManager mapManager = new MapManager(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
 
+        Castle myCastle = new HeroCastle(gameMap.getHeight()+1, gameMap.getWidth()) {
+        };
+        Object position = CastleManager.logCastlePosition(myCastle);
+        System.out.println("Позиция замка: " + position);
+
         CastleManager.enterCastle(heroCastle, hero, player,
                 enemy, enemyCastle, heroCastle, gameMap,
                 mapManager, buyUnit, hero, battleField,
@@ -82,6 +87,7 @@ public class App {
 
 
     }
+
 }
 
 //Battle.autoFight(battleField, allUnits);
