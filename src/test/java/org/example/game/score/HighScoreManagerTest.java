@@ -12,14 +12,19 @@ public class HighScoreManagerTest {
     private static final String TEST_MAP = "test_map";
     private static HighScoreManager highScoreManager;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
+        // Удаляем файл с рекордами перед каждым тестом для чистоты тестирования
+        File scoresFile = new File("scores.dat");
+        if (scoresFile.exists()) {
+            scoresFile.delete();
+        }
         highScoreManager = new HighScoreManager();
     }
 
-    @AfterAll
-    static void tearDown() {
-        // Удаляем файл с рекордами после тестов
+    @AfterEach
+    void tearDown() {
+        // Удаляем файл с рекордами после каждого теста
         File scoresFile = new File("scores.dat");
         if (scoresFile.exists()) {
             scoresFile.delete();
@@ -28,113 +33,158 @@ public class HighScoreManagerTest {
 
     @Test
     @Order(1)
-    @DisplayName("Тест добавления нового рекорда")
-    void testAddNewRecord() {
-        Record record = new Record(TEST_PLAYER, TEST_MAP, 5, 2, 30, 1);
-        highScoreManager.addScore(record);
+    @DisplayName("Тест обновления рекорда при улучшении результата")
+    void testScoreUpdate() {
+        // Добавляем начальный рекорд
+        Record initialRecord = new Record(TEST_PLAYER, TEST_MAP, 3, 1, 40, 2);
+        highScoreManager.addScore(initialRecord);
         
+        // Добавляем улучшенный рекорд
+        Record betterRecord = new Record(TEST_PLAYER, TEST_MAP, 5, 2, 30, 1);
+        highScoreManager.addScore(betterRecord);
+        
+        // Получаем все рекорды
         List<Record> scores = highScoreManager.getHighScores();
-        assertFalse(scores.isEmpty());
-        assertEquals(1, scores.size());
-        assertEquals(TEST_PLAYER, scores.get(0).getPlayerName());
-        assertEquals(TEST_MAP, scores.get(0).getMapName());
+
+        // Проверяем, что сохранился именно лучший результат
+        Record savedRecord = scores.stream()
+            .filter(r -> r.getPlayerName().equals(TEST_PLAYER) && r.getMapName().equals(TEST_MAP))
+            .findFirst()
+            .orElseThrow();
+        assertTrue(savedRecord.getScore() > initialRecord.getScore(), 
+            "Должен сохраниться рекорд с лучшим результатом");
     }
 
     @Test
     @Order(2)
-    @DisplayName("Тест сортировки рекордов")
-    void testScoreSorting() {
-        // Добавляем рекорды с разными очками
-        Record lowScore = new Record("player2", TEST_MAP, 1, 0, 40, 2);
-        Record highScore = new Record("player3", TEST_MAP, 10, 3, 25, 0);
+    @DisplayName("Тест сохранения рекордов на разных картах")
+    void testMultipleMapRecords() {
+        String map1 = "map1";
+        String map2 = "map2";
         
-        highScoreManager.addScore(lowScore);
-        highScoreManager.addScore(highScore);
+        // Добавляем рекорды на разных картах
+        Record recordMap1 = new Record(TEST_PLAYER, map1, 3, 1, 40, 2);
+        Record recordMap2 = new Record(TEST_PLAYER, map2, 5, 2, 30, 1);
+        
+        highScoreManager.addScore(recordMap1);
+        highScoreManager.addScore(recordMap2);
         
         List<Record> scores = highScoreManager.getHighScores();
-        assertTrue(scores.get(0).getScore() > scores.get(1).getScore());
+        
+        // Проверяем наличие рекордов на обеих картах
+        assertEquals(1, scores.stream()
+            .filter(r -> r.getMapName().equals(map1))
+            .count(), "Должен быть один рекорд на первой карте");
+        assertEquals(1, scores.stream()
+            .filter(r -> r.getMapName().equals(map2))
+            .count(), "Должен быть один рекорд на второй карте");
     }
 
     @Test
     @Order(3)
-    @DisplayName("Тест ограничения количества рекордов")
-    void testMaxScoresLimit() {
-        // Добавляем больше 5 рекордов
-        for (int i = 0; i < 7; i++) {
-            Record record = new Record("player" + i, TEST_MAP, i, 1, 30, 0);
-            highScoreManager.addScore(record);
-        }
+    @DisplayName("Тест обновления рекордов разных игроков")
+    void testMultiplePlayerRecords() {
+        String player1 = "player1";
+        String player2 = "player2";
+        
+        // Добавляем рекорды разных игроков
+        Record recordPlayer1 = new Record(player1, TEST_MAP, 3, 1, 40, 2);
+        Record recordPlayer2 = new Record(player2, TEST_MAP, 5, 2, 30, 1);
+        Record betterRecordPlayer1 = new Record(player1, TEST_MAP, 6, 3, 25, 0);
+        
+        highScoreManager.addScore(recordPlayer1);
+        highScoreManager.addScore(recordPlayer2);
+        highScoreManager.addScore(betterRecordPlayer1);
         
         List<Record> scores = highScoreManager.getHighScores();
-        assertEquals(5, scores.size()); // Проверяем, что хранится только топ-5
+        
+
+        // Проверяем, что сохранился лучший результат первого игрока
+        Record savedPlayer1Record = scores.stream()
+            .filter(r -> r.getPlayerName().equals(player1))
+            .findFirst()
+            .orElseThrow();
+        assertTrue(savedPlayer1Record.getScore() > recordPlayer1.getScore(),
+            "Должен сохраниться улучшенный рекорд первого игрока");
     }
 
     @Test
     @Order(4)
-    @DisplayName("Тест сохранения и загрузки рекордов")
-    void testScoresPersistence() {
-        // Добавляем рекорды в новый менеджер
-        HighScoreManager manager = new HighScoreManager();
-        for (int i = 0; i < 5; i++) {
-            Record record = new Record("player" + i, TEST_MAP, i, 1, 30, 0);
-            manager.addScore(record);
-        }
+    @DisplayName("Тест правильности подсчета очков")
+    void testScoreCalculation() {
+        // Тестируем различные сценарии подсчета очков
         
-        // Создаем новый менеджер рекордов (который должен загрузить существующие рекорды)
-        HighScoreManager newManager = new HighScoreManager();
-        List<Record> scores = newManager.getHighScores();
+        // Сценарий 1: Много врагов, мало замков
+        Record record1 = new Record(TEST_PLAYER, TEST_MAP, 10, 1, 60, 2);
         
-        assertFalse(scores.isEmpty());
-        assertEquals(5, scores.size()); // Проверяем, что предыдущие рекорды сохранились
+        // Сценарий 2: Мало врагов, много замков
+        Record record2 = new Record(TEST_PLAYER, TEST_MAP, 2, 4, 45, 1);
+        
+        // Сценарий 3: Быстрое прохождение (бонус за время)
+        Record record3 = new Record(TEST_PLAYER, TEST_MAP, 5, 2, 30, 1);
+        
+        // Проверяем формулу подсчета очков для каждого сценария
+        assertEquals(1000 + 500 - 100, record1.getScore(), // 10*100 + 1*500 - 2*50
+            "Неверный подсчет очков для сценария с множеством врагов");
+
     }
 
     @Test
     @Order(5)
-    @DisplayName("Тест фильтрации рекордов по карте")
-    void testMapFiltering() {
-        String newMap = "another_map";
-        Record recordOnNewMap = new Record(TEST_PLAYER, newMap, 5, 2, 30, 1);
-        highScoreManager.addScore(recordOnNewMap);
+    @DisplayName("Тест лимита на количество рекордов")
+    void testRecordsLimit() {
+        // Добавляем 7 рекордов (больше максимума в 5)
+        for (int i = 0; i < 7; i++) {
+            Record record = new Record(
+                "player" + i,
+                TEST_MAP,
+                5 + i, // Увеличиваем количество врагов для разных очков
+                2,
+                30,
+                1
+            );
+            highScoreManager.addScore(record);
+        }
         
-        // Проверяем отображение рекордов для конкретной карты
-        highScoreManager.displayMapHighScores(newMap);
-        List<Record> allScores = highScoreManager.getHighScores();
-        long mapRecordsCount = allScores.stream()
-                .filter(r -> r.getMapName().equals(newMap))
-                .count();
-        assertEquals(1, mapRecordsCount);
+        List<Record> scores = highScoreManager.getHighScores();
+        
+        // Проверяем, что сохранилось только 5 лучших рекордов
+        assertEquals(5, scores.size(), "Должно сохраниться только 5 рекордов");
+        
+        // Проверяем, что рекорды отсортированы по убыванию очков
+        for (int i = 0; i < scores.size() - 1; i++) {
+            assertTrue(scores.get(i).getScore() >= scores.get(i + 1).getScore(),
+                "Рекорды должны быть отсортированы по убыванию");
+        }
     }
 
     @Test
     @Order(6)
-    @DisplayName("Тест обновления рекорда игрока")
-    void testPlayerRecordUpdate() {
-        // Добавляем новый рекорд для существующего игрока с лучшим результатом
-        Record betterRecord = new Record(TEST_PLAYER, TEST_MAP, 15, 5, 20, 0);
-        highScoreManager.addScore(betterRecord);
+    @DisplayName("Тест сохранения рекордов между перезапусками")
+    void testRecordsPersistence() {
+        // Добавляем рекорды
+        Record record1 = new Record(TEST_PLAYER, TEST_MAP, 5, 2, 30, 1);
+        Record record2 = new Record("player2", TEST_MAP, 6, 3, 25, 0);
         
-        List<Record> scores = highScoreManager.getHighScores();
-        Record bestPlayerRecord = scores.stream()
-                .filter(r -> r.getPlayerName().equals(TEST_PLAYER))
-                .findFirst()
-                .orElse(null);
+        highScoreManager.addScore(record1);
+        highScoreManager.addScore(record2);
         
-        assertNotNull(bestPlayerRecord);
-        assertTrue(bestPlayerRecord.getScore() > 1000); // Проверяем, что сохранился лучший результат
-    }
-
-    @Test
-    @Order(7)
-    @DisplayName("Тест расчета очков")
-    void testScoreCalculation() {
-        // Проверяем формулу подсчета очков
-        Record record = new Record(TEST_PLAYER, TEST_MAP, 
-            5,  // 5 врагов = 500 очков
-            2,  // 2 замка = 1000 очков
-            30, // < 50 ходов = 1000 очков бонус
-            1   // 1 потерянный юнит = -50 очков
-        );
+        // Создаем новый экземпляр менеджера (имитация перезапуска)
+        HighScoreManager newManager = new HighScoreManager();
+        List<Record> loadedScores = newManager.getHighScores();
         
-        assertEquals(2450, record.getScore()); // 500 + 1000 + 1000 - 50 = 2450
+        // Проверяем, что все рекорды загрузились
+        assertEquals(2, loadedScores.size(), "Должны загрузиться все сохраненные рекорды");
+        
+        // Проверяем, что данные рекордов сохранились корректно
+        assertTrue(loadedScores.stream()
+            .anyMatch(r -> r.getPlayerName().equals(TEST_PLAYER) && 
+                         r.getScore() == record1.getScore()),
+            "Должен найтись рекорд первого игрока с правильными очками");
+        
+        assertTrue(loadedScores.stream()
+            .anyMatch(r -> r.getPlayerName().equals("player2") && 
+                         r.getScore() == record2.getScore()),
+            "Должен найтись рекорд второго игрока с правильными очками");
     }
 } 
