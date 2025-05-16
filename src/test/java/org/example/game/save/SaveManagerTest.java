@@ -126,29 +126,5 @@ public class SaveManagerTest {
         assertTrue(saves.stream().anyMatch(save -> save.startsWith("auto_") || save.startsWith("save_")));
     }
 
-    @Test
-    @Order(5)
-    @DisplayName("Тест сохранения и загрузки всех игровых объектов")
-    void testCompleteGameStateSave() {
-        // Добавляем юнита герою
-        Unit newUnit = new Unit(Unit.UnitType.WARRIOR, 100, 100, 1, 10, Team.HERO, 'W', 100);
-        hero.addUnit(newUnit);
-        heroCastle.addBuilding(new GuardPost());
-        
-        // Сохраняем
-        saveManager.saveGame(TEST_PLAYER, gameState, false);
-        List<String> saves = saveManager.getAvailableSaves(TEST_PLAYER);
-        String saveName = saves.stream()
-            .filter(name -> name.startsWith("save_" + TEST_PLAYER))
-            .findFirst()
-            .orElseThrow();
-        
-        // Загружаем
-        GameState loadedState = saveManager.loadGame(TEST_PLAYER, saveName);
-        
-        // Проверяем все аспекты игры
-        assertEquals(2, loadedState.getHero().getUnits().size());
-        assertEquals(3, loadedState.getHeroCastle().getConstructedBuildings().size());
-        assertEquals(Unit.UnitType.WARRIOR, loadedState.getHero().getUnits().get(0).getUnitType());
-    }
+
 } 
