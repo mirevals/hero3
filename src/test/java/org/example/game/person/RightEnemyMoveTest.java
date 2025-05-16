@@ -34,7 +34,7 @@ public class RightEnemyMoveTest {
     private Carriage carriage;
 
     @BeforeEach
-    public void setup() {
+    public void setUp() {
         gameMap = new GameMap(10, 10);
         char[][] mapLayout = {
                 {'#', '#', '#', '#', '#'},
@@ -51,7 +51,7 @@ public class RightEnemyMoveTest {
             }
         }
 
-        player = new Player(1000);
+        player = new Player("TestPlayer", 1000);
 
         Unit heroUnit = new Unit(Unit.UnitType.WARRIOR, 1000, 100, 1, 10, Team.HERO, 'W', 100);
         Unit enemyUnit = new Unit(Unit.UnitType.WARRIOR, 100, 100, 1, 10, Team.ENEMY, 'A', 100);

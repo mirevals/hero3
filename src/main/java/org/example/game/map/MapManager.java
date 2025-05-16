@@ -696,8 +696,18 @@ public class MapManager {
             return map;
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Ошибка при загрузке карты: " + e.getMessage());
-            return null;
+            throw new RuntimeException("Ошибка при загрузке карты: " + e.getMessage());
         }
     }
 
+    public static void saveMap(GameMap map, String mapPath) {
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(mapPath));
+            out.writeObject(map);
+            out.close();
+        } catch (IOException e) {
+            System.out.println("Ошибка при сохранении карты: " + e.getMessage());
+            throw new RuntimeException("Ошибка при сохранении карты: " + e.getMessage());
+        }
+    }
 }

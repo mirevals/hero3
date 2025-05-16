@@ -11,6 +11,9 @@ public class GameMap implements Serializable {
 
     // Конструктор карты
     public GameMap(int width, int height) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Размеры карты должны быть положительными числами");
+        }
         this.width = width;
         this.height = height;
         this.map = new char[height][width];  // Инициализация карты с заданными размерами
@@ -41,6 +44,43 @@ public class GameMap implements Serializable {
         }
     }
 
+    // Метод для проверки валидности позиции на карте
+    public boolean isValidPosition(int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    // Метод для проверки валидности типа местности
+    public boolean isValidTerrain(char terrain) {
+        return terrain == 'C' || // Замок
+               terrain == 'R' || // Дорога
+               terrain == '#' || // Препятствие
+               terrain == 'P' || // Равнина
+               terrain == 'F' || // Лес
+               terrain == 'M' || // Горы
+               terrain == 'W';   // Вода
+    }
+
+    // Метод для получения значения клетки
+    public char getCell(int x, int y) {
+        if (!isValidPosition(x, y)) {
+            throw new IndexOutOfBoundsException("Координаты выходят за пределы карты");
+        }
+        return map[y][x];
+    }
+
+    // Метод для установки значения клетки
+    public void setCell(int x, int y, char value) {
+        if (!isValidPosition(x, y)) {
+            throw new IndexOutOfBoundsException("Координаты выходят за пределы карты");
+        }
+        map[y][x] = value;
+    }
+
+    // Метод для очистки карты
+    public void clear() {
+        initializeMap();
+    }
+
     // Дополнительный метод для печати карты (для отладки)
     public void printMap() {
         for (int i = 0; i < height; i++) {
@@ -52,11 +92,16 @@ public class GameMap implements Serializable {
     }
 
     public void setCellValue(int x, int y, char value) {
-        // Проверяем, находятся ли координаты в пределах карты
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            map[y][x] = value;  // Устанавливаем символ в соответствующую клетку
-        } else {
-            System.out.println("Ошибка: Координаты выходят за пределы карты.");
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+            throw new IllegalArgumentException("Координаты выходят за пределы карты");
         }
+        map[y][x] = value;
+    }
+
+    public char getCellValue(int x, int y) {
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+            throw new IllegalArgumentException("Координаты выходят за пределы карты");
+        }
+        return map[y][x];
     }
 }
