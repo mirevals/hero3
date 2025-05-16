@@ -121,7 +121,8 @@ public class MapEditor {
 
     private void saveMap(String mapName) {
         try {
-            File mapFile = new File(MAPS_DIRECTORY + "/" + mapName + ".map");
+            String normalizedMapName = mapName.replace("maps/", "");
+            File mapFile = new File(MAPS_DIRECTORY + "/" + normalizedMapName + ".map");
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(mapFile));
             out.writeObject(currentMap);
             out.close();
@@ -152,11 +153,12 @@ public class MapEditor {
 
         String mapName = maps.get(choice - 1);
         try {
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream(MAPS_DIRECTORY + "/" + mapName));
+            String normalizedMapName = mapName.replace("maps/", "");
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(MAPS_DIRECTORY + "/" + normalizedMapName));
             currentMap = (GameMap) in.readObject();
             in.close();
             editMap();
-            saveMap(mapName.replace(".map", ""));
+            saveMap(normalizedMapName.replace(".map", ""));
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Ошибка при загрузке карты: " + e.getMessage());
         }

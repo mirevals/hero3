@@ -699,7 +699,10 @@ public class MapManager {
             throw new IllegalArgumentException("Имя файла содержит недопустимые символы");
         }
 
-        String fullPath = MAPS_DIRECTORY + mapName;
+        // Убираем лишний префикс maps/, если он есть
+        String normalizedMapName = mapName.replace("maps/", "");
+        
+        String fullPath = MAPS_DIRECTORY + normalizedMapName;
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fullPath))) {
             out.writeObject(map);
             return true;
@@ -714,7 +717,10 @@ public class MapManager {
             throw new IllegalArgumentException("Имя файла не может быть пустым");
         }
 
-        String fullPath = MAPS_DIRECTORY + mapName;
+        // Убираем лишний префикс maps/, если он есть
+        String normalizedMapName = mapName.replace("maps/", "");
+        
+        String fullPath = MAPS_DIRECTORY + normalizedMapName;
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fullPath))) {
             return (GameMap) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
