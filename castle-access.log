@@ -1,0 +1,4 @@
+апр. 25, 2025 7:10:12 PM org.example.game.build.CastleManager logCastlePosition
+SEVERE: Доступ к приватному полю 'position': org.example.game.map.Position@3e2
+мая 16, 2025 3:29:52 PM org.example.game.build.CastleManager logCastlePosition
+SEVERE: Доступ к приватному полю 'position': org.example.game.map.Position@3e2

@@ -7,6 +7,7 @@ import org.example.game.build.*;
 import org.example.game.map.*;
 import org.example.game.person.*;
 import org.example.game.save.*;
+import org.example.game.score.HighScoreManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,45 +17,126 @@ import static org.example.game.build.Shop.availableBuildings;
 
 public class App {
     private static SaveManager saveManager;
+    private static HighScoreManager highScoreManager;
     private static String playerName;
     private static Scanner scanner;
 
     public static void main(String[] args) {
         scanner = new Scanner(System.in);
         saveManager = new SaveManager();
+        highScoreManager = new HighScoreManager();
         
         System.out.println("Добро пожаловать в игру!");
-        System.out.print("Введите ваше имя: ");
-        playerName = scanner.nextLine();
         
         while (true) {
             System.out.println("\nГлавное меню:");
-            System.out.println("1. Новая игра");
-            System.out.println("2. Загрузить игру");
-            System.out.println("3. Редактор карт");
-            System.out.println("4. Выход");
+            System.out.println("1. Рекорды");
+            System.out.println("2. Новая игра");
+            System.out.println("3. Загрузить игру");
+            System.out.println("4. Редактор карт");
+            System.out.println("5. Выход");
             
             int choice = scanner.nextInt();
             scanner.nextLine(); // consume newline
             
             switch (choice) {
                 case 1:
-                    startNewGame();
+                    showRecordsMenu();
                     break;
                 case 2:
-                    loadGame();
+                    System.out.print("Введите ваше имя: ");
+                    playerName = scanner.nextLine();
+                    startNewGame();
                     break;
                 case 3:
+                    if (playerName == null) {
+                        System.out.print("Введите ваше имя: ");
+                        playerName = scanner.nextLine();
+                    }
+                    loadGame();
+                    break;
+                case 4:
                     MapEditor editor = new MapEditor();
                     editor.start();
                     break;
-                case 4:
-                    System.out.println("До свидания!");
+                case 5:
+                    System.out.println("\nТаблица рекордов перед выходом:");
+                    highScoreManager.displayHighScores();
+                    System.out.println("\nДо свидания!");
                     System.exit(0);
                 default:
                     System.out.println("Неверный выбор!");
             }
         }
+    }
+
+    private static void showRecordsMenu() {
+        while (true) {
+            System.out.println("\n=== Меню рекордов ===");
+            System.out.println("1. Показать все рекорды");
+            System.out.println("2. Показать рекорды по карте");
+            System.out.println("3. Показать мои рекорды");
+            System.out.println("4. Вернуться в главное меню");
+            System.out.print("Выберите действие: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+            
+            switch (choice) {
+                case 1:
+                    System.out.println("\n=== ОБЩАЯ ТАБЛИЦА РЕКОРДОВ ===");
+                    highScoreManager.displayHighScores();
+                    break;
+                case 2:
+                    showRecordsByMap();
+                    break;
+                case 3:
+                    if (playerName != null && !playerName.trim().isEmpty()) {
+                        showPlayerRecords();
+                    } else {
+                        System.out.println("Для просмотра личных рекордов необходимо начать игру.");
+                        System.out.println("Выберите пункт \"Новая игра\" в главном меню.");
+                    }
+                    break;
+                case 4:
+                    return;
+                default:
+                    System.out.println("Неверный выбор. Попробуйте снова.");
+            }
+            
+            System.out.println("\nНажмите Enter для продолжения...");
+            scanner.nextLine();
+        }
+    }
+
+    private static void showRecordsByMap() {
+        List<String> maps = MapEditor.getAvailableMaps();
+        if (maps.isEmpty()) {
+            System.out.println("Нет доступных карт с рекордами.");
+            return;
+        }
+
+        System.out.println("\nДоступные карты:");
+        for (int i = 0; i < maps.size(); i++) {
+            System.out.println((i + 1) + ". " + maps.get(i).replace(".map", ""));
+        }
+
+        System.out.print("\nВыберите номер карты: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+
+        if (choice < 1 || choice > maps.size()) {
+            System.out.println("Неверный выбор карты!");
+            return;
+        }
+
+        String mapName = maps.get(choice - 1).replace(".map", "");
+        highScoreManager.displayMapHighScores(mapName);
+    }
+
+    private static void showPlayerRecords() {
+        System.out.println("\n=== Рекорды игрока " + playerName + " ===\n");
+        highScoreManager.displayPlayerHighScores(playerName);
     }
 
     private static void startNewGame() {
