@@ -1,6 +1,9 @@
 package org.example.game.map;
 
-public class GameMap {
+import java.io.Serializable;
+
+public class GameMap implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final int width;
     private final int height;

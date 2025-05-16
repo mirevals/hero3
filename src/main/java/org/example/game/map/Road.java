@@ -1,10 +1,14 @@
 package org.example.game.map;
 
-public class Road {
-    private int startX;
-    private int startY;
-    private int endX;
-    private int endY;
+import java.io.Serializable;
+
+public class Road implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private final int startX;
+    private final int startY;
+    private final int endX;
+    private final int endY;
 
     public Road(int startX, int startY, int endX, int endY) {
         this.startX = startX;
@@ -15,19 +19,27 @@ public class Road {
 
     // Метод для размещения дороги на карте
     public void placeRoad(char[][] map) {
-        // Размещение дороги по горизонтали (не перекрывая замки)
-        for (int x = startX; x <= endX; x++) {
-            if (map[startY][x] != 'C' && map[startY][x] != 'E') {  // Если клетка не занята замками
-                map[startY][x] = '.';  // Размещение дороги
-            }
+        // Размещаем дорогу на карте
+        int dx = Integer.compare(endX, startX);
+        int dy = Integer.compare(endY, startY);
+
+        int x = startX;
+        int y = startY;
+
+        // Сначала идем по X
+        while (x != endX) {
+            map[y][x] = '.';
+            x += dx;
         }
 
-        // Размещение дороги по вертикали (не перекрывая замки)
-        for (int y = startY + 1; y < map.length; y++) {
-            if (map[y][endX] != 'C' && map[y][endX] != 'E') {  // Если клетка не занята замками
-                map[y][endX] = '.';  // Размещение дороги
-            }
+        // Затем по Y
+        while (y != endY) {
+            map[y][x] = '.';
+            y += dy;
         }
+
+        // Ставим точку в конечной позиции
+        map[endY][endX] = '.';
     }
 
     // Геттеры для начала и конца дороги

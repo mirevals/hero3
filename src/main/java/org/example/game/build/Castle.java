@@ -5,8 +5,11 @@ import org.example.game.map.Position;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
-public abstract class Castle {
+public abstract class Castle implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private List<Building> constructedBuildings;
     private final String name;  // Название замка

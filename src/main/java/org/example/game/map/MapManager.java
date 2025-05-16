@@ -6,15 +6,22 @@ import org.example.game.battle.BattleField;
 import org.example.game.build.*;
 import org.example.game.person.*;
 import org.example.game.person.Character;
+import org.example.game.save.SaveManager;
+import org.example.game.save.GameState;
+
 import java.util.Random;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.io.*;
 
 import static org.example.game.person.Carriage.Direction.*;
 
 public class MapManager {
 
     private final Scanner scanner;
+    private final SaveManager saveManager;
+    private final String playerName;
+    private final GameState gameState;
 
     private boolean isFirstEnemyMove = true;
     private boolean first = true;
@@ -26,7 +33,20 @@ public class MapManager {
 
     public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage) {
         this.scanner = new Scanner(System.in);
-
+        this.saveManager = new SaveManager();
+        this.playerName = hero.getName();
+        
+        // Создаем список юнитов для GameState
+        List<Unit> allUnits = new ArrayList<>();
+        allUnits.addAll(hero.getUnits());
+        if (enemy != null && enemy.getUnits() != null) {
+            allUnits.addAll(enemy.getUnits());
+        }
+        
+        // Создаем временного игрока для GameState
+        Player player = new Player(hero.getName(), hero.getGold());
+        
+        this.gameState = new GameState(playerName, player, gameMap, hero, enemy, heroCastle, enemyCastle, allUnits, carriage, road);
         initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
     }
 
@@ -96,71 +116,78 @@ public class MapManager {
         boolean isHeroTurn = true; // Флаг для отслеживания хода: true - ход героя, false - ход врага
 
         while (true) {
+            System.out.println("\nХод героя:");
+            System.out.println("w - вверх");
+            System.out.println("s - вниз");
+            System.out.println("a - влево");
+            System.out.println("d - вправо");
+            System.out.println("q - выход");
 
-                System.out.println("\nХод героя:");
-                System.out.println("w - вверх");
-                System.out.println("s - вниз");
-                System.out.println("a - влево");
-                System.out.println("d - вправо");
-                System.out.println("q - выход");
+            System.out.print("Введите команду: ");
+            String command = scanner.nextLine();
 
-                System.out.print("Введите команду: ");
-                String command = scanner.nextLine();
-
-                if (command.equals("q")) {
-                    System.out.println("Выход из игры.");
-                    scanner.close();
-                    return;
+            if (command.equals("q")) {
+                System.out.println("Хотите сохранить игру перед выходом? (y/n)");
+                String saveChoice = scanner.nextLine().trim().toLowerCase();
+                if (saveChoice.equals("y")) {
+                    saveManager.saveGame(playerName, gameState, false);
                 }
+                System.out.println("Выход из игры.");
+                return;
+            }
 
-                // Получаем максимальную длину хода
-                int maxSteps = hero.getAttackRange();
-                System.out.println("Максимальная длина хода: " + maxSteps);
+            // Получаем максимальную длину хода
+            int maxSteps = hero.getAttackRange();
+            System.out.println("Максимальная длина хода: " + maxSteps);
 
-                // Запрос на количество клеток для движения
-                int steps;
-                while (true) {
-                    System.out.print("Введите количество клеток для движения (не больше " + maxSteps + "): ");
-                    try {
-                        steps = Integer.parseInt(scanner.nextLine());
-                        if (steps > 0 && steps <= maxSteps) {
-                            break;
-                        } else {
-                            System.out.println("Некорректный ввод. Введите число от 1 до " + maxSteps + ".");
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Некорректный ввод. Введите целое число.");
+            // Запрос на количество клеток для движения
+            int steps;
+            while (true) {
+                System.out.print("Введите количество клеток для движения (не больше " + maxSteps + "): ");
+                try {
+                    steps = Integer.parseInt(scanner.nextLine());
+                    if (steps > 0 && steps <= maxSteps) {
+                        break;
+                    } else {
+                        System.out.println("Некорректный ввод. Введите число от 1 до " + maxSteps + ".");
                     }
+                } catch (NumberFormatException e) {
+                    System.out.println("Некорректный ввод. Введите целое число.");
                 }
+            }
 
-                // Определение смещения в зависимости от команды
-                int dx = 0, dy = 0;
-                switch (command) {
-                    case "w": dy = -1; break;
-                    case "s": dy = 1; break;
-                    case "a": dx = -1; break;
-                    case "d": dx = 1; break;
-                    default:
-                        System.out.println("Неверная команда. Попробуйте снова.");
-                        continue;
-                }
+            // Определение смещения в зависимости от команды
+            int dx = 0, dy = 0;
+            switch (command) {
+                case "w": dy = -1; break;
+                case "s": dy = 1; break;
+                case "a": dx = -1; break;
+                case "d": dx = 1; break;
+                default:
+                    System.out.println("Неверная команда. Попробуйте снова.");
+                    continue;
+            }
 
-                // Перемещаем героя
-                moveHero(dx, dy, steps, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
+            // Перемещаем героя
+            moveHero(dx, dy, steps, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
-                gameMap.printMap();
-                // Завершаем ход героя и переходим к ходу врага
-
-
-                System.out.println("\nХод врага:");
-
-                enemyMove(hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits, carriage);
+            gameMap.printMap();
+            // Завершаем ход героя и переходим к ходу врага
 
 
-                moveCarriage(carriage, gameMap, hero);
-                gameMap.printMap();
-                // Завершаем ход врага и переходим к ходу героя
+            System.out.println("\nХод врага:");
 
+            enemyMove(hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits, carriage);
+
+
+            moveCarriage(carriage, gameMap, hero);
+            gameMap.printMap();
+            // Завершаем ход врага и переходим к ходу героя
+
+            // Автосохранение каждые 5 ходов
+            if (hero.getCurrentMoves() % 5 == 0) {
+                saveManager.saveGame(playerName, gameState, true);
+            }
         }
     }
 
@@ -468,6 +495,8 @@ public class MapManager {
         } else if (x == enemyCastle.getPosition().getX() && y == enemyCastle.getPosition().getY()) {
             if (enemy.isDead()){
                 System.out.println("Герой выйграл битву и захватил замок!");
+                // Автосохранение после захвата замка
+                saveManager.saveGame(playerName, gameState, true);
                 endGame();
             }
             if (enemy.getX() == enemyCastle.getPosition().getX() && enemy.getY() == enemyCastle.getPosition().getY()){
@@ -635,6 +664,9 @@ public class MapManager {
                 enemy.die();
                 updateCharacterPosition(hero, x, y, gameMap);
                 hero.addGold(500);
+                
+                // Автосохранение после победы над врагом
+                saveManager.saveGame(playerName, gameState, true);
             }
 
 
@@ -656,6 +688,16 @@ public class MapManager {
         System.exit(0); // Завершаем выполнение программы
     }
 
-
+    public static GameMap loadMap(String mapPath) {
+        try {
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(mapPath));
+            GameMap map = (GameMap) in.readObject();
+            in.close();
+            return map;
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Ошибка при загрузке карты: " + e.getMessage());
+            return null;
+        }
+    }
 
 }

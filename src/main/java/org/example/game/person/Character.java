@@ -6,8 +6,11 @@ import org.example.game.map.Position;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
-public abstract class Character {
+public abstract class Character implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String name;  // Имя героя
     private int maxMoves;  // Максимальное количество перемещений за ход

@@ -28,6 +28,7 @@ public class CastleManager {
         try {
             FileHandler fileHandler = new FileHandler("castle-access.log", true);
             fileHandler.setLevel(Level.SEVERE);
+            fileHandler.setLevel(Level.WARNING);
             fileHandler.setFormatter(new SimpleFormatter());
             LOGGER.addHandler(fileHandler);
             LOGGER.setUseParentHandlers(false); // отключаем консольный вывод
