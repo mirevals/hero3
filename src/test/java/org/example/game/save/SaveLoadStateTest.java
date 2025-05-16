@@ -383,4 +383,59 @@ public class SaveLoadStateTest {
         Unit loadedHeroWarrior = loadedState.getHero().getUnits().get(0);
         assertEquals(initialHealth, loadedHeroWarrior.getHealth(), "Здоровье воина должно совпадать");
     }
+
+
+
+
+    @Test
+    @Order(11)
+    @DisplayName("Тест корректности данных в автосохранении")
+    void testAutoSaveDataIntegrity() {
+        // Создаем специфическое состояние для проверки
+        hero.setGold(12345);
+        Unit newUnit = new Unit(Unit.UnitType.MAGE, 90, 150, 2, 15, Team.HERO, 'M', 200);
+        hero.addUnit(newUnit);
+        heroCastle.addBuilding(new GuardPost());
+        
+        gameState = new GameState(TEST_PLAYER, player, gameMap, hero, enemy, 
+                                heroCastle, enemyCastle, allUnits, carriage, road);
+
+        // Делаем автосохранение
+        saveManager.saveGame(TEST_PLAYER, gameState, true);
+
+        // Получаем последнее автосохранение
+        String lastAutoSave = saveManager.getAvailableSaves(TEST_PLAYER)
+            .stream()
+            .filter(name -> name.startsWith("auto_" + TEST_PLAYER))
+            .max(String::compareTo)
+            .orElseThrow();
+
+        // Загружаем состояние
+        GameState loadedState = saveManager.loadGame(TEST_PLAYER, lastAutoSave);
+
+        // Проверяем все аспекты сохраненного состояния
+        assertNotNull(loadedState, "Загруженное состояние не должно быть null");
+        assertEquals(12345, loadedState.getHero().getGold(), "Количество золота должно совпадать");
+        assertEquals(hero.getUnits().size(), loadedState.getHero().getUnits().size(), 
+            "Количество юнитов должно совпадать");
+        
+        // Проверяем последнего добавленного юнита
+        Unit loadedUnit = loadedState.getHero().getUnits().get(loadedState.getHero().getUnits().size() - 1);
+        assertEquals(Unit.UnitType.MAGE, loadedUnit.getType(), "Тип юнита должен совпадать");
+        assertEquals(90, loadedUnit.getHealth(), "Здоровье юнита должно совпадать");
+        
+        // Проверяем постройки
+        assertEquals(heroCastle.getConstructedBuildings().size(), 
+            loadedState.getHeroCastle().getConstructedBuildings().size(),
+            "Количество построек должно совпадать");
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("Тест загрузки автосохранения при отсутствии файла")
+    void testAutoSaveLoadingWithMissingFile() {
+        // Пытаемся загрузить несуществующее автосохранение
+        GameState loadedState = saveManager.loadGame(TEST_PLAYER, "auto_nonexistent.sav");
+        assertNull(loadedState, "При загрузке несуществующего файла должен возвращаться null");
+    }
 } 
