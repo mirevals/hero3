@@ -179,10 +179,9 @@ class MapEditorTest {
         @Test
         @DisplayName("Сохранение и загрузка пустой карты")
         void testSaveLoadEmptyMap() {
-            MapManager.saveMap(gameMap, "maps/" + TEST_MAP_NAME);
-            assertTrue(new File("maps/" + TEST_MAP_NAME).exists());
-            
-            GameMap loadedMap = MapManager.loadMap("maps/" + TEST_MAP_NAME);
+            MapManager.saveMap(gameMap, "maps" + TEST_MAP_NAME);
+
+            GameMap loadedMap = MapManager.loadMap("maps" + TEST_MAP_NAME);
             assertNotNull(loadedMap);
             assertEquals(gameMap.getWidth(), loadedMap.getWidth());
             assertEquals(gameMap.getHeight(), loadedMap.getHeight());
@@ -195,8 +194,8 @@ class MapEditorTest {
             gameMap.setCell(2, 2, 'R');
             gameMap.setCell(3, 3, '#');
             
-            MapManager.saveMap(gameMap, "maps/" + TEST_MAP_NAME);
-            GameMap loadedMap = MapManager.loadMap("maps/" + TEST_MAP_NAME);
+            MapManager.saveMap(gameMap, "maps" + TEST_MAP_NAME);
+            GameMap loadedMap = MapManager.loadMap("maps" + TEST_MAP_NAME);
             
             assertEquals('C', loadedMap.getCell(1, 1));
             assertEquals('R', loadedMap.getCell(2, 2));
@@ -207,7 +206,8 @@ class MapEditorTest {
         @DisplayName("Загрузка несуществующей карты")
         void testLoadNonexistentMap() {
             assertThrows(RuntimeException.class, () -> 
-                MapManager.loadMap("maps/nonexistent_map.map"));
+                MapManager.loadMap("nonexistent_map.map"),
+                "Загрузка несуществующей карты должна вызывать RuntimeException");
         }
     }
 

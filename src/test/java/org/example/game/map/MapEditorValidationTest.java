@@ -2,11 +2,13 @@ package org.example.game.map;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+import java.io.File;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MapEditorValidationTest {
     private static final int MAP_WIDTH = 10;
     private static final int MAP_HEIGHT = 10;
+    private static final String TEST_MAP_NAME = "test_map.map";
     private GameMap gameMap;
     private MapEditor mapEditor;
 
@@ -14,6 +16,17 @@ public class MapEditorValidationTest {
     void setUp() {
         gameMap = new GameMap(MAP_WIDTH, MAP_HEIGHT);
         mapEditor = new MapEditor();
+        // Создаем директорию для карт, если её нет
+        new File("maps").mkdirs();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Удаляем тестовую карту после каждого теста
+        File testMap = new File("maps/" + TEST_MAP_NAME);
+        if (testMap.exists()) {
+            testMap.delete();
+        }
     }
 
     @Test
@@ -131,5 +144,86 @@ public class MapEditorValidationTest {
         assertEquals(MAP_HEIGHT + 5, newMap.getHeight(), "Новая высота карты должна быть увеличена на 5");
     }
 
+    @Test
+    @Order(6)
+    @DisplayName("Тест проверки связности дороги")
+    void testRoadConnectivity() {
+        // Создаем дорогу от (1,1) до (8,1)
+        Road road = new Road(1, 1, 8, 1);
 
+        // Проверяем, что все точки дороги доступны
+        for (int x = 1; x <= 8; x++) {
+            assertTrue(road.isPointOnRoad(x, 1),
+                    String.format("Точка (%d, 1) должна быть частью дороги", x));
+        }
+
+        // Проверяем точки вне дороги
+        assertFalse(road.isPointOnRoad(0, 1), "Точка (0, 1) не должна быть частью дороги");
+        assertFalse(road.isPointOnRoad(9, 1), "Точка (9, 1) не должна быть частью дороги");
+        assertFalse(road.isPointOnRoad(5, 0), "Точка (5, 0) не должна быть частью дороги");
+        assertFalse(road.isPointOnRoad(5, 2), "Точка (5, 2) не должна быть частью дороги");
+    }
+
+    @Nested
+    @DisplayName("Тесты сохранения и загрузки")
+    class SaveLoadTests {
+        @Test
+        @DisplayName("Сохранение и загрузка пустой карты")
+        void testSaveLoadEmptyMap() {
+            MapManager.saveMap(gameMap, TEST_MAP_NAME);
+            assertTrue(new File("maps/" + TEST_MAP_NAME).exists());
+            
+            GameMap loadedMap = MapManager.loadMap(TEST_MAP_NAME);
+            assertNotNull(loadedMap);
+            assertEquals(gameMap.getWidth(), loadedMap.getWidth());
+            assertEquals(gameMap.getHeight(), loadedMap.getHeight());
+        }
+
+        @Test
+        @DisplayName("Сохранение и загрузка карты с объектами")
+        void testSaveLoadMapWithObjects() {
+            gameMap.setCellValue(1, 1, 'C');
+            gameMap.setCellValue(2, 2, 'R');
+            gameMap.setCellValue(3, 3, '#');
+            
+            MapManager.saveMap(gameMap, TEST_MAP_NAME);
+            GameMap loadedMap = MapManager.loadMap(TEST_MAP_NAME);
+            
+            assertEquals('C', loadedMap.getCellValue(1, 1));
+            assertEquals('R', loadedMap.getCellValue(2, 2));
+            assertEquals('#', loadedMap.getCellValue(3, 3));
+        }
+
+        @Test
+        @DisplayName("Загрузка несуществующей карты")
+        void testLoadNonexistentMap() {
+            assertThrows(RuntimeException.class, () -> 
+                MapManager.loadMap("nonexistent_map.map"),
+                "Загрузка несуществующей карты должна вызывать RuntimeException");
+        }
+
+        @Test
+        @DisplayName("Сохранение с некорректным именем файла")
+        void testSaveWithInvalidFileName() {
+            assertThrows(IllegalArgumentException.class, () -> 
+                MapManager.saveMap(gameMap, "invalid/file/name.map"),
+                "Сохранение с некорректным именем файла должно вызывать IllegalArgumentException");
+        }
+
+        @Test
+        @DisplayName("Сохранение с пустым именем файла")
+        void testSaveWithEmptyFileName() {
+            assertThrows(IllegalArgumentException.class, () -> 
+                MapManager.saveMap(gameMap, ""),
+                "Сохранение с пустым именем файла должно вызывать IllegalArgumentException");
+        }
+
+        @Test
+        @DisplayName("Сохранение null карты")
+        void testSaveNullMap() {
+            assertThrows(IllegalArgumentException.class, () -> 
+                MapManager.saveMap(null, TEST_MAP_NAME),
+                "Сохранение null карты должно вызывать IllegalArgumentException");
+        }
+    }
 } 

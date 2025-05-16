@@ -29,7 +29,7 @@ public class MapManager {
     private int secondStepEnemy = 0;
     private boolean isHeroTurn = true;
 
-
+    private static final String MAPS_DIRECTORY = "maps/";
 
     public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage) {
         this.scanner = new Scanner(System.in);
@@ -688,26 +688,52 @@ public class MapManager {
         System.exit(0); // Завершаем выполнение программы
     }
 
-    public static GameMap loadMap(String mapPath) {
-        try {
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream(mapPath));
-            GameMap map = (GameMap) in.readObject();
-            in.close();
-            return map;
+    public static boolean saveMap(GameMap map, String mapName) {
+        if (map == null) {
+            throw new IllegalArgumentException("Карта не может быть null");
+        }
+        if (mapName == null || mapName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Имя файла не может быть пустым");
+        }
+        if (mapName.contains("/") || mapName.contains("\\")) {
+            throw new IllegalArgumentException("Имя файла содержит недопустимые символы");
+        }
+
+        String fullPath = MAPS_DIRECTORY + mapName;
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fullPath))) {
+            out.writeObject(map);
+            return true;
+        } catch (IOException e) {
+            System.err.println("Ошибка при сохранении карты: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static GameMap loadMap(String mapName) {
+        if (mapName == null || mapName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Имя файла не может быть пустым");
+        }
+
+        String fullPath = MAPS_DIRECTORY + mapName;
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fullPath))) {
+            return (GameMap) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Ошибка при загрузке карты: " + e.getMessage());
+            System.err.println("Ошибка при загрузке карты: " + e.getMessage());
             throw new RuntimeException("Ошибка при загрузке карты: " + e.getMessage());
         }
     }
 
-    public static void saveMap(GameMap map, String mapPath) {
-        try {
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(mapPath));
-            out.writeObject(map);
-            out.close();
-        } catch (IOException e) {
-            System.out.println("Ошибка при сохранении карты: " + e.getMessage());
-            throw new RuntimeException("Ошибка при сохранении карты: " + e.getMessage());
+    public boolean deleteMap(String mapName) {
+        if (mapName == null || mapName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Имя файла не может быть пустым");
         }
+
+        File mapFile = new File(MAPS_DIRECTORY + mapName);
+        return mapFile.exists() && mapFile.delete();
+    }
+
+    public String[] getAvailableMaps() {
+        File mapsDir = new File(MAPS_DIRECTORY);
+        return mapsDir.list((dir, name) -> name.endsWith(".map"));
     }
 }

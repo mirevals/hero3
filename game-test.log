@@ -76,3 +76,9 @@ INFO: testVictoryWhenHeroDie успешно пройден.
 INFO: testHeroWinsAutoFight успешно пройден.
 мая 16, 2025 4:42:24 PM org.example.game.person.FinishEnemyTest testVictoryWhenAllEnemiesDefeated
 INFO: testVictoryWhenAllEnemiesDefeated успешно пройден.
+мая 16, 2025 5:00:36 PM org.example.game.person.FinishEnemyTest testVictoryWhenHeroDie
+INFO: testVictoryWhenHeroDie успешно пройден.
+мая 16, 2025 5:00:36 PM org.example.game.person.FinishEnemyTest testHeroWinsAutoFight
+INFO: testHeroWinsAutoFight успешно пройден.
+мая 16, 2025 5:00:36 PM org.example.game.person.FinishEnemyTest testVictoryWhenAllEnemiesDefeated
+INFO: testVictoryWhenAllEnemiesDefeated успешно пройден.

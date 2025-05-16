@@ -58,4 +58,38 @@ public class Road implements Serializable {
     public int getEndY() {
         return endY;
     }
+
+    public boolean isPointOnRoad(int x, int y) {
+        // Для горизонтальной дороги
+        if (startY == endY && y == startY) {
+            int minX = Math.min(startX, endX);
+            int maxX = Math.max(startX, endX);
+            return x >= minX && x <= maxX;
+        }
+        
+        // Для вертикальной дороги
+        if (startX == endX && x == startX) {
+            int minY = Math.min(startY, endY);
+            int maxY = Math.max(startY, endY);
+            return y >= minY && y <= maxY;
+        }
+        
+        // Для диагональной дороги
+        if (Math.abs(endX - startX) == Math.abs(endY - startY)) {
+            int dx = endX > startX ? 1 : -1;
+            int dy = endY > startY ? 1 : -1;
+            int currentX = startX;
+            int currentY = startY;
+            
+            while (currentX != endX + dx) {
+                if (x == currentX && y == currentY) {
+                    return true;
+                }
+                currentX += dx;
+                currentY += dy;
+            }
+        }
+        
+        return false;
+    }
 }
