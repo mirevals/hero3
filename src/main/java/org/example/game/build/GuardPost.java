@@ -1,8 +1,10 @@
 package org.example.game.build;
 import org.example.game.Player;
 import org.example.game.person.Hero;
+import org.example.game.person.Team;
 import org.example.game.person.Unit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GuardPost extends Building {
@@ -26,7 +28,6 @@ public class GuardPost extends Building {
             System.out.println("Некорректный выбор.");
             return false;
         }
-
         Unit selectedUnit = buyUnit.get(heroChoice - 1); // Получаем выбранного юнита
         int unitCost = selectedUnit.getCost();
 

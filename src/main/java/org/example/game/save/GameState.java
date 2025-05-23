@@ -25,8 +25,8 @@ public class GameState implements Serializable {
     private final Road road;
 
     public GameState(String playerName, Player player, GameMap gameMap, Hero hero, Enemy enemy,
-                    HeroCastle heroCastle, EnemyCastle enemyCastle, List<Unit> allUnits,
-                    Carriage carriage, Road road) {
+                     HeroCastle heroCastle, EnemyCastle enemyCastle, List<Unit> allUnits,
+                     Carriage carriage, Road road) {
         this.playerName = playerName;
         this.player = player;
         this.gameMap = gameMap;

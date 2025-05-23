@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import static org.example.game.build.Shop.availableBuildings;
+import static org.example.game.person.Unit.UnitType.WARRIOR;
 
 public class App {
     private static SaveManager saveManager;
@@ -150,6 +151,37 @@ public class App {
 
         // Создаем остальные объекты игры
         GameState gameState = initializeGameState(player, gameMap);
+
+        List<Unit> buyUnit = new ArrayList<>();
+        Unit warrior1 = new Unit(WARRIOR, 100, 100, 1, 10, Team.HERO, 'W', 100);
+        Unit warrior2 = new Unit(WARRIOR, 100, 100, 1, 10, Team.HERO, 'W', 100);
+        buyUnit.add(warrior1);
+        buyUnit.add(warrior2);
+
+        CastleManager.enterCastle(
+                gameState.getHeroCastle(),
+                gameState.getHero(),
+                gameState.getPlayer(),
+                gameState.getEnemy(),
+                gameState.getEnemyCastle(),
+                gameState.getHeroCastle(),
+                gameState.getGameMap(),
+                new MapManager(
+                        gameState.getHeroCastle(),
+                        gameState.getEnemyCastle(),
+                        gameState.getEnemy(),
+                        gameState.getHero(),
+                        gameState.getGameMap(),
+                        gameState.getRoad(),
+                        gameState.getCarriage()
+                ),
+                buyUnit,
+                gameState.getHero(),
+                new BattleField(gameState.getAllUnits()),
+                gameState.getAllUnits(),
+                gameState.getCarriage()
+        );
+
         startGameLoop(gameState);
     }
 
@@ -216,11 +248,13 @@ public class App {
     }
 
     private static GameState initializeGameState(Player player, GameMap gameMap) {
-        Unit warrior = new Unit(Unit.UnitType.WARRIOR, 100, 100, 1, 10, Team.HERO, 'W', 100);
+
+        Unit warrior = new Unit(WARRIOR, 100, 100, 1, 10, Team.HERO, 'W', 100);
         List<Unit> unitsHero = new ArrayList<>();
         unitsHero.add(warrior);
+        unitsHero.add(warrior);
 
-        Unit enemyUnit = new Unit(Unit.UnitType.WARRIOR, 100, 100, 1, 10, Team.ENEMY, 'A', 100);
+        Unit enemyUnit = new Unit(WARRIOR, 100, 100, 1, 10, Team.ENEMY, 'A', 100);
         List<Unit> unitsEnemy = new ArrayList<>();
         unitsEnemy.add(enemyUnit);
 
@@ -241,6 +275,7 @@ public class App {
 
         Carriage carriage = new Carriage(new Position(5, 0), 1, 10, Carriage.Direction.DOWN);
         Road road = new Road(gameMap.getWidth() / 6, gameMap.getHeight() / 4, 5 * gameMap.getWidth() / 6, gameMap.getHeight() / 4);
+
 
         return new GameState(playerName, player, gameMap, hero, enemy, heroCastle, enemyCastle, allUnits, carriage, road);
     }

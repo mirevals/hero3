@@ -35,7 +35,7 @@ public class MapManager {
         this.scanner = new Scanner(System.in);
         this.saveManager = new SaveManager();
         this.playerName = hero.getName();
-        
+
         // Создаем список юнитов для GameState
         List<Unit> allUnits = new ArrayList<>();
         allUnits.addAll(hero.getUnits());
@@ -45,7 +45,6 @@ public class MapManager {
         
         // Создаем временного игрока для GameState
         Player player = new Player(hero.getName(), hero.getGold());
-        
         this.gameState = new GameState(playerName, player, gameMap, hero, enemy, heroCastle, enemyCastle, allUnits, carriage, road);
         initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
     }

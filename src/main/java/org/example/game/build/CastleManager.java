@@ -256,7 +256,9 @@ public class CastleManager {
     }
 
     private static void openGuardPost(List<Unit> buyUnit, Hero hero, Player player) {
+
         System.out.println("Добро пожаловать в Пост!");
+
         GuardPost.displayAvailableUnits(buyUnit);
 
         System.out.println("Введите номер юнита, которого хотите купить:");
