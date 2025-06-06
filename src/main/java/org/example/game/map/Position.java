@@ -1,8 +1,11 @@
 package org.example.game.map;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Position {
+public class Position implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int x;
     private int y;
 
@@ -17,6 +20,14 @@ public class Position {
 
     public int getY() {
         return y;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
     }
 
     // Переопределяем equals для корректного сравнения объектов Position

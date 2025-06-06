@@ -1,0 +1,20 @@
+апр. 25, 2025 7:10:12 PM org.example.game.build.CastleManager logCastlePosition
+SEVERE: Доступ к приватному полю 'position': org.example.game.map.Position@3e2
+мая 16, 2025 3:29:52 PM org.example.game.build.CastleManager logCastlePosition
+SEVERE: Доступ к приватному полю 'position': org.example.game.map.Position@3e2
+мая 17, 2025 12:20:49 AM org.example.game.build.CastleManager openShop
+WARNING: Ошибка ввода: ожидалось число для выбора здания.
+java.util.InputMismatchException
+	at java.base/java.util.Scanner.throwFor(Scanner.java:939)
+	at java.base/java.util.Scanner.next(Scanner.java:1594)
+	at java.base/java.util.Scanner.nextInt(Scanner.java:2258)
+	at java.base/java.util.Scanner.nextInt(Scanner.java:2212)
+	at org.example.game.build.CastleManager.openShop(CastleManager.java:172)
+	at org.example.game.build.CastleManager.handleGuardNotBuilt(CastleManager.java:104)
+	at org.example.game.build.CastleManager.processCastleCommands(CastleManager.java:74)
+	at org.example.game.build.CastleManager.enterCastle(CastleManager.java:308)
+	at org.example.game.map.MapManager.startGame(MapManager.java:118)
+	at org.example.App.startGameLoop(App.java:266)
+	at org.example.App.startNewGame(App.java:153)
+	at org.example.App.main(App.java:49)
+

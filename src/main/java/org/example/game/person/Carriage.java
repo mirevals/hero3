@@ -2,14 +2,17 @@ package org.example.game.person;
 
 import org.example.game.map.Position;
 import org.example.game.person.Character;
+import java.io.Serializable;
 
-public class Carriage {
+public class Carriage implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Position position;
     private int speed; // Количество клеток, на которое перемещается за ход
     private int damage; // Урон, который наносит при столкновении
     private Direction direction;
 
-    public enum Direction {
+    public enum Direction implements Serializable {
         LEFT, RIGHT, UP, DOWN
     }
 

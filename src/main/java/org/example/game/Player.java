@@ -1,10 +1,21 @@
 package org.example.game;
 
-public class Player {
+import java.io.Serializable;
+
+public class Player implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private final String name;
     private int gold;  // Количество золота у игрока
 
-    public Player(int initialGold) {
+    public Player(String name, int initialGold) {
+        this.name = name;
         this.gold = initialGold;  // Инициализация с начальным количеством золота
+    }
+
+    // Метод для получения имени игрока
+    public String getName() {
+        return name;
     }
 
     // Метод для получения текущего количества золота

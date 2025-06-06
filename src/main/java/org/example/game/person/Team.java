@@ -1,8 +1,10 @@
 package org.example.game.person;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-public enum Team {
+
+public enum Team implements Serializable {
     HERO("Player"),
     ENEMY("Enemy");
 

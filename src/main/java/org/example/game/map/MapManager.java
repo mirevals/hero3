@@ -6,15 +6,22 @@ import org.example.game.battle.BattleField;
 import org.example.game.build.*;
 import org.example.game.person.*;
 import org.example.game.person.Character;
+import org.example.game.save.SaveManager;
+import org.example.game.save.GameState;
+
 import java.util.Random;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.io.*;
 
 import static org.example.game.person.Carriage.Direction.*;
 
 public class MapManager {
 
     private final Scanner scanner;
+    private final SaveManager saveManager;
+    private final String playerName;
+    private final GameState gameState;
 
     private boolean isFirstEnemyMove = true;
     private boolean first = true;
@@ -22,11 +29,23 @@ public class MapManager {
     private int secondStepEnemy = 0;
     private boolean isHeroTurn = true;
 
-
+    private static final String MAPS_DIRECTORY = "maps/";
 
     public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage) {
         this.scanner = new Scanner(System.in);
+        this.saveManager = new SaveManager();
+        this.playerName = hero.getName();
 
+        // Создаем список юнитов для GameState
+        List<Unit> allUnits = new ArrayList<>();
+        allUnits.addAll(hero.getUnits());
+        if (enemy != null && enemy.getUnits() != null) {
+            allUnits.addAll(enemy.getUnits());
+        }
+        
+        // Создаем временного игрока для GameState
+        Player player = new Player(hero.getName(), hero.getGold());
+        this.gameState = new GameState(playerName, player, gameMap, hero, enemy, heroCastle, enemyCastle, allUnits, carriage, road);
         initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
     }
 
@@ -86,7 +105,7 @@ public class MapManager {
         return 2;  // Штраф на нейтральной территории
     }
 
-    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player,
+    public boolean startGame(Hero hero, Enemy enemy, Castle castle, Player player,
                           EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap,
                           MapManager mapManager, List<Unit> buyUnit, BattleField battleField,
                           List<Unit> allUnits, Carriage carriage) {
@@ -96,71 +115,78 @@ public class MapManager {
         boolean isHeroTurn = true; // Флаг для отслеживания хода: true - ход героя, false - ход врага
 
         while (true) {
+            System.out.println("\nХод героя:");
+            System.out.println("w - вверх");
+            System.out.println("s - вниз");
+            System.out.println("a - влево");
+            System.out.println("d - вправо");
+            System.out.println("q - выход");
 
-                System.out.println("\nХод героя:");
-                System.out.println("w - вверх");
-                System.out.println("s - вниз");
-                System.out.println("a - влево");
-                System.out.println("d - вправо");
-                System.out.println("q - выход");
+            System.out.print("Введите команду: ");
+            String command = scanner.nextLine();
 
-                System.out.print("Введите команду: ");
-                String command = scanner.nextLine();
-
-                if (command.equals("q")) {
-                    System.out.println("Выход из игры.");
-                    scanner.close();
-                    return;
+            if (command.equals("q")) {
+                System.out.println("Хотите сохранить игру перед выходом? (y/n)");
+                String saveChoice = scanner.nextLine().trim().toLowerCase();
+                if (saveChoice.equals("y")) {
+                    saveManager.saveGame(playerName, gameState, false);
                 }
+                System.out.println("Возвращение в главное меню...");
+                return true; // Возвращаем true для возврата в главное меню
+            }
 
-                // Получаем максимальную длину хода
-                int maxSteps = hero.getAttackRange();
-                System.out.println("Максимальная длина хода: " + maxSteps);
+            // Получаем максимальную длину хода
+            int maxSteps = hero.getAttackRange();
+            System.out.println("Максимальная длина хода: " + maxSteps);
 
-                // Запрос на количество клеток для движения
-                int steps;
-                while (true) {
-                    System.out.print("Введите количество клеток для движения (не больше " + maxSteps + "): ");
-                    try {
-                        steps = Integer.parseInt(scanner.nextLine());
-                        if (steps > 0 && steps <= maxSteps) {
-                            break;
-                        } else {
-                            System.out.println("Некорректный ввод. Введите число от 1 до " + maxSteps + ".");
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Некорректный ввод. Введите целое число.");
+            // Запрос на количество клеток для движения
+            int steps;
+            while (true) {
+                System.out.print("Введите количество клеток для движения (не больше " + maxSteps + "): ");
+                try {
+                    steps = Integer.parseInt(scanner.nextLine());
+                    if (steps > 0 && steps <= maxSteps) {
+                        break;
+                    } else {
+                        System.out.println("Некорректный ввод. Введите число от 1 до " + maxSteps + ".");
                     }
+                } catch (NumberFormatException e) {
+                    System.out.println("Некорректный ввод. Введите целое число.");
                 }
+            }
 
-                // Определение смещения в зависимости от команды
-                int dx = 0, dy = 0;
-                switch (command) {
-                    case "w": dy = -1; break;
-                    case "s": dy = 1; break;
-                    case "a": dx = -1; break;
-                    case "d": dx = 1; break;
-                    default:
-                        System.out.println("Неверная команда. Попробуйте снова.");
-                        continue;
-                }
+            // Определение смещения в зависимости от команды
+            int dx = 0, dy = 0;
+            switch (command) {
+                case "w": dy = -1; break;
+                case "s": dy = 1; break;
+                case "a": dx = -1; break;
+                case "d": dx = 1; break;
+                default:
+                    System.out.println("Неверная команда. Попробуйте снова.");
+                    continue;
+            }
 
-                // Перемещаем героя
-                moveHero(dx, dy, steps, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
+            // Перемещаем героя
+            moveHero(dx, dy, steps, hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
-                gameMap.printMap();
-                // Завершаем ход героя и переходим к ходу врага
-
-
-                System.out.println("\nХод врага:");
-
-                enemyMove(hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits, carriage);
+            gameMap.printMap();
+            // Завершаем ход героя и переходим к ходу врага
 
 
-                moveCarriage(carriage, gameMap, hero);
-                gameMap.printMap();
-                // Завершаем ход врага и переходим к ходу героя
+            System.out.println("\nХод врага:");
 
+            enemyMove(hero, enemy, castle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits, carriage);
+
+
+            moveCarriage(carriage, gameMap, hero);
+            gameMap.printMap();
+            // Завершаем ход врага и переходим к ходу героя
+
+            // Автосохранение каждые 5 ходов
+            if (hero.getCurrentMoves() % 5 == 0) {
+                saveManager.saveGame(playerName, gameState, true);
+            }
         }
     }
 
@@ -468,6 +494,8 @@ public class MapManager {
         } else if (x == enemyCastle.getPosition().getX() && y == enemyCastle.getPosition().getY()) {
             if (enemy.isDead()){
                 System.out.println("Герой выйграл битву и захватил замок!");
+                // Автосохранение после захвата замка
+                saveManager.saveGame(playerName, gameState, true);
                 endGame();
             }
             if (enemy.getX() == enemyCastle.getPosition().getX() && enemy.getY() == enemyCastle.getPosition().getY()){
@@ -635,6 +663,9 @@ public class MapManager {
                 enemy.die();
                 updateCharacterPosition(hero, x, y, gameMap);
                 hero.addGold(500);
+                
+                // Автосохранение после победы над врагом
+                saveManager.saveGame(playerName, gameState, true);
             }
 
 
@@ -653,9 +684,61 @@ public class MapManager {
         // - Сохранение статистики
         // - Очистка ресурсов
         // - Вывод финального экрана и т.д.
-        System.exit(0); // Завершаем выполнение программы
+        // Не используем System.exit(0), чтобы позволить вернуться в главное меню
     }
 
+    public static boolean saveMap(GameMap map, String mapName) {
+        if (map == null) {
+            throw new IllegalArgumentException("Карта не может быть null");
+        }
+        if (mapName == null || mapName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Имя файла не может быть пустым");
+        }
+        if (mapName.contains("/") || mapName.contains("\\")) {
+            throw new IllegalArgumentException("Имя файла содержит недопустимые символы");
+        }
 
+        // Убираем лишний префикс maps/, если он есть
+        String normalizedMapName = mapName.replace("maps/", "");
+        
+        String fullPath = MAPS_DIRECTORY + normalizedMapName;
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fullPath))) {
+            out.writeObject(map);
+            return true;
+        } catch (IOException e) {
+            System.err.println("Ошибка при сохранении карты: " + e.getMessage());
+            return false;
+        }
+    }
 
+    public static GameMap loadMap(String mapName) {
+        if (mapName == null || mapName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Имя файла не может быть пустым");
+        }
+
+        // Убираем лишний префикс maps/, если он есть
+        String normalizedMapName = mapName.replace("maps/", "");
+        
+        String fullPath = MAPS_DIRECTORY + normalizedMapName;
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fullPath))) {
+            return (GameMap) in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Ошибка при загрузке карты: " + e.getMessage());
+            throw new RuntimeException("Ошибка при загрузке карты: " + e.getMessage());
+        }
+    }
+
+    public boolean deleteMap(String mapName) {
+        if (mapName == null || mapName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Имя файла не может быть пустым");
+        }
+
+        File mapFile = new File(MAPS_DIRECTORY + mapName);
+        return mapFile.exists() && mapFile.delete();
+    }
+
+    public String[] getAvailableMaps() {
+        File mapsDir = new File(MAPS_DIRECTORY);
+        return mapsDir.list((dir, name) -> name.endsWith(".map"));
+    }
 }

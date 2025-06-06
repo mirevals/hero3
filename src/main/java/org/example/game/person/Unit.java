@@ -1,9 +1,10 @@
 package org.example.game.person;
 
-
 import org.example.game.map.Position;
+import java.io.Serializable;
 
-public class Unit {
+public class Unit implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String name;  // Имя юнита
     private int health;  // Здоровье юнита
@@ -16,10 +17,7 @@ public class Unit {
     private char symbol;
     private final int cost;
 
-
-
-
-    public enum UnitType {
+    public enum UnitType implements Serializable {
         WARRIOR,
         ARCHER,
         SPEARMAN,
@@ -43,8 +41,6 @@ public class Unit {
         this.cost = cost;
     }
 
-
-
     // Метод для установки позиции юнита
     public void setPosition(Position position) {
         this.position = position;
@@ -65,7 +61,6 @@ public class Unit {
         // Логика перемещения
         System.out.println(name + " перемещается на " + moveRange + " клеток.");
     }
-
 
     // Получение дефолтного символа по типу юнита
     private String getDefaultSymbol() {
@@ -159,7 +154,7 @@ public class Unit {
         }
     }
 
-    public UnitType  getType() {
+    public UnitType getType() {
         return this.unitType;
     }
 
