@@ -90,6 +90,74 @@ public class Hotel extends ServiceBuilding {
                     }
                 }
                 System.out.println("\nВы должны подождать, пока эти посетители получат свои услуги.");
+                
+                // Показываем статистику очереди
+                System.out.println("\nСтатистика отеля:");
+                System.out.println("----------------");
+                
+                // Общая статистика
+                System.out.println("Текущая загруженность: " + currentVisitors + "/" + maxVisitors + " посетителей");
+                System.out.println("Размер очереди: " + serviceQueue.size() + " человек");
+                
+                // Статистика по услугам
+                System.out.println("\nСтатистика по услугам:");
+                for (Service availableService : availableServices) {
+                    int requestCount = serviceRequestCounts.getOrDefault(availableService, 0);
+                    long totalServiceTime = serviceDurations.getOrDefault(availableService, 0L);
+                    
+                    // Получаем длительность услуги в миллисекундах
+                    long serviceDurationMs = getServiceDurationMs(availableService);
+                    
+                    // Подсчитываем количество людей в очереди для этой услуги
+                    long currentQueueForService = serviceQueue.stream()
+                        .filter(req -> req.getService() == availableService)
+                        .count();
+                    
+                    // Подсчитываем количество людей перед героем для этой услуги
+                    long queueBeforeHero = serviceQueue.stream()
+                        .filter(req -> req.getService() == availableService && req.getRequester() instanceof NPC)
+                        .count();
+                    
+                    // Считаем среднее время ожидания
+                    double avgWaitTime = 0;
+                    if (maxVisitors > 0) {
+                        avgWaitTime = (currentQueueForService * serviceDurationMs) / (double)maxVisitors / 1000.0;
+                    }
+                    
+                    double avgServiceTime = requestCount > 0 ? (double) totalServiceTime / requestCount / 1000.0 : 0;
+                    
+                    System.out.println(availableService.getName() + ":");
+                    System.out.println("  - Всего запросов: " + requestCount);
+                    System.out.println("  - Среднее время ожидания: " + String.format("%.1f", avgWaitTime) + " сек");
+                    System.out.println("  - Среднее время обслуживания: " + String.format("%.1f", avgServiceTime) + " сек");
+                    System.out.println("  - В очереди сейчас: " + currentQueueForService + " человек");
+                    if (queueBeforeHero > 0) {
+                        System.out.println("  - Перед вами в очереди: " + queueBeforeHero + " человек");
+                        // Оцениваем примерное время ожидания
+                        double estimatedWaitTime = (queueBeforeHero * serviceDurationMs) / (double)maxVisitors / 1000.0;
+                        System.out.println("  - Примерное время ожидания: " + String.format("%.1f", estimatedWaitTime) + " сек");
+                    }
+                }
+                
+                // Общая статистика ожидания
+                long totalRequests = serviceRequestCounts.values().stream().mapToInt(Integer::intValue).sum();
+                if (totalRequests > 0) {
+                    // Считаем общее среднее время ожидания как среднее по всем услугам
+                    double overallAvgWaitTime = availableServices.stream()
+                        .mapToDouble(s -> {
+                            long currentQueueSize = serviceQueue.stream()
+                                .filter(req -> req.getService() == s)
+                                .count();
+                            return (currentQueueSize * getServiceDurationMs(s)) / (double)maxVisitors / 1000.0;
+                        })
+                        .average()
+                        .orElse(0.0);
+                    
+                    System.out.println("\nОбщая статистика:");
+                    System.out.println("  - Всего обслужено: " + totalRequests + " посетителей");
+                    System.out.println("  - Среднее время ожидания: " + String.format("%.1f", overallAvgWaitTime) + " сек");
+                }
+                System.out.println(); // Добавляем пустую строку для лучшей читаемости
             }
 
             // Создаем запрос на услугу для героя
@@ -222,9 +290,80 @@ public class Hotel extends ServiceBuilding {
             if (!hasNPCs) {
                 System.out.println("В очереди только герой.");
             }
+
+            // Показываем статистику очереди
+            showQueueStatistics();
+            
             System.out.println(); // Добавляем пустую строку для лучшей читаемости
         } else {
             System.out.println("\nВ данный момент очередь пуста.");
+            showQueueStatistics();
+        }
+    }
+    
+    private void showQueueStatistics() {
+        System.out.println("\nСтатистика отеля:");
+        System.out.println("----------------");
+        
+        // Общая статистика
+        System.out.println("Текущая загруженность: " + currentVisitors + "/" + maxVisitors + " посетителей");
+        System.out.println("Размер очереди: " + serviceQueue.size() + " человек");
+        
+        // Статистика по услугам
+        System.out.println("\nСтатистика по услугам:");
+        for (Service service : availableServices) {
+            int requestCount = serviceRequestCounts.getOrDefault(service, 0);
+            long totalServiceTime = serviceDurations.getOrDefault(service, 0L);
+            
+            // Получаем длительность услуги в миллисекундах
+            long serviceDurationMs = getServiceDurationMs(service);
+            
+            // Считаем среднее время ожидания как: (количество посетителей * время услуги) / количество доступных мест
+            double avgWaitTime = 0;
+            if (maxVisitors > 0) {
+                // Если есть посетители в очереди, учитываем их
+                long currentQueueSize = serviceQueue.stream()
+                    .filter(req -> req.getService() == service)
+                    .count();
+                avgWaitTime = (currentQueueSize * serviceDurationMs) / (double)maxVisitors / 1000.0;
+            }
+            
+            double avgServiceTime = requestCount > 0 ? (double) totalServiceTime / requestCount / 1000.0 : 0;
+            
+            System.out.println(service.getName() + ":");
+            System.out.println("  - Всего запросов: " + requestCount);
+            System.out.println("  - Среднее время ожидания: " + String.format("%.1f", avgWaitTime) + " сек");
+            System.out.println("  - Среднее время обслуживания: " + String.format("%.1f", avgServiceTime) + " сек");
+            
+            // Показываем текущую очередь для этой услуги
+            long currentQueueForService = serviceQueue.stream()
+                .filter(req -> req.getService() == service)
+                .count();
+            if (currentQueueForService > 0) {
+                System.out.println("  - В очереди сейчас: " + currentQueueForService + " человек");
+                // Показываем примерное время ожидания для текущей очереди
+                double currentWaitTime = (currentQueueForService * serviceDurationMs) / (double)maxVisitors / 1000.0;
+                System.out.println("  - Примерное время ожидания: " + String.format("%.1f", currentWaitTime) + " сек");
+            }
+        }
+        
+        // Общая статистика ожидания
+        long totalRequests = serviceRequestCounts.values().stream().mapToInt(Integer::intValue).sum();
+        if (totalRequests > 0) {
+            // Считаем общее среднее время ожидания как среднее по всем услугам
+            double overallAvgWaitTime = availableServices.stream()
+                .mapToDouble(s -> {
+                    long currentQueueSize = serviceQueue.stream()
+                        .filter(req -> req.getService() == s)
+                        .count();
+                    return (currentQueueSize * getServiceDurationMs(s)) / (double)maxVisitors / 1000.0;
+                })
+                .average()
+                .orElse(0.0);
+            
+            System.out.println("\nОбщая статистика:");
+            System.out.println("  - Всего обслужено: " + totalRequests + " посетителей");
+            System.out.println("  - Среднее время ожидания: " + String.format("%.1f", overallAvgWaitTime) + " сек");
         }
     }
     
@@ -242,6 +381,23 @@ public class Hotel extends ServiceBuilding {
         }
     }
     
+    @Override
+    protected void updateServiceStatistics(ServiceRequest request) {
+        super.updateServiceStatistics(request);
+        
+        // Обновляем статистику времени ожидания и обслуживания
+        Service service = request.getService();
+        long waitTime = request.getWaitTime();
+        long serviceDuration = request.getServiceDuration();
+        
+        serviceWaitTimes.merge(service, waitTime, Long::sum);
+        serviceDurations.merge(service, serviceDuration, Long::sum);
+    }
+    
+    // Добавляем новые поля для хранения статистики
+    private final Map<Service, Long> serviceWaitTimes = new HashMap<>();
+    private final Map<Service, Long> serviceDurations = new HashMap<>();
+    
     public String getDescription() {
         return "Отель расположен в живописном месте у подножия гор. " +
                "Предлагает уютные номера и различные услуги для отдыха. " +
@@ -254,5 +410,15 @@ public class Hotel extends ServiceBuilding {
         for (NPC npc : regularVisitors) {
             npc.setPosition(newPosition.getX(), newPosition.getY());
         }
+    }
+
+    private long getServiceDurationMs(Service service) {
+        // Конвертируем часы в миллисекунды
+        if (service.getName().equals("Длинный отдых")) {
+            return 144 * 60 * 60 * 1000L; // 144 часа
+        } else if (service.getName().equals("Короткий отдых")) {
+            return 48 * 60 * 60 * 1000L;  // 48 часов
+        }
+        return 0;
     }
 } 
