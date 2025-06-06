@@ -14,6 +14,7 @@ public abstract class ServiceBuilding extends Building {
     protected final List<Service> availableServices;
     protected final List<NPC> regularVisitors;
     protected final Queue<ServiceRequest> serviceQueue; // Очередь на услуги
+    protected int currentVisitors;
     
     protected void addService(Service service) {
         availableServices.add(service);
@@ -65,10 +66,11 @@ public abstract class ServiceBuilding extends Building {
         this.availableServices = new ArrayList<>();
         this.regularVisitors = new ArrayList<>();
         this.serviceQueue = new LinkedList<>();
+        this.currentVisitors = 0;
     }
     
     public boolean canAcceptVisitor() {
-        return activeServices.size() < maxVisitors;
+        return currentVisitors < maxVisitors;
     }
     
     public List<Service> getAvailableServices() {
@@ -405,5 +407,20 @@ public abstract class ServiceBuilding extends Building {
         }
         
         return status.toString();
+    }
+
+    public void provideService(Character hero, Service service) {
+        if (!canAcceptVisitor()) {
+            System.out.println("Извините, " + getName() + " сейчас заполнен.");
+            return;
+        }
+
+        currentVisitors++;
+        try {
+            applyServiceEffects(hero, service);
+            System.out.println(hero.getName() + " использует услугу " + service.getName() + " в " + getName());
+        } finally {
+            currentVisitors--;
+        }
     }
 } 

@@ -5,10 +5,43 @@ import org.example.game.person.Hero;
 import org.example.game.person.Team;
 import java.util.List;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Storage {
     private static final Scanner scanner = new Scanner(System.in);
     static boolean useBuilding = false;
+
+    public static Building findBuildingByInput(String input, List<Building> buildings) {
+        // Try to parse as number first
+        try {
+            int index = Integer.parseInt(input.trim());
+            if (index > 0 && index <= buildings.size()) {
+                return buildings.get(index - 1);
+            }
+        } catch (NumberFormatException e) {
+            // Not a number, try to find by name
+            String searchTerm = input.trim().toLowerCase();
+            List<Building> matches = new ArrayList<>();
+            
+            for (Building building : buildings) {
+                if (building.getName().toLowerCase().contains(searchTerm)) {
+                    matches.add(building);
+                }
+            }
+            
+            if (matches.size() == 1) {
+                return matches.get(0);
+            } else if (matches.size() > 1) {
+                System.out.println("Найдено несколько зданий, соответствующих вашему запросу:");
+                for (int i = 0; i < matches.size(); i++) {
+                    System.out.println((i + 1) + ". " + matches.get(i).getName());
+                }
+                System.out.println("Пожалуйста, уточните выбор, введя более точное название или номер.");
+                return null;
+            }
+        }
+        return null;
+    }
 
     // Метод для использования здания на основе выбранного номера здания и типа замка
     public static boolean useBuilding(int buildingChoice, Castle castle, Hero currentHero) {
@@ -54,7 +87,7 @@ public class Storage {
             // Выбор услуги
             System.out.print("\nВыберите услугу (или 0 для отмены): ");
             int serviceChoice = scanner.nextInt();
-            scanner.nextLine(); // очистка буфера
+            scanner.nextLine();
 
             if (serviceChoice == 0) {
                 System.out.println("Отмена выбора услуги.");
@@ -66,38 +99,19 @@ public class Storage {
                 return false;
             }
 
-            // Начинаем услугу с текущим героем
-            if (serviceBuilding.startService(currentHero, serviceChoice - 1)) {
-                System.out.println("Вы начали использовать услугу в " + serviceBuilding.getName());
-                useBuilding = true;
-                return true;
-            } else {
-                System.out.println("Не удалось начать услугу.");
-                return false;
-            }
-        } else {
-            // Для не-сервисных зданий оставляем стандартное поведение
-            useBuilding = true;
-            System.out.println("Вы используете здание " + selectedBuilding.getName());
+            ServiceBuilding.Service selectedService = services.get(serviceChoice - 1);
+            serviceBuilding.provideService(currentHero, selectedService);
             return true;
         }
+        return false;
     }
 
     private static String formatDuration(int minutes) {
-        int days = minutes / (24 * 60);
-        int hours = (minutes % (24 * 60)) / 60;
+        int hours = minutes / 60;
         int mins = minutes % 60;
-        
-        StringBuilder result = new StringBuilder();
-        if (days > 0) {
-            result.append(days).append(" дн. ");
-        }
         if (hours > 0) {
-            result.append(hours).append(" ч. ");
+            return String.format("%dч %02dм", hours, mins);
         }
-        if (mins > 0 || (days == 0 && hours == 0)) {
-            result.append(mins).append(" мин.");
-        }
-        return result.toString().trim();
+        return String.format("%dм", mins);
     }
 }

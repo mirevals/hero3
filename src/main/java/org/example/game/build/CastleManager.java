@@ -7,7 +7,6 @@ import org.example.game.map.Position;
 import org.example.game.person.*;
 import org.example.game.map.GameMap;
 import org.example.game.person.Character;
-import org.example.game.build.Shop;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -186,28 +185,23 @@ public class CastleManager {
         Shop.showAvailableBuildings();
 
         while (true) {
-            System.out.println("Введите номер здания, которое вы хотите купить (или 0 для выхода):");
-            try {
-                int buildingChoice = scanner.nextInt();
-                scanner.nextLine(); // очистка буфера
+            System.out.println("Введите номер или название здания, которое вы хотите купить (или 0 для выхода):");
+            String input = scanner.nextLine().trim();
 
-                if (buildingChoice == 0) {
-                    System.out.println("Выход из магазина.");
-                    break;
-                }
+            if (input.equals("0")) {
+                System.out.println("Выход из магазина.");
+                break;
+            }
 
-                Building purchasedBuilding = buyBuilding(buildingChoice, castle);
+            Building selectedBuilding = Shop.findBuildingByInput(input);
+            if (selectedBuilding != null) {
+                Building purchasedBuilding = buyBuilding(Shop.availableBuildings.indexOf(selectedBuilding) + 1, castle);
                 if (purchasedBuilding != null) {
                     System.out.println("Здание " + purchasedBuilding.getName() + " добавлено в ваш замок.");
                     break; // покупка завершена — выходим
-                } else {
-                    System.out.println("Невозможно купить здание. Попробуйте снова.");
                 }
-
-            } catch (InputMismatchException e) {
-                scanner.nextLine(); // очистка некорректного ввода
-                LOGGER.log(Level.WARNING, "Ошибка ввода: ожидалось число для выбора здания.", e);
-                System.out.println("Некорректный ввод. Пожалуйста, введите номер здания.");
+            } else {
+                System.out.println("Не удалось найти здание. Попробуйте снова.");
             }
         }
     }
@@ -247,29 +241,36 @@ public class CastleManager {
 
     private static void openStorage(Scanner scanner, Castle castle, Hero hero, Player player, List<Unit> buyUnit) {
         System.out.println("Добро пожаловать в список зданий!");
-
         castle.showConstructedBuildings();
+        System.out.println("\nВы можете выбрать здание по номеру или ввести часть названия здания.");
 
-        System.out.println("Введите номер здания, которое вы хотите использовать:");
-        int buildingChoice = scanner.nextInt();
-        scanner.nextLine();
+        while (true) {
+            System.out.println("Введите номер или название здания, которое вы хотите использовать (или 0 для выхода):");
+            String input = scanner.nextLine().trim();
 
-        // Проверка на допустимость выбора
-        if (buildingChoice < 1) {
-            System.out.println("Ошибка: неверный выбор здания.");
-        } else {
-            // Используем здание
-            if (buildingChoice == 1) {
-                openTavern(scanner, hero, player);
-            } else if (buildingChoice == 2) {
-                openGuardPost(buyUnit, hero, player);
-            } else {
-                Storage.useBuilding(buildingChoice, castle, hero);
-                if (Storage.useBuilding) {
-                    System.out.println("Вы успешно использовали здание.");
+            if (input.equals("0")) {
+                System.out.println("Выход из списка зданий.");
+                break;
+            }
+
+            Building selectedBuilding = Storage.findBuildingByInput(input, castle.getConstructedBuildings());
+            if (selectedBuilding != null) {
+                int buildingIndex = castle.getConstructedBuildings().indexOf(selectedBuilding) + 1;
+                
+                if (selectedBuilding instanceof Tavern) {
+                    openTavern(scanner, hero, player);
+                } else if (selectedBuilding instanceof GuardPost) {
+                    openGuardPost(buyUnit, hero, player);
                 } else {
-                    System.out.println("Ошибка: не удалось использовать здание.");
+                    if (Storage.useBuilding(buildingIndex, castle, hero)) {
+                        System.out.println("Вы успешно использовали здание.");
+                        break;
+                    } else {
+                        System.out.println("Не удалось использовать здание. Попробуйте снова.");
+                    }
                 }
+            } else {
+                System.out.println("Не удалось найти здание. Попробуйте снова.");
             }
         }
     }
