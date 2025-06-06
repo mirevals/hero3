@@ -7,6 +7,7 @@ import org.example.game.time.GameTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.io.Serializable;
 
 public abstract class ServiceBuilding extends Building {
     protected final int maxVisitors;
@@ -15,32 +16,65 @@ public abstract class ServiceBuilding extends Building {
     protected final List<NPC> regularVisitors;
     protected final Queue<ServiceRequest> serviceQueue; // Очередь на услуги
     protected int currentVisitors;
+    protected final Map<Service, Integer> serviceDurations; // Средняя продолжительность каждой услуги
+    protected final Map<Service, Integer> serviceWaitTimes; // Среднее время ожидания для каждой услуги
+    protected final Map<Service, Integer> serviceRequestCounts; // Количество запросов на каждую услугу
     
-    protected void addService(Service service) {
-        availableServices.add(service);
-    }
-    
-    protected static class ServiceRequest {
-        private final Character visitor;
+    protected static class ServiceRequest implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final Character requester;
         private final Service service;
         private final long requestTime;
+        private long startTime;
+        private long endTime;
         private int queuePosition;
         
-        public ServiceRequest(Character visitor, Service service) {
-            this.visitor = visitor;
+        public ServiceRequest(Character requester, Service service) {
+            this.requester = requester;
             this.service = service;
             this.requestTime = GameTime.getGameTimeMs();
             this.queuePosition = 0;
         }
         
-        public Character getVisitor() { return visitor; }
-        public Service getService() { return service; }
-        public long getRequestTime() { return requestTime; }
-        public int getQueuePosition() { return queuePosition; }
-        public void setQueuePosition(int position) { this.queuePosition = position; }
+        public Character getRequester() {
+            return requester;
+        }
+        
+        public Service getService() {
+            return service;
+        }
+        
+        public long getRequestTime() {
+            return requestTime;
+        }
+        
+        public int getQueuePosition() {
+            return queuePosition;
+        }
+        
+        public void setQueuePosition(int position) {
+            this.queuePosition = position;
+        }
+        
+        public void startService() {
+            this.startTime = GameTime.getGameTimeMs();
+        }
+        
+        public void endService() {
+            this.endTime = GameTime.getGameTimeMs();
+        }
+        
+        public long getWaitTime() {
+            return startTime - requestTime;
+        }
+        
+        public long getServiceDuration() {
+            return endTime - startTime;
+        }
     }
     
-    protected static class Service {
+    protected static class Service implements Serializable {
+        private static final long serialVersionUID = 1L;
         private final String name;
         private final int durationMinutes;
         private final int goldCost;
@@ -67,6 +101,16 @@ public abstract class ServiceBuilding extends Building {
         this.regularVisitors = new ArrayList<>();
         this.serviceQueue = new LinkedList<>();
         this.currentVisitors = 0;
+        this.serviceDurations = new HashMap<>();
+        this.serviceWaitTimes = new HashMap<>();
+        this.serviceRequestCounts = new HashMap<>();
+    }
+    
+    protected void addService(Service service) {
+        availableServices.add(service);
+        serviceDurations.put(service, 0);
+        serviceWaitTimes.put(service, 0);
+        serviceRequestCounts.put(service, 0);
     }
     
     public boolean canAcceptVisitor() {
@@ -108,7 +152,7 @@ public abstract class ServiceBuilding extends Building {
             System.out.println("Свободных мест: " + (maxVisitors - activeServices.size()));
             
             // Удаляем посетителя из очереди, если он там был
-            boolean wasInQueue = serviceQueue.removeIf(req -> req.getVisitor().equals(visitor));
+            boolean wasInQueue = serviceQueue.removeIf(req -> req.getRequester().equals(visitor));
             if (wasInQueue) {
                 System.out.println(visitor.getName() + " был удален из очереди");
             }
@@ -132,7 +176,7 @@ public abstract class ServiceBuilding extends Building {
             
             // Если нет свободных мест - добавляем в очередь
             // Удаляем старый запрос этого посетителя, если он был в очереди
-            boolean wasInQueue = serviceQueue.removeIf(req -> req.getVisitor().equals(visitor));
+            boolean wasInQueue = serviceQueue.removeIf(req -> req.getRequester().equals(visitor));
             if (wasInQueue) {
                 System.out.println(visitor.getName() + " был удален из очереди");
             }
@@ -149,13 +193,13 @@ public abstract class ServiceBuilding extends Building {
                 
                 // Показываем только NPC перед героем в очереди
                 List<ServiceRequest> npcBeforeHero = serviceQueue.stream()
-                    .filter(req -> req.getQueuePosition() < request.getQueuePosition() && req.getVisitor() instanceof NPC)
+                    .filter(req -> req.getQueuePosition() < request.getQueuePosition() && req.getRequester() instanceof NPC)
                     .collect(Collectors.toList());
                 
                 if (!npcBeforeHero.isEmpty()) {
                     System.out.println("Перед вами в очереди:");
                     for (ServiceRequest queuedRequest : npcBeforeHero) {
-                        System.out.println("- " + queuedRequest.getVisitor().getName() + 
+                        System.out.println("- " + queuedRequest.getRequester().getName() + 
                                          " (" + queuedRequest.getService().getName() + ")");
                     }
                 } else {
@@ -186,9 +230,9 @@ public abstract class ServiceBuilding extends Building {
         if (!serviceQueue.isEmpty() && canAcceptVisitor()) {
             ServiceRequest request = serviceQueue.poll();
             // Удаляем посетителя из очереди, если он там был
-            serviceQueue.removeIf(req -> req.getVisitor().equals(request.getVisitor()));
-            activeServices.put(request.getVisitor(), request.getService());
-            System.out.println(request.getVisitor().getName() + " начал использовать услугу " + 
+            serviceQueue.removeIf(req -> req.getRequester().equals(request.getRequester()));
+            activeServices.put(request.getRequester(), request.getService());
+            System.out.println(request.getRequester().getName() + " начал использовать услугу " + 
                              request.getService().getName());
             
             updateQueuePositions();
@@ -248,14 +292,14 @@ public abstract class ServiceBuilding extends Building {
         // Показываем очередь
         System.out.println("\nОжидающие в очереди:");
         List<ServiceRequest> npcInQueue = serviceQueue.stream()
-            .filter(request -> request.getVisitor() instanceof NPC)
+            .filter(request -> request.getRequester() instanceof NPC)
             .collect(Collectors.toList());
             
         if (npcInQueue.isEmpty()) {
             System.out.println("- Очередь пуста");
         } else {
             for (ServiceRequest request : npcInQueue) {
-                System.out.println(request.getQueuePosition() + ". " + request.getVisitor().getName() + 
+                System.out.println(request.getQueuePosition() + ". " + request.getRequester().getName() + 
                                  " - " + request.getService().getName() + 
                                  " (ожидание: " + formatWaitingTime(request.getRequestTime()) + ")");
             }
@@ -302,7 +346,7 @@ public abstract class ServiceBuilding extends Building {
     private void ensureQueueNotEmpty() {
         // Если в очереди меньше 5 NPC, добавляем случайных NPC
         int npcInQueue = (int) serviceQueue.stream()
-                .filter(request -> request.getVisitor() instanceof NPC)
+                .filter(request -> request.getRequester() instanceof NPC)
                 .count();
                 
         System.out.println("\n=== Отладка очереди в " + getName() + " ===");
@@ -338,7 +382,7 @@ public abstract class ServiceBuilding extends Building {
                     // Удаляем его из активных услуг, если он там есть
                     activeServices.remove(randomNPC);
                     // Удаляем его из очереди, если он там есть
-                    serviceQueue.removeIf(req -> req.getVisitor().equals(randomNPC));
+                    serviceQueue.removeIf(req -> req.getRequester().equals(randomNPC));
                     // Добавляем в очередь
                     int randomServiceIndex = new Random().nextInt(availableServices.size());
                     System.out.println("Пытаемся добавить " + randomNPC.getName() + " в очередь (принудительно)...");
@@ -356,7 +400,7 @@ public abstract class ServiceBuilding extends Building {
     
     private boolean isInQueue(Character visitor) {
         return serviceQueue.stream()
-                .anyMatch(request -> request.getVisitor().equals(visitor));
+                .anyMatch(request -> request.getRequester().equals(visitor));
     }
     
     public void addRegularVisitor(NPC npc) {
@@ -393,7 +437,7 @@ public abstract class ServiceBuilding extends Building {
             status.append("\nОчередь:\n");
             for (ServiceRequest request : serviceQueue) {
                 status.append(request.getQueuePosition()).append(". ")
-                      .append(request.getVisitor().getName())
+                      .append(request.getRequester().getName())
                       .append(" - ").append(request.getService().getName()).append("\n");
             }
         }
@@ -409,18 +453,77 @@ public abstract class ServiceBuilding extends Building {
         return status.toString();
     }
 
-    public void provideService(Character hero, Service service) {
+    public void provideService(Character visitor, Service service) {
         if (!canAcceptVisitor()) {
             System.out.println("Извините, " + getName() + " сейчас заполнен.");
             return;
         }
 
+        // Создаем запрос на услугу
+        ServiceRequest request = new ServiceRequest(visitor, service);
+        serviceQueue.add(request);
+        serviceRequestCounts.put(service, serviceRequestCounts.get(service) + 1);
+
+        // Вычисляем и показываем статистику очереди
+        showQueueStatistics(service);
+
+        // Начинаем оказание услуги
         currentVisitors++;
+        request.startService();
         try {
-            applyServiceEffects(hero, service);
-            System.out.println(hero.getName() + " использует услугу " + service.getName() + " в " + getName());
+            applyServiceEffects(visitor, service);
+            System.out.println(visitor.getName() + " использует услугу " + service.getName() + " в " + getName());
         } finally {
+            request.endService();
             currentVisitors--;
+            
+            // Обновляем статистику
+            updateServiceStatistics(request);
         }
+    }
+
+    private void showQueueStatistics(Service service) {
+        int queueSize = serviceQueue.size();
+        int avgWaitTime = serviceWaitTimes.get(service);
+        int avgDuration = serviceDurations.get(service);
+        int totalRequests = serviceRequestCounts.get(service);
+        
+        System.out.println("\nСтатистика очереди для услуги " + service.getName() + ":");
+        System.out.println("Текущий размер очереди: " + queueSize + " человек");
+        System.out.println("Среднее время ожидания: " + formatDuration(avgWaitTime));
+        System.out.println("Средняя продолжительность услуги: " + formatDuration(avgDuration));
+        System.out.println("Всего запросов на услугу: " + totalRequests);
+        
+        if (queueSize > 0) {
+            int estimatedWaitTime = avgWaitTime * queueSize;
+            System.out.println("Примерное время ожидания: " + formatDuration(estimatedWaitTime));
+        }
+    }
+
+    protected void updateServiceStatistics(ServiceRequest request) {
+        Service service = request.getService();
+        long waitTime = request.getWaitTime();
+        long duration = request.getServiceDuration();
+        
+        // Обновляем среднее время ожидания
+        int currentAvgWait = serviceWaitTimes.get(service);
+        int newAvgWait = (int)((currentAvgWait * (serviceRequestCounts.get(service) - 1) + waitTime) / serviceRequestCounts.get(service));
+        serviceWaitTimes.put(service, newAvgWait);
+        
+        // Обновляем среднюю продолжительность
+        int currentAvgDuration = serviceDurations.get(service);
+        int newAvgDuration = (int)((currentAvgDuration * (serviceRequestCounts.get(service) - 1) + duration) / serviceRequestCounts.get(service));
+        serviceDurations.put(service, newAvgDuration);
+    }
+
+    private String formatDuration(long milliseconds) {
+        long minutes = milliseconds / (1000 * 60);
+        long hours = minutes / 60;
+        minutes = minutes % 60;
+        
+        if (hours > 0) {
+            return String.format("%dч %02dм", hours, minutes);
+        }
+        return String.format("%dм", minutes);
     }
 } 
