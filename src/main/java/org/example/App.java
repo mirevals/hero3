@@ -272,6 +272,10 @@ public class App {
         HeroCastle heroCastle = new HeroCastle(gameMap.getHeight(), gameMap.getWidth());
         EnemyCastle enemyCastle = new EnemyCastle(gameMap.getHeight(), gameMap.getWidth());
 
+        // Добавляем отель в замок героя
+        Hotel hotel = new Hotel();
+        heroCastle.addBuilding(hotel);
+
         Building building1 = availableBuildings.get(0);
         Building building2 = availableBuildings.get(1);
         enemyCastle.addBuilding(building1);
@@ -289,6 +293,13 @@ public class App {
         MapManager mapManager = new MapManager(gameState.getHeroCastle(), gameState.getEnemyCastle(), 
             gameState.getEnemy(), gameState.getHero(), gameState.getGameMap(), gameState.getRoad(), gameState.getCarriage());
 
+        System.out.println("\n=== Инициализация игрового цикла ===");
+        System.out.println("Здания в замке героя:");
+        for (Building building : gameState.getHeroCastle().getConstructedBuildings()) {
+            System.out.println("- " + building.getName() + (building instanceof ServiceBuilding ? " (Сервисное здание)" : ""));
+        }
+        System.out.println("=== Конец инициализации игрового цикла ===\n");
+
         // Запускаем игровой цикл
         while (true) {
             System.out.println("\nИгровое меню:");
@@ -301,10 +312,12 @@ public class App {
             
             switch (choice) {
                 case 1:
+                    System.out.println("\n=== Начало игрового хода ===");
                     boolean returnToMenu = mapManager.startGame(gameState.getHero(), gameState.getEnemy(), gameState.getHeroCastle(),
                         gameState.getPlayer(), gameState.getEnemyCastle(), gameState.getHeroCastle(),
                         gameState.getGameMap(), mapManager, new ArrayList<>(), battleField,
                         gameState.getAllUnits(), gameState.getCarriage());
+                    System.out.println("=== Конец игрового хода ===\n");
                     if (returnToMenu) {
                         return; // Возвращаемся в главное меню
                     }

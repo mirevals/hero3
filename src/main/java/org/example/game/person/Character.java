@@ -138,7 +138,7 @@ public abstract class Character implements Serializable {
         }
     }
     public enum CharacterType {
-        HERO, ENEMY
+        HERO, ENEMY, NPC
     }
 
     public abstract CharacterType getType();

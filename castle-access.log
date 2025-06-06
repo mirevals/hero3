@@ -18,3 +18,17 @@ java.util.InputMismatchException
 	at org.example.App.startNewGame(App.java:153)
 	at org.example.App.main(App.java:49)
 
+июн. 06, 2025 7:33:52 PM org.example.game.build.CastleManager openShop
+WARNING: Ошибка ввода: ожидалось число для выбора здания.
+java.util.InputMismatchException
+	at java.base/java.util.Scanner.throwFor(Scanner.java:939)
+	at java.base/java.util.Scanner.next(Scanner.java:1594)
+	at java.base/java.util.Scanner.nextInt(Scanner.java:2258)
+	at java.base/java.util.Scanner.nextInt(Scanner.java:2212)
+	at org.example.game.build.CastleManager.openShop(CastleManager.java:191)
+	at org.example.game.build.CastleManager.handleTavernNotBuilt(CastleManager.java:135)
+	at org.example.game.build.CastleManager.processCastleCommands(CastleManager.java:89)
+	at org.example.game.build.CastleManager.enterCastle(CastleManager.java:79)
+	at org.example.App.startNewGame(App.java:172)
+	at org.example.App.main(App.java:50)
+

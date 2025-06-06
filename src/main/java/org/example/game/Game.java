@@ -2,28 +2,140 @@ package org.example.game;
 
 import org.example.game.score.HighScoreManager;
 import org.example.game.score.Record;
-import java.util.Scanner;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import org.example.game.build.*;
+import org.example.game.map.GameMap;
+import org.example.game.map.MapManager;
+import org.example.game.person.*;
+import org.example.game.time.GameTime;
+import org.example.game.battle.BattleField;
 
-// ... existing code ...
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Game {
-    private GameState gameState;
+    private final org.example.game.save.GameState saveGameState;
+    private final org.example.game.GameState statsGameState;
+    private final MapManager mapManager;
+    private final Random random;
+    private static final int NPC_COUNT = 10; // Number of NPCs in the game
     private HighScoreManager highScoreManager;
     private String playerName;
     private Scanner scanner;
     
-    public Game() {
+    public Game(org.example.game.save.GameState saveGameState, MapManager mapManager) {
+        this.saveGameState = saveGameState;
+        this.statsGameState = new org.example.game.GameState();
+        this.mapManager = mapManager;
+        this.random = new Random();
         this.highScoreManager = new HighScoreManager();
         this.scanner = new Scanner(System.in);
+        this.playerName = saveGameState.getPlayerName();
     }
 
     public void start() {
-        showMainMenu();
+        // Initialize NPCs
+        List<org.example.game.person.Character> npcs = initializeNPCs();
+        
+        // Main game loop
+        while (true) {
+            // Update game time (1 game minute = 100ms real time)
+            GameTime.updateTime(100);
+            
+            // Update all service buildings
+            updateServiceBuildings();
+            
+            // Process NPC actions
+            processNPCActions(npcs);
+            
+            // Process player turn
+            if (!mapManager.startGame(saveGameState.getHero(), saveGameState.getEnemy(), saveGameState.getHeroCastle(),
+                saveGameState.getPlayer(), saveGameState.getEnemyCastle(), saveGameState.getHeroCastle(),
+                saveGameState.getGameMap(), mapManager, new ArrayList<>(), new BattleField(saveGameState.getAllUnits()),
+                saveGameState.getAllUnits(), saveGameState.getCarriage())) {
+                break; // Game over
+            }
+            
+            // Update game statistics after each turn
+            updateGameStatistics();
+            
+            try {
+                Thread.sleep(100); // 1 game minute = 100ms real time
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
     }
-
+    
+    private List<org.example.game.person.Character> initializeNPCs() {
+        List<org.example.game.person.Character> npcs = new ArrayList<>();
+        for (int i = 0; i < NPC_COUNT; i++) {
+            // Create NPCs with random positions and basic stats
+            Hero npc = new Hero("NPC " + (i + 1), 5, Team.HERO, 100, 
+                              saveGameState.getGameMap().getWidth(), 
+                              saveGameState.getGameMap().getHeight(),
+                              50, 10, 10, 1, new ArrayList<>());
+            npcs.add(npc);
+        }
+        return npcs;
+    }
+    
+    private void updateServiceBuildings() {
+        System.out.println("\n=== Отладка updateServiceBuildings ===");
+        System.out.println("Обновление сервисных зданий в замке героя...");
+        
+        // Update services in all castles
+        for (Building building : saveGameState.getHeroCastle().getConstructedBuildings()) {
+            if (building instanceof ServiceBuilding) {
+                System.out.println("Обновление здания: " + building.getName());
+                ((ServiceBuilding) building).updateServices();
+            }
+        }
+        
+        System.out.println("Обновление сервисных зданий в замке врага...");
+        for (Building building : saveGameState.getEnemyCastle().getConstructedBuildings()) {
+            if (building instanceof ServiceBuilding) {
+                System.out.println("Обновление здания: " + building.getName());
+                ((ServiceBuilding) building).updateServices();
+            }
+        }
+        System.out.println("=== Конец отладки updateServiceBuildings ===\n");
+    }
+    
+    private void processNPCActions(List<org.example.game.person.Character> npcs) {
+        for (org.example.game.person.Character npc : npcs) {
+            if (npc.isDead()) continue;
+            
+            // Randomly decide if NPC wants to visit a building
+            if (random.nextDouble() < 0.3) { // 30% chance to visit a building
+                // Get all service buildings
+                List<ServiceBuilding> availableBuildings = new ArrayList<>();
+                for (Building building : saveGameState.getHeroCastle().getConstructedBuildings()) {
+                    if (building instanceof ServiceBuilding) {
+                        availableBuildings.add((ServiceBuilding) building);
+                    }
+                }
+                
+                if (!availableBuildings.isEmpty()) {
+                    // Choose a random building
+                    ServiceBuilding building = availableBuildings.get(random.nextInt(availableBuildings.size()));
+                    
+                    if (building.canAcceptVisitor()) {
+                        // Choose a random service
+                        List<?> services = building.getAvailableServices();
+                        if (!services.isEmpty()) {
+                            int serviceIndex = random.nextInt(services.size());
+                            building.startService(npc, serviceIndex);
+                            System.out.println(npc.getName() + " начал использовать услугу " + 
+                                             services.get(serviceIndex).toString() + 
+                                             " в " + building.getName());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     private void showMainMenu() {
         while (true) {
             System.out.println("\n=== Главное меню ===");
@@ -162,8 +274,7 @@ public class Game {
         }
         
         // Инициализация новой игры
-        gameState = new GameState();
-        gameState.setCurrentMapName(mapName);
+        statsGameState.setCurrentMapName(mapName);
         // ... остальной код инициализации ...
     }
 
@@ -186,36 +297,36 @@ public class Game {
     private void checkGameOver() {
         if (isGameWon()) {
             System.out.println("Поздравляем! Вы победили!");
-            Record record = gameState.generateRecord(playerName);
+            Record record = statsGameState.generateRecord(playerName);
             highScoreManager.addScore(record);
             System.out.println("\nВаш результат:");
-            System.out.println("Уничтожено врагов: " + gameState.getEnemiesDefeated());
-            System.out.println("Захвачено замков: " + gameState.getCastlesCaptured());
-            System.out.println("Потеряно юнитов: " + gameState.getUnitsLost());
-            System.out.println("Количество ходов: " + gameState.getTurnsCompleted());
+            System.out.println("Уничтожено врагов: " + statsGameState.getEnemiesDefeated());
+            System.out.println("Захвачено замков: " + statsGameState.getCastlesCaptured());
+            System.out.println("Потеряно юнитов: " + statsGameState.getUnitsLost());
+            System.out.println("Количество ходов: " + statsGameState.getTurnsCompleted());
             System.out.println("\nТаблица рекордов:");
             highScoreManager.displayHighScores();
         }
     }
 
-    // Вызывать этот метод после каждого хода
+    // Call this method after each turn
     private void updateGameStatistics() {
-        gameState.incrementTurns();
+        statsGameState.incrementTurns();
     }
 
-    // Вызывать при уничтожении вражеского юнита
+    // Call when an enemy unit is defeated
     private void onEnemyDefeated() {
-        gameState.incrementEnemiesDefeated();
+        statsGameState.incrementEnemiesDefeated();
     }
 
-    // Вызывать при захвате замка
+    // Call when a castle is captured
     private void onCastleCaptured() {
-        gameState.incrementCastlesCaptured();
+        statsGameState.incrementCastlesCaptured();
     }
 
-    // Вызывать при потере союзного юнита
+    // Call when an allied unit is lost
     private void onUnitLost() {
-        gameState.incrementUnitsLost();
+        statsGameState.incrementUnitsLost();
     }
 
     // ... existing code ...

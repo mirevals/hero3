@@ -6,7 +6,8 @@ import java.util.List;
 
 public enum Team implements Serializable {
     HERO("Player"),
-    ENEMY("Enemy");
+    ENEMY("Enemy"),
+    NEUTRAL("Neutral");
 
     private final String name;
     private final List<Unit> units = new ArrayList<>();

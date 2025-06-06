@@ -7,6 +7,7 @@ import org.example.game.map.Position;
 import org.example.game.person.*;
 import org.example.game.map.GameMap;
 import org.example.game.person.Character;
+import org.example.game.build.Shop;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -259,11 +260,11 @@ public class CastleManager {
         } else {
             // Используем здание
             if (buildingChoice == 1) {
-                openTavern(scanner, hero, player );
+                openTavern(scanner, hero, player);
             } else if (buildingChoice == 2) {
                 openGuardPost(buyUnit, hero, player);
             } else {
-                Storage.useBuilding(buildingChoice, castle);
+                Storage.useBuilding(buildingChoice, castle, hero);
                 if (Storage.useBuilding) {
                     System.out.println("Вы успешно использовали здание.");
                 } else {
