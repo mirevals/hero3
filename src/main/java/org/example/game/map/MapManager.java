@@ -105,7 +105,7 @@ public class MapManager {
         return 2;  // Штраф на нейтральной территории
     }
 
-    public void startGame(Hero hero, Enemy enemy, Castle castle, Player player,
+    public boolean startGame(Hero hero, Enemy enemy, Castle castle, Player player,
                           EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap,
                           MapManager mapManager, List<Unit> buyUnit, BattleField battleField,
                           List<Unit> allUnits, Carriage carriage) {
@@ -131,8 +131,8 @@ public class MapManager {
                 if (saveChoice.equals("y")) {
                     saveManager.saveGame(playerName, gameState, false);
                 }
-                System.out.println("Выход из игры.");
-                return;
+                System.out.println("Возвращение в главное меню...");
+                return true; // Возвращаем true для возврата в главное меню
             }
 
             // Получаем максимальную длину хода
@@ -684,7 +684,7 @@ public class MapManager {
         // - Сохранение статистики
         // - Очистка ресурсов
         // - Вывод финального экрана и т.д.
-        System.exit(0); // Завершаем выполнение программы
+        // Не используем System.exit(0), чтобы позволить вернуться в главное меню
     }
 
     public static boolean saveMap(GameMap map, String mapName) {

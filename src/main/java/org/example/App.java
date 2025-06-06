@@ -158,6 +158,17 @@ public class App {
         buyUnit.add(warrior1);
         buyUnit.add(warrior2);
 
+        MapManager mapManager = new MapManager(
+                gameState.getHeroCastle(),
+                gameState.getEnemyCastle(),
+                gameState.getEnemy(),
+                gameState.getHero(),
+                gameState.getGameMap(),
+                gameState.getRoad(),
+                gameState.getCarriage()
+        );
+
+        // Входим в замок
         CastleManager.enterCastle(
                 gameState.getHeroCastle(),
                 gameState.getHero(),
@@ -166,15 +177,7 @@ public class App {
                 gameState.getEnemyCastle(),
                 gameState.getHeroCastle(),
                 gameState.getGameMap(),
-                new MapManager(
-                        gameState.getHeroCastle(),
-                        gameState.getEnemyCastle(),
-                        gameState.getEnemy(),
-                        gameState.getHero(),
-                        gameState.getGameMap(),
-                        gameState.getRoad(),
-                        gameState.getCarriage()
-                ),
+                mapManager,
                 buyUnit,
                 gameState.getHero(),
                 new BattleField(gameState.getAllUnits()),
@@ -182,6 +185,7 @@ public class App {
                 gameState.getCarriage()
         );
 
+        // После выхода из замка запускаем игровой цикл
         startGameLoop(gameState);
     }
 
@@ -297,10 +301,13 @@ public class App {
             
             switch (choice) {
                 case 1:
-                    mapManager.startGame(gameState.getHero(), gameState.getEnemy(), gameState.getHeroCastle(),
+                    boolean returnToMenu = mapManager.startGame(gameState.getHero(), gameState.getEnemy(), gameState.getHeroCastle(),
                         gameState.getPlayer(), gameState.getEnemyCastle(), gameState.getHeroCastle(),
                         gameState.getGameMap(), mapManager, new ArrayList<>(), battleField,
                         gameState.getAllUnits(), gameState.getCarriage());
+                    if (returnToMenu) {
+                        return; // Возвращаемся в главное меню
+                    }
                     break;
                 case 2:
                     saveManager.saveGame(playerName, gameState, false);

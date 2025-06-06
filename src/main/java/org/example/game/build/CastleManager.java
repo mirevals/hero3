@@ -60,6 +60,24 @@ public class CastleManager {
     private static Scanner scanner = new Scanner(System.in);  // Один Scanner на всю программу
 
 
+    public static void enterCastle(Castle castle, Hero hero, Player player, Enemy enemy,
+                                     EnemyCastle enemyCastle, HeroCastle heroCastle,
+                                     GameMap gameMap, MapManager mapManager,
+                                     List<Unit> buyUnit, Character character,
+                                     BattleField battleField, List<Unit> allUnits, Carriage carriage) {
+        isInCastle = true;
+        String castleName = (castle.getType() == Castle.CastleType.HERO) ? "замок героя!" : "замок противника!";
+        System.out.println("Вы вошли в " + castleName);
+
+        // Проверка на null
+        if (castle == null) {
+            System.out.println("Ошибка: замок не был инициализирован.");
+            return;
+        }
+
+        processCastleCommands(castle, hero, enemy, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnits, carriage);
+    }
+
     public static void processCastleCommands(Castle castle, Hero hero, Enemy enemy, Player player,
                                              EnemyCastle enemyCastle, HeroCastle heroCastle,
                                              GameMap gameMap, MapManager mapManager,
@@ -77,7 +95,7 @@ public class CastleManager {
             } else {
                 showCastleCommands();
                 String command = scanner.nextLine().trim().toLowerCase();
-                processCastleAction(command, castle, enemy, hero, player, enemyCastle, heroCastle ,gameMap, mapManager, buyUnit, character, battleField, allUnits, carriage);
+                processCastleAction(command, castle, enemy, hero, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnits, carriage);
             }
         }
     }
@@ -294,22 +312,6 @@ public class CastleManager {
         }
     }
 
-
-
-    public static void enterCastle(Castle castle, Hero hero, Player player, Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle, GameMap gameMap, MapManager mapManager, List<Unit> buyUnit, Character character, BattleField battleField, List<Unit> allUnits, Carriage carriage) {
-        isInCastle = true;
-        String castleName = (castle.getType() == Castle.CastleType.HERO) ? "замок героя!" : "замок противника!";
-        System.out.println("Вы вошли в " + castleName);
-
-        // Проверка на null
-        if (castle == null) {
-            System.out.println("Ошибка: замок не был инициализирован.");
-            return;
-        }
-
-        processCastleCommands(castle, hero, enemy, player,enemyCastle, heroCastle, gameMap, mapManager, buyUnit, character, battleField, allUnits, carriage);
-    }
-
     public static void exitCastle(Enemy enemy, EnemyCastle enemyCastle, HeroCastle heroCastle,
                                   Hero hero, Player player, GameMap gameMap, Castle castle,
                                   MapManager mapManager, List<Unit> buyUnit, Character character,
@@ -325,13 +327,9 @@ public class CastleManager {
         Position enemyCastlePos = enemyCastle.getPosition();
 
         // Определяем направление выхода в зависимости от типа замка
-       // Castle.CastleType  = castle.getType();
         int direction;
 
         Castle currentCastle = null;
-      // Position heroPos = hero.getPosition();
-      //  Position heroCastlePos = heroCastle.getPosition();
-      //  Position enemyCastlePos = enemyCastle.getPosition();
 
         // Определяем, в каком замке находится персонаж
         if (characterType == Character.CharacterType.HERO) {
@@ -376,7 +374,6 @@ public class CastleManager {
         char heroSymbol = character.getType() == Character.CharacterType.HERO ? 'H' : 'A';
         char[][] map = gameMap.getMap();
 
-
         if (mapManager.isWalkable(newX, newY, gameMap)) {
             map[newY][newX] = heroSymbol;
             character.setPosition(newX, newY);
@@ -391,11 +388,13 @@ public class CastleManager {
         map[heroCastle.getPosition().getY()][heroCastle.getPosition().getX()] = 'C';
         map[enemyCastle.getPosition().getY()][enemyCastle.getPosition().getX()] = 'E';
 
+        // Устанавливаем флаг выхода из замка
+        isInCastle = false;
+
+        // Если это первый выход, запускаем игру
         if (isFirstExit) {
             mapManager.startGame(hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, battleField, allUnits, carriage);
             isFirstExit = false;
-        } else {
-            isInCastle = false;
         }
     }
 }

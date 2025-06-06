@@ -28,10 +28,10 @@ public class SaveManager {
 
     public void saveGame(String playerName, GameState gameState, boolean isAutoSave) {
         try {
-            String fileName = generateSaveFileName(playerName, isAutoSave);
-            File saveFile = new File(SAVES_DIRECTORY + "/" + fileName);
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(saveFile));
-            out.writeObject(gameState);
+            String fileName = generateSaveFileName(playerName, isAutoSave); //Генерация имени файла
+            File saveFile = new File(SAVES_DIRECTORY + "/" + fileName); //Создание файла сохранения
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(saveFile));// записваем данные в файл и преобразуем объект в байты
+            out.writeObject(gameState); //Сохраняем в в файл
             out.close();
             System.out.println(isAutoSave ? "Игра автоматически сохранена!" : "Игра успешно сохранена!");
         } catch (IOException e) {
