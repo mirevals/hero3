@@ -35,7 +35,7 @@ public class SaveManager {
             out.close();
             System.out.println(isAutoSave ? "Игра автоматически сохранена!" : "Игра успешно сохранена!");
         } catch (IOException e) {
-            System.out.println("Ошибка при сохранении игры: " + e.getMessage());
+            System.out.println("Ошибка при сохранении игры:: " + e.getMessage());
         }
     }
 
