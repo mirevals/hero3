@@ -97,7 +97,7 @@ public class RightDoAttackTest {
 
         // Проверим, что герой может двигаться в сторону врага и остановится, если он в пределах дальности хода
         // Герой двигается на 3 клетки (в пределах его дальности хода)
-        mapManager.moveHero(1, 1, 3, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, null, battleField, allUnits, carriage);
+        mapManager.moveHero(1, 1, 3, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
         // Проверка, что герой остановился на враге, так как враг в пределах дальности хода
         assertEquals(5, hero.getX(), "Герой должен был остановиться на враге.");

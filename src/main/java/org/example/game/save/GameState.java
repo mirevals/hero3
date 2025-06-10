@@ -1,6 +1,7 @@
 package org.example.game.save;
 
 import org.example.game.Player;
+import org.example.game.Virus;
 import org.example.game.map.GameMap;
 import org.example.game.map.Road;
 import org.example.game.person.*;
@@ -9,6 +10,7 @@ import org.example.game.build.*;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.ArrayList;
 
 public class GameState implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -23,10 +25,12 @@ public class GameState implements Serializable {
     private final List<Unit> allUnits;
     private final Carriage carriage;
     private final Road road;
+    private final boolean accountInfected;
+    private final List<Virus> accountViruses;
 
     public GameState(String playerName, Player player, GameMap gameMap, Hero hero, Enemy enemy,
                      HeroCastle heroCastle, EnemyCastle enemyCastle, List<Unit> allUnits,
-                     Carriage carriage, Road road) {
+                     Carriage carriage, Road road, boolean accountInfected, List<Virus> accountViruses) {
         this.playerName = playerName;
         this.player = player;
         this.gameMap = gameMap;
@@ -37,6 +41,15 @@ public class GameState implements Serializable {
         this.allUnits = allUnits;
         this.carriage = carriage;
         this.road = road;
+        this.accountInfected = accountInfected;
+        this.accountViruses = new ArrayList<>(accountViruses);
+        
+        System.out.println("Creating GameState for " + playerName);
+        System.out.println("Account infected: " + accountInfected);
+        System.out.println("Number of viruses: " + accountViruses.size());
+        for (Virus virus : accountViruses) {
+            System.out.println("  - Virus: " + virus.getName() + " (ID: " + virus.getId() + ")");
+        }
     }
 
     // Геттеры для всех полей
@@ -78,5 +91,13 @@ public class GameState implements Serializable {
 
     public Road getRoad() {
         return road;
+    }
+
+    public boolean isAccountInfected() {
+        return accountInfected;
+    }
+
+    public List<Virus> getAccountViruses() {
+        return new ArrayList<>(accountViruses);
     }
 } 

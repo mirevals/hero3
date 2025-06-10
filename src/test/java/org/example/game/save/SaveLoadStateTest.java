@@ -10,6 +10,10 @@ import org.junit.jupiter.api.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
 
 import static org.example.game.build.Shop.availableBuildings;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +35,16 @@ public class SaveLoadStateTest {
     private Player player;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
+        // Удаляем все предыдущие сохранения перед каждым тестом
+        Path savesDirPath = Paths.get("saves");
+        if (Files.exists(savesDirPath)) {
+            Files.walk(savesDirPath)
+                    .filter(Files::isRegularFile)
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        }
+
         // Создаем базовые объекты
         gameMap = new GameMap(20, 20);
         player = new Player(TEST_PLAYER, 1000);

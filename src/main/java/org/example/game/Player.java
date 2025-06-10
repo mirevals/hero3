@@ -5,12 +5,13 @@ import java.io.Serializable;
 public class Player implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    private final String name;
+    private String name;
     private int gold;  // Количество золота у игрока
+    private boolean infected = false;
 
     public Player(String name, int initialGold) {
         this.name = name;
-        this.gold = initialGold;  // Инициализация с начальным количеством золота
+        this.gold = initialGold;
     }
 
     // Метод для получения имени игрока
@@ -50,5 +51,13 @@ public class Player implements Serializable {
     // Метод для проверки, хватает ли золота на покупку
     public boolean hasEnoughGold(int amount) {
         return gold >= amount;
+    }
+
+    public boolean isInfected() {
+        return infected;
+    }
+
+    public void setInfected(boolean infected) {
+        this.infected = infected;
     }
 }

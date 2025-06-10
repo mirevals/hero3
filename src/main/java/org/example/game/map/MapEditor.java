@@ -66,7 +66,7 @@ public class MapEditor {
 
     private void editMap() {
         while (true) {
-            currentMap.printMap();
+            currentMap.displayMap();
             System.out.println("\nРедактирование карты:");
             System.out.println("1. Добавить замок (C)");
             System.out.println("2. Добавить дорогу (R)");

@@ -9,6 +9,10 @@ public class Position implements Serializable {
     private int x;
     private int y;
 
+    public Position() {
+        // Default constructor for Jackson deserialization
+    }
+
     public Position(int x, int y) {
         this.x = x;
         this.y = y;
@@ -28,6 +32,11 @@ public class Position implements Serializable {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
     }
 
     // Переопределяем equals для корректного сравнения объектов Position

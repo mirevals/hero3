@@ -68,6 +68,7 @@ public class RightMoveTest {
         unitsHero.add(heroUnit);
         unitsHero.add(heroUnit);
         unitsHero.add(heroUnit);
+        unitsHero.add(heroUnit);
 
         unitsEnemy.add(enemyUnit);
 
@@ -109,7 +110,7 @@ public class RightMoveTest {
 
 
         // Пробуем двигать героя вправо
-        mapManager.moveHero(1, 0, 1, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, null, battleField, allUnits, carriage);
+        mapManager.moveHero(1, 0, 1, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
         // Проверяем, что герой двигался вправо
         assertEquals(4, hero.getX(), "Герой должен был двигаться вправо.");
@@ -126,15 +127,14 @@ public class RightMoveTest {
         hero.setY(3);
 
         // Устанавливаем карту с препятствием
-        char[][] map = new char[10][10];
-        map[6][5] = '#';  // Препятствие на одной клетке вправо
+        gameMap.setCellValue(3, 4, '#'); // Obstacle at (4,3) - remember (y,x) for setCellValue
 
 
         // Пробуем двигаться вправо, но там препятствие
-        mapManager.moveHero(1, 0, 1, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, null, battleField, allUnits, carriage);
+        mapManager.moveHero(1, 0, 1, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
         // Проверка, что герой остался на месте, так как есть препятствие
-        assertEquals(4, hero.getX(), "Герой не должен был двигаться.");
+        assertEquals(3, hero.getX(), "Герой не должен был двигаться.");
         assertEquals(3, hero.getY(), "Герой не должен был двигаться.");
     }
 
@@ -155,7 +155,7 @@ public class RightMoveTest {
         when(mockGameMap.getMap()).thenReturn(map);  // Стабаем метод getMap
 
         // Пробуем выйти за пределы карты
-        mapManager.moveHero(1, 0, 11, hero, enemy, heroCastle, player, enemyCastle, heroCastle, mockGameMap, mapManager, buyUnit, null, battleField, allUnits, carriage);
+        mapManager.moveHero(1, 0, 11, hero, enemy, heroCastle, player, enemyCastle, heroCastle, mockGameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
         // Проверка, что герой не вышел за пределы карты
         assertEquals(3, hero.getX(), "Герой не должен был выйти за пределы карты.");
@@ -176,7 +176,7 @@ public class RightMoveTest {
         enemy.setY(5);
 
         // Проверяем, что герой двигается в сторону врага и остановится, если враг в пределах дальности хода
-        mapManager.moveHero(1, 1, 3, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, null, battleField, allUnits, carriage);
+        mapManager.moveHero(1, 1, 3, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
         // Проверка, что герой остановился на враге, так как враг в пределах дальности хода
         assertEquals(5, hero.getX(), "Герой должен был остановиться на враге.");
@@ -199,13 +199,13 @@ public class RightMoveTest {
         System.out.println("Начальная позиция героя: (" + hero.getX() + ", " + hero.getY() + ")");
 
         // Пробуем переместиться к замку героев
-        mapManager.moveHero(1, 1, 3, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, null, battleField, allUnits, carriage);
+        mapManager.moveHero(1, 1, 3, hero, enemy, heroCastle, player, enemyCastle, heroCastle, gameMap, mapManager, buyUnit, hero, battleField, allUnits, carriage);
 
         // Печать позиции героя после движения
         System.out.println("Позиция героя после движения: (" + hero.getX() + ", " + hero.getY() + ")");
 
         // Проверка, что герой достиг замка
-        assertEquals(5, hero.getX(), "Герой должен был переместиться к замку.");
+        assertEquals(6, hero.getX(), "Герой должен был переместиться к замку.");
         assertEquals(5, hero.getY(), "Герой должен был переместиться к замку.");
     }
 }

@@ -81,8 +81,8 @@ public class GameMap implements Serializable {
         initializeMap();
     }
 
-    // Дополнительный метод для печати карты (для отладки)
-    public void printMap() {
+    // Метод для печати/отображения карты
+    public void displayMap() {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 System.out.print(map[i][j] + " ");

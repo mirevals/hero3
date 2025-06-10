@@ -4,9 +4,12 @@ import org.example.game.Gold;
 import org.example.game.build.EnemyCastle;
 import org.example.game.map.Position;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Enemy extends Character {
+public class Enemy extends Character implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
 
     public Enemy(String name, int maxMoves, Team team, int gold, int width, int height,

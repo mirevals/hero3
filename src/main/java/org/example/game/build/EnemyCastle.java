@@ -2,11 +2,13 @@ package org.example.game.build;
 
 import org.example.game.map.Position;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnemyCastle extends Castle{
+public class EnemyCastle extends Castle implements Serializable {
 
+    private static final long serialVersionUID = 1L;
 
 
     public EnemyCastle(int height, int width) {

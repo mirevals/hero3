@@ -52,4 +52,10 @@ public class Carriage implements Serializable {
             }
         }
     }
+
+    public int collectGold() {
+        int collected = 100; // Example value, adjust as needed
+        System.out.println("Карета собрала " + collected + " золота.");
+        return collected;
+    }
 }

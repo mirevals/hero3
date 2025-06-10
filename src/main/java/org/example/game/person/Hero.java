@@ -2,9 +2,11 @@ package org.example.game.person;
 
 import org.example.game.map.Position;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Hero extends Character {
+public class Hero extends Character implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     public Hero(String name, int maxMoves, Team team, int gold, int width, int height,
                 int health, int attack, int defense, int attackRange, List<Unit> units) {
