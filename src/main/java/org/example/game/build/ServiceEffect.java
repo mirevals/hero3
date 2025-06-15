@@ -1,6 +1,8 @@
 package org.example.game.build;
 
-public class ServiceEffect {
+import java.io.Serializable;
+
+public class ServiceEffect implements Serializable {
     public enum EffectType {
         HEALTH_BOOST,
         MOVEMENT_BOOST,
