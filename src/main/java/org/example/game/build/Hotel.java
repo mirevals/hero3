@@ -1,41 +1,45 @@
 package org.example.game.build;
 
+import org.example.game.person.NPC;
 import org.example.game.build.Service;
 import org.example.game.build.ServiceEffect;
+import org.example.game.build.ServiceEffect.EffectType;
+import java.io.Serializable;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
 
 public class Hotel extends Building {
-    private static final int MAX_VISITORS = 5;
     private static final long serialVersionUID = -7409586504057075246L;
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        // Инициализируем услуги после десериализации
-        initializeServices();
-    }
+    private static final int MAX_VISITORS = 5;
+    private final ConcurrentHashMap<String, Service> services;
 
     public Hotel() {
         super("У погибшего альпиниста", false);
         this.maxVisitors = MAX_VISITORS;
+        this.services = new ConcurrentHashMap<>();
         initializeServices();
     }
 
     private void initializeServices() {
-        this.services.clear();
-        services.put("short_rest", new Service(
-            "Короткий отдых",
-            1440, // 1 day in minutes
-            100,
-            new ServiceEffect(ServiceEffect.EffectType.HEALTH_BOOST, 2)
-        ));
+        services.clear();
+        services.put("hour_room", new Service("Номер на час", 50, 60, new ServiceEffect(EffectType.HEALTH_BOOST, 20)));
+        services.put("night_room", new Service("Номер на ночь", 200, 480, new ServiceEffect(EffectType.HEALTH_BOOST, 50)));
+        services.put("luxury_room", new Service("Люкс-номер", 500, 1440, new ServiceEffect(EffectType.HEALTH_BOOST, 100)));
+    }
 
-        services.put("long_rest", new Service(
-            "Длинный отдых",
-            4320, // 3 days in minutes
-            250,
-            new ServiceEffect(ServiceEffect.EffectType.HEALTH_BOOST, 3)
-        ));
+    public List<Service> getServices() {
+        return new ArrayList<>(services.values());
+    }
+
+    public List<Service> getAvailableServices() {
+        return getServices();
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        initializeServices();
     }
 
     @Override

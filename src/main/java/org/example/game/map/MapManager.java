@@ -651,111 +651,281 @@ public class MapManager {
         System.out.println("\nВы вошли в " + building.getName());
         
         if (building instanceof Hotel) {
-            showHotelServices((Hotel) building, hero, player);
+            showHotelServices(building);
         } else if (building instanceof Cafe) {
-            showCafeServices((Cafe) building, hero, player);
+            showCafeServices(building);
         } else if (building instanceof BarberShop) {
-            showBarberShopServices((BarberShop) building, hero, player);
+            showBarberShopServices(building);
         }
     }
 
-    private void showHotelServices(Hotel hotel, Hero hero, Player player) {
-        System.out.println("\nДоступные услуги в отеле:");
-        for (Service service : hotel.getAvailableServices()) {
-            System.out.println(service.toString());
+    private void showBarberShopServices(Building building) {
+        if (!(building instanceof BarberShop)) {
+            System.out.println("Это не парикмахерская!");
+            return;
         }
-        
+
+        BarberShop barberShop = (BarberShop) building;
+        Scanner scanner = new Scanner(System.in);
+
         while (true) {
-            System.out.println("\nВыберите услугу (введите номер) или 0 для выхода:");
-            try {
-                int choice = Integer.parseInt(scanner.nextLine());
-                if (choice == 0) break;
-                
-                List<Service> services = hotel.getAvailableServices();
-                if (choice > 0 && choice <= services.size()) {
-                    Service selectedService = services.get(choice - 1);
-                    if (player.getGold() >= selectedService.getGoldCost()) {
-                        player.spendGold(selectedService.getGoldCost());
-                        System.out.println("Вы приобрели услугу: " + selectedService.getName());
-                        // Применяем эффект услуги
-                        applyServiceEffect(selectedService.getEffect(), hero);
-                    } else {
-                        System.out.println("Недостаточно золота!");
+            System.out.println("\n=== Парикмахерская ===");
+            System.out.println("Ваше золото: " + gameState.getPlayer().getGold());
+            System.out.println("\nДоступные услуги:");
+            
+            List<Service> services = barberShop.getAvailableServices();
+            if (services.isEmpty()) {
+                System.out.println("Нет доступных услуг");
+                return;
+            }
+
+            for (int i = 0; i < services.size(); i++) {
+                Service service = services.get(i);
+                System.out.printf("%d. %s - %d золота (Длительность: %d мин)\n",
+                    i + 1, service.getName(), service.getCost(), service.getDurationMinutes());
+            }
+
+            // Показываем статус очереди
+            showQueueStatus(building);
+
+            System.out.println("\nВыберите действие:");
+            System.out.println("1. Выбрать услугу");
+            System.out.println("2. Обновить статус очереди");
+            System.out.println("0. Выйти из парикмахерской");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+
+            switch (choice) {
+                case 0:
+                    return;
+                case 1:
+                    System.out.print("Введите номер услуги: ");
+                    int serviceChoice = scanner.nextInt();
+                    scanner.nextLine(); // consume newline
+
+                    if (serviceChoice < 1 || serviceChoice > services.size()) {
+                        System.out.println("Неверный выбор услуги!");
+                        continue;
                     }
-                } else {
+
+                    Service selectedService = services.get(serviceChoice - 1);
+                    if (gameState.getPlayer().getGold() < selectedService.getCost()) {
+                        System.out.println("Недостаточно золота!");
+                        continue;
+                    }
+
+                    if (building.isQueueFull()) {
+                        System.out.println("Очередь полная! Попробуйте позже.");
+                        continue;
+                    }
+
+                    // Создаем NPC для героя
+                    NPC heroNPC = new NPC(gameState.getHero().getName());
+                    heroNPC.setSelectedService(selectedService);
+
+                    // Добавляем в очередь
+                    if (building.addToQueue(heroNPC, gameTimeInMinutes)) {
+                        gameState.getPlayer().spendGold(selectedService.getCost());
+                        System.out.println("Вы встали в очередь на услугу: " + selectedService.getName());
+                        System.out.println("Ожидайте своей очереди...");
+                    }
+                    break;
+                case 2:
+                    building.updateQueue(gameTimeInMinutes);
+                    showQueueStatus(building);
+                    break;
+                default:
                     System.out.println("Неверный выбор!");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Пожалуйста, введите число!");
+            }
+
+            // Обновляем очередь и обрабатываем текущего клиента
+            building.updateQueue(gameTimeInMinutes);
+            if (building.getCurrentCustomer() != null && !building.getCurrentCustomer().isServiceCompleted(gameTimeInMinutes)) {
+                building.startServiceForCurrentCustomer(building.getCurrentCustomer().getSelectedService(), gameTimeInMinutes);
             }
         }
     }
 
-    private void showCafeServices(Cafe cafe, Hero hero, Player player) {
-        System.out.println("\nДоступные услуги в кафе:");
-        for (Service service : cafe.getAvailableServices()) {
-            System.out.println(service.toString());
+    private void showHotelServices(Building building) {
+        if (!(building instanceof Hotel)) {
+            System.out.println("Это не отель!");
+            return;
         }
-        
+
+        Hotel hotel = (Hotel) building;
+        Scanner scanner = new Scanner(System.in);
+
         while (true) {
-            System.out.println("\nВыберите услугу (введите номер) или 0 для выхода:");
-            try {
-                int choice = Integer.parseInt(scanner.nextLine());
-                if (choice == 0) break;
-                
-                List<Service> services = cafe.getAvailableServices();
-                if (choice > 0 && choice <= services.size()) {
-                    Service selectedService = services.get(choice - 1);
-                    if (player.getGold() >= selectedService.getGoldCost()) {
-                        player.spendGold(selectedService.getGoldCost());
-                        System.out.println("Вы приобрели услугу: " + selectedService.getName());
-                        // Применяем эффект услуги
-                        applyServiceEffect(selectedService.getEffect(), hero);
-                    } else {
-                        System.out.println("Недостаточно золота!");
+            System.out.println("\n=== Отель ===");
+            System.out.println("Ваше золото: " + gameState.getPlayer().getGold());
+            System.out.println("\nДоступные услуги:");
+            
+            List<Service> services = hotel.getAvailableServices();
+            if (services.isEmpty()) {
+                System.out.println("Нет доступных услуг");
+                return;
+            }
+
+            for (int i = 0; i < services.size(); i++) {
+                Service service = services.get(i);
+                System.out.printf("%d. %s - %d золота (Длительность: %d мин)\n",
+                    i + 1, service.getName(), service.getCost(), service.getDurationMinutes());
+            }
+
+            // Показываем статус очереди
+            showQueueStatus(building);
+
+            System.out.println("\nВыберите действие:");
+            System.out.println("1. Выбрать услугу");
+            System.out.println("2. Обновить статус очереди");
+            System.out.println("0. Выйти из отеля");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+
+            switch (choice) {
+                case 0:
+                    return;
+                case 1:
+                    System.out.print("Введите номер услуги: ");
+                    int serviceChoice = scanner.nextInt();
+                    scanner.nextLine(); // consume newline
+
+                    if (serviceChoice < 1 || serviceChoice > services.size()) {
+                        System.out.println("Неверный выбор услуги!");
+                        continue;
                     }
-                } else {
+
+                    Service selectedService = services.get(serviceChoice - 1);
+                    if (gameState.getPlayer().getGold() < selectedService.getCost()) {
+                        System.out.println("Недостаточно золота!");
+                        continue;
+                    }
+
+                    if (building.isQueueFull()) {
+                        System.out.println("Очередь полная! Попробуйте позже.");
+                        continue;
+                    }
+
+                    // Создаем NPC для героя
+                    NPC heroNPC = new NPC(gameState.getHero().getName());
+                    heroNPC.setSelectedService(selectedService);
+
+                    // Добавляем в очередь
+                    if (building.addToQueue(heroNPC, gameTimeInMinutes)) {
+                        gameState.getPlayer().spendGold(selectedService.getCost());
+                        System.out.println("Вы встали в очередь на услугу: " + selectedService.getName());
+                        System.out.println("Ожидайте своей очереди...");
+                    }
+                    break;
+                case 2:
+                    building.updateQueue(gameTimeInMinutes);
+                    showQueueStatus(building);
+                    break;
+                default:
                     System.out.println("Неверный выбор!");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Пожалуйста, введите число!");
+            }
+
+            // Обновляем очередь и обрабатываем текущего клиента
+            building.updateQueue(gameTimeInMinutes);
+            if (building.getCurrentCustomer() != null && !building.getCurrentCustomer().isServiceCompleted(gameTimeInMinutes)) {
+                building.startServiceForCurrentCustomer(building.getCurrentCustomer().getSelectedService(), gameTimeInMinutes);
             }
         }
     }
 
-    private void showBarberShopServices(BarberShop barberShop, Hero hero, Player player) {
-        System.out.println("\nДоступные услуги в парикмахерской:");
-        System.out.println("Debug: services map is " + (barberShop.getAvailableServices() == null ? "null" : "not null"));
-        System.out.println("Debug: services size is " + (barberShop.getAvailableServices() == null ? "N/A" : barberShop.getAvailableServices().size()));
-        for (Service service : barberShop.getAvailableServices()) {
-            System.out.println("Debug: Processing service: " + service.getName());
-            System.out.println(service.toString());
+    private void showCafeServices(Building building) {
+        if (!(building instanceof Cafe)) {
+            System.out.println("Это не кафе!");
+            return;
         }
-        
+
+        Cafe cafe = (Cafe) building;
+        Scanner scanner = new Scanner(System.in);
+
         while (true) {
-            System.out.println("\nВыберите услугу (введите номер) или 0 для выхода:");
-            try {
-                int choice = Integer.parseInt(scanner.nextLine());
-                if (choice == 0) break;
-                
-                List<Service> services = barberShop.getAvailableServices();
-                System.out.println("Debug: Available services count: " + services.size());
-                if (choice > 0 && choice <= services.size()) {
-                    Service selectedService = services.get(choice - 1);
-                    if (player.getGold() >= selectedService.getGoldCost()) {
-                        player.spendGold(selectedService.getGoldCost());
-                        System.out.println("Вы приобрели услугу: " + selectedService.getName());
-                        // Применяем эффект услуги
-                        applyServiceEffect(selectedService.getEffect(), hero);
-                    } else {
-                        System.out.println("Недостаточно золота!");
-                    }
-                } else {
-                    System.out.println("Неверный выбор!");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Пожалуйста, введите число!");
+            System.out.println("\n=== Кафе ===");
+            System.out.println("Ваше золото: " + gameState.getPlayer().getGold());
+            System.out.println("\nДоступные услуги:");
+            
+            List<Service> services = cafe.getAvailableServices();
+            if (services.isEmpty()) {
+                System.out.println("Нет доступных услуг");
+                return;
             }
+
+            for (int i = 0; i < services.size(); i++) {
+                Service service = services.get(i);
+                System.out.printf("%d. %s - %d золота (Длительность: %d мин)\n",
+                    i + 1, service.getName(), service.getCost(), service.getDurationMinutes());
+            }
+
+            // Показываем статус очереди
+            showQueueStatus(building);
+
+            System.out.println("\nВыберите действие:");
+            System.out.println("1. Выбрать услугу");
+            System.out.println("2. Обновить статус очереди");
+            System.out.println("0. Выйти из кафе");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+
+            switch (choice) {
+                case 0:
+                    return;
+                case 1:
+                    System.out.print("Введите номер услуги: ");
+                    int serviceChoice = scanner.nextInt();
+                    scanner.nextLine(); // consume newline
+
+                    if (serviceChoice < 1 || serviceChoice > services.size()) {
+                        System.out.println("Неверный выбор услуги!");
+                        continue;
+                    }
+
+                    Service selectedService = services.get(serviceChoice - 1);
+                    if (gameState.getPlayer().getGold() < selectedService.getCost()) {
+                        System.out.println("Недостаточно золота!");
+                        continue;
+                    }
+
+                    if (building.isQueueFull()) {
+                        System.out.println("Очередь полная! Попробуйте позже.");
+                        continue;
+                    }
+
+                    // Создаем NPC для героя
+                    NPC heroNPC = new NPC(gameState.getHero().getName());
+                    heroNPC.setSelectedService(selectedService);
+
+                    // Добавляем в очередь
+                    if (building.addToQueue(heroNPC, gameTimeInMinutes)) {
+                        gameState.getPlayer().spendGold(selectedService.getCost());
+                        System.out.println("Вы встали в очередь на услугу: " + selectedService.getName());
+                        System.out.println("Ожидайте своей очереди...");
+                    }
+                    break;
+                case 2:
+                    building.updateQueue(gameTimeInMinutes);
+                    showQueueStatus(building);
+                    break;
+                default:
+                    System.out.println("Неверный выбор!");
+            }
+
+            // Обновляем очередь и обрабатываем текущего клиента
+            building.updateQueue(gameTimeInMinutes);
+            if (building.getCurrentCustomer() != null && !building.getCurrentCustomer().isServiceCompleted(gameTimeInMinutes)) {
+                building.startServiceForCurrentCustomer(building.getCurrentCustomer().getSelectedService(), gameTimeInMinutes);
+            }
+        }
+    }
+
+    private void showQueueStatus(Building building) {
+        if (building != null) {
+            System.out.println(building.getQueueStatus(gameTimeInMinutes));
         }
     }
 

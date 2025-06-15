@@ -2,45 +2,56 @@ package org.example.game.build;
 
 import org.example.game.build.Service;
 import org.example.game.build.ServiceEffect;
+import org.example.game.build.ServiceEffect.EffectType;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Cafe extends Building {
     private static final int MAX_VISITORS = 3;
     private static final long serialVersionUID = 4116052731001905656L;
+    private final ConcurrentHashMap<String, Service> services;
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        // Инициализируем услуги после десериализации
         initializeServices();
     }
 
     public Cafe() {
         super("Сырники от тети Глаши", false);
         this.maxVisitors = MAX_VISITORS;
+        this.services = new ConcurrentHashMap<>();
         initializeServices();
     }
 
     private void initializeServices() {
-        this.services.clear();
+        services.clear();
         services.put("coffee", new Service(
             "Кофе",
-            30, // 30 minutes
             50,
-            new ServiceEffect(ServiceEffect.EffectType.MOVEMENT_BOOST, 1)
+            30,
+            new ServiceEffect(EffectType.MOVEMENT_BOOST, 2)
         ));
 
         services.put("meal", new Service(
             "Питание",
-            60, // 1 hour
             100,
-            new ServiceEffect(ServiceEffect.EffectType.HEALTH_BOOST, 1)
+            60,
+            new ServiceEffect(EffectType.HEALTH_BOOST, 30)
         ));
+    }
+
+    public List<Service> getServices() {
+        return new ArrayList<>(services.values());
+    }
+
+    public List<Service> getAvailableServices() {
+        return getServices();
     }
 
     @Override
     public boolean canPlaceAt(int x, int y, char[][] map) {
-        // Используем базовую реализацию - только проверка на пустую клетку
         return super.canPlaceAt(x, y, map);
     }
 

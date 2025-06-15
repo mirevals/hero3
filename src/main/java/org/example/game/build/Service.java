@@ -1,31 +1,39 @@
 package org.example.game.build;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Service implements Serializable {
     private static final long serialVersionUID = -602029190897193349L;
-    private String name;
-    private int durationMinutes;
-    private int goldCost;
-    private ServiceEffect effect;
+    private static final AtomicInteger idCounter = new AtomicInteger(0);
+    private final int id;
+    private final String name;
+    private final int cost;
+    private final int durationMinutes;
+    private final ServiceEffect effect;
 
-    public Service(String name, int durationMinutes, int goldCost, ServiceEffect effect) {
+    public Service(String name, int cost, int durationMinutes, ServiceEffect effect) {
+        this.id = idCounter.incrementAndGet();
         this.name = name;
+        this.cost = cost;
         this.durationMinutes = durationMinutes;
-        this.goldCost = goldCost;
         this.effect = effect;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getDurationMinutes() {
-        return durationMinutes;
+    public int getCost() {
+        return cost;
     }
 
-    public int getGoldCost() {
-        return goldCost;
+    public int getDurationMinutes() {
+        return durationMinutes;
     }
 
     public ServiceEffect getEffect() {
@@ -52,7 +60,7 @@ public class Service implements Serializable {
         } else {
             sb.append(durationMinutes).append(" минут");
         }
-        sb.append(", цена: ").append(goldCost).append(" золота");
+        sb.append(", цена: ").append(cost).append(" золота");
         return sb.toString();
     }
 } 

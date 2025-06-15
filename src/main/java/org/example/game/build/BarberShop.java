@@ -1,11 +1,17 @@
 package org.example.game.build;
 
+import org.example.game.build.Service;
+import org.example.game.build.ServiceEffect;
+import org.example.game.build.ServiceEffect.EffectType;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
 public class BarberShop extends Building {
     private static final int MAX_VISITORS = 2; // 2 specialists
     private static final long serialVersionUID = 9075732562272709601L;
+    private final ConcurrentHashMap<String, Service> services;
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
@@ -18,35 +24,25 @@ public class BarberShop extends Building {
         System.out.println("Debug: BarberShop constructor called");
         this.symbol = 'B';
         this.maxVisitors = MAX_VISITORS;
+        this.services = new ConcurrentHashMap<>();
         initializeServices();
     }
 
     private void initializeServices() {
-        System.out.println("Debug: initializeServices called");
-        System.out.println("Debug: services before clear: " + (this.services == null ? "null" : "not null"));
-        this.services.clear();
-        System.out.println("Debug: services after clear: " + (this.services == null ? "null" : "not null"));
-        
-        // Простая стрижка - без бонусов
-        Service simpleCut = new Service(
-            "Просто стрижка",
-            10,  // 10 minutes
-            30,  // 30 gold
-            null  // без эффекта
-        );
-        this.services.put("simple_cut", simpleCut);
-        System.out.println("Debug: Added simple_cut service");
+        services.clear();
+        services.put("simple_cut", new Service(
+            "Простая стрижка",
+            10, // стоимость
+            30, // длительность
+            new ServiceEffect(EffectType.HEALTH_BOOST, 10)
+        ));
 
-        // Модная стрижка - сокращение времени захвата замка
-        Service fashionCut = new Service(
+        services.put("fashion_cut", new Service(
             "Модная стрижка",
-            30,  // 30 minutes
-            100, // 100 gold
-            new ServiceEffect(ServiceEffect.EffectType.CASTLE_CAPTURE_TIME_REDUCTION, 1)
-        );
-        this.services.put("fashion_cut", fashionCut);
-        System.out.println("Debug: Added fashion_cut service");
-        System.out.println("Debug: Final services size: " + this.services.size());
+            100, // стоимость
+            30, // длительность
+            new ServiceEffect(EffectType.CASTLE_CAPTURE_TIME_REDUCTION, 1)
+        ));
     }
 
     @Override
@@ -61,5 +57,13 @@ public class BarberShop extends Building {
 
     public int getMaxVisitors() {
         return MAX_VISITORS;
+    }
+
+    public List<Service> getServices() {
+        return new ArrayList<>(services.values());
+    }
+
+    public List<Service> getAvailableServices() {
+        return getServices();
     }
 } 

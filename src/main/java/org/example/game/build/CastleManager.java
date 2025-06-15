@@ -7,6 +7,8 @@ import org.example.game.map.Position;
 import org.example.game.person.*;
 import org.example.game.map.GameMap;
 import org.example.game.person.Character;
+import org.example.game.build.Tavern;
+import org.example.game.build.GuardPost;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
