@@ -762,12 +762,17 @@ public class MapManager {
                 System.out.println("Здоровье увеличено на " + effect.getValue());
                 break;
             case MOVEMENT_BOOST:
-                hero.addMoves(effect.getValue());
-                System.out.println("Добавлено " + effect.getValue() + " шагов");
+                // Применяем бонус к перемещению всем юнитам героя
+                for (Unit unit : hero.getUnits()) {
+                    // Увеличиваем дальность перемещения юнита
+                    unit.setMoveRange(unit.getMoveRange() + effect.getValue());
+                }
+                System.out.println("Добавлено " + effect.getValue() + " к перемещению всем юнитам");
                 break;
             case CASTLE_CAPTURE_TIME_REDUCTION:
-                // Здесь можно добавить логику для уменьшения времени захвата замка
-                System.out.println("Время захвата замка уменьшено на " + effect.getValue() + " минут");
+                // Применяем эффект сокращения времени захвата замка
+                enemyCastle.setCaptureTime(effect.getValue());
+                System.out.println("Время захвата замка сокращено до " + effect.getValue() + " хода");
                 break;
         }
     }

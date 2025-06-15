@@ -9,7 +9,7 @@ public class Unit implements Serializable {
     private final String name;  // Имя юнита
     private int health;  // Здоровье юнита
     private final int damage;  // Урон, который наносит юнит
-    private final int moveRange;  // Дальность перемещения
+    private int moveRange;  // Дальность перемещения (изменено с final на обычное поле)
     private final int attackRange;  // Дальность атаки
     private final Team team;  // Команда, к которой принадлежит юнит
     private int stackSize;  // Количество юнитов в стеке
@@ -170,5 +170,10 @@ public class Unit implements Serializable {
 
     public boolean isDead() {
         return health <= 0 || stackSize <= 0;
+    }
+
+    // Метод для установки дальности перемещения
+    public void setMoveRange(int moveRange) {
+        this.moveRange = moveRange;
     }
 }

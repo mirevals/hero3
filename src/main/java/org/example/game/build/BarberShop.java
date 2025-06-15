@@ -16,21 +16,21 @@ public class BarberShop extends Building {
     private void initializeServices() {
         services = new ConcurrentHashMap<>();
         
-        // Simple haircut service
+        // Простая стрижка - без бонусов
         Service simpleCut = new Service(
-            "Simple Haircut",
-            30,  // 30 minutes
-            50,  // 50 gold
-            new ServiceEffect(ServiceEffect.EffectType.HEALTH_BOOST, 10)
+            "Просто стрижка",
+            10,  // 10 minutes
+            30,  // 30 gold
+            null  // без эффекта
         );
         services.put("simple_cut", simpleCut);
 
-        // Fashion haircut service
+        // Модная стрижка - сокращение времени захвата замка
         Service fashionCut = new Service(
-            "Fashion Haircut",
-            45,  // 45 minutes
+            "Модная стрижка",
+            30,  // 30 minutes
             100, // 100 gold
-            new ServiceEffect(ServiceEffect.EffectType.HEALTH_BOOST, 25)
+            new ServiceEffect(ServiceEffect.EffectType.CASTLE_CAPTURE_TIME_REDUCTION, 1)
         );
         services.put("fashion_cut", fashionCut);
     }

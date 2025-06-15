@@ -15,11 +15,19 @@ public abstract class Castle implements Serializable {
     private final String name;  // Название замка
     private Position position = null;  // Позиция замка на карте
     private boolean isCaptured;  // Флаг для проверки, захвачен ли замок
+    private int captureTime = 2;  // Время захвата замка в ходах по умолчанию
 
     public void setPosition(Position position) {
         this.position = position;
     }
 
+    public int getCaptureTime() {
+        return captureTime;
+    }
+
+    public void setCaptureTime(int captureTime) {
+        this.captureTime = captureTime;
+    }
 
     public enum CastleType {
         HERO, ENEMY
