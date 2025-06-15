@@ -3,18 +3,26 @@ package org.example.game.build;
 import org.example.game.build.Service;
 import org.example.game.build.ServiceEffect;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
 
 public class Hotel extends Building {
     private static final int MAX_VISITORS = 5;
-    private ConcurrentHashMap<String, Service> services;
+    private static final long serialVersionUID = -7409586504057075246L;
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        // Инициализируем услуги после десериализации
+        initializeServices();
+    }
 
     public Hotel() {
         super("У погибшего альпиниста", false);
+        this.maxVisitors = MAX_VISITORS;
         initializeServices();
     }
 
     private void initializeServices() {
-        services = new ConcurrentHashMap<>();
+        this.services.clear();
         services.put("short_rest", new Service(
             "Короткий отдых",
             1440, // 1 day in minutes

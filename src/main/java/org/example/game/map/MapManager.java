@@ -725,7 +725,10 @@ public class MapManager {
 
     private void showBarberShopServices(BarberShop barberShop, Hero hero, Player player) {
         System.out.println("\nДоступные услуги в парикмахерской:");
+        System.out.println("Debug: services map is " + (barberShop.getAvailableServices() == null ? "null" : "not null"));
+        System.out.println("Debug: services size is " + (barberShop.getAvailableServices() == null ? "N/A" : barberShop.getAvailableServices().size()));
         for (Service service : barberShop.getAvailableServices()) {
+            System.out.println("Debug: Processing service: " + service.getName());
             System.out.println(service.toString());
         }
         
@@ -736,6 +739,7 @@ public class MapManager {
                 if (choice == 0) break;
                 
                 List<Service> services = barberShop.getAvailableServices();
+                System.out.println("Debug: Available services count: " + services.size());
                 if (choice > 0 && choice <= services.size()) {
                     Service selectedService = services.get(choice - 1);
                     if (player.getGold() >= selectedService.getGoldCost()) {
@@ -756,6 +760,11 @@ public class MapManager {
     }
 
     private void applyServiceEffect(ServiceEffect effect, Hero hero) {
+        if (effect == null) {
+            System.out.println("Услуга не имеет эффекта.");
+            return;
+        }
+
         switch (effect.getType()) {
             case HEALTH_BOOST:
                 hero.setHealth(hero.getHealth() + effect.getValue());

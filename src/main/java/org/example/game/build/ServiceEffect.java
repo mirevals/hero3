@@ -3,6 +3,8 @@ package org.example.game.build;
 import java.io.Serializable;
 
 public class ServiceEffect implements Serializable {
+    private static final long serialVersionUID = -4267364649894094910L;
+
     public enum EffectType {
         HEALTH_BOOST,
         MOVEMENT_BOOST,

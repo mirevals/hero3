@@ -1,20 +1,31 @@
 package org.example.game.build;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
 
 public class BarberShop extends Building {
     private static final int MAX_VISITORS = 2; // 2 specialists
-    private ConcurrentHashMap<String, Service> services;
+    private static final long serialVersionUID = 9075732562272709601L;
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        // Инициализируем услуги после десериализации
+        initializeServices();
+    }
 
     public BarberShop() {
         super("Barber Shop", false);
+        System.out.println("Debug: BarberShop constructor called");
         this.symbol = 'B';
         this.maxVisitors = MAX_VISITORS;
         initializeServices();
     }
 
     private void initializeServices() {
-        services = new ConcurrentHashMap<>();
+        System.out.println("Debug: initializeServices called");
+        System.out.println("Debug: services before clear: " + (this.services == null ? "null" : "not null"));
+        this.services.clear();
+        System.out.println("Debug: services after clear: " + (this.services == null ? "null" : "not null"));
         
         // Простая стрижка - без бонусов
         Service simpleCut = new Service(
@@ -23,7 +34,8 @@ public class BarberShop extends Building {
             30,  // 30 gold
             null  // без эффекта
         );
-        services.put("simple_cut", simpleCut);
+        this.services.put("simple_cut", simpleCut);
+        System.out.println("Debug: Added simple_cut service");
 
         // Модная стрижка - сокращение времени захвата замка
         Service fashionCut = new Service(
@@ -32,7 +44,9 @@ public class BarberShop extends Building {
             100, // 100 gold
             new ServiceEffect(ServiceEffect.EffectType.CASTLE_CAPTURE_TIME_REDUCTION, 1)
         );
-        services.put("fashion_cut", fashionCut);
+        this.services.put("fashion_cut", fashionCut);
+        System.out.println("Debug: Added fashion_cut service");
+        System.out.println("Debug: Final services size: " + this.services.size());
     }
 
     @Override
