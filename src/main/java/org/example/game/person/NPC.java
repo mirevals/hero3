@@ -32,12 +32,12 @@ public class NPC implements Serializable {
         this.selectedService = service;
         this.serviceCompleted = false;
         this.serviceStartTime = currentGameTime;
-        this.serviceEndTime = currentGameTime + service.getDurationMinutes();
+        this.serviceEndTime = currentGameTime + service.getDurationMinutes(); // durationMinutes теперь в секундах
 
         serviceThread = new Thread(() -> {
             try {
                 // Ждем, пока не наступит время окончания услуги
-                while (currentGameTime < serviceEndTime) {
+                while (System.currentTimeMillis() / 1000 < serviceEndTime) {
                     Thread.sleep(100); // Проверяем каждые 100мс
                 }
                 serviceCompleted = true;
@@ -51,7 +51,7 @@ public class NPC implements Serializable {
     }
 
     public boolean isServiceCompleted(long currentGameTime) {
-        return currentGameTime >= serviceEndTime;
+        return System.currentTimeMillis() / 1000 >= serviceEndTime;
     }
 
     public void cancelService() {
@@ -83,7 +83,7 @@ public class NPC implements Serializable {
     }
 
     public long getRemainingTime(long currentGameTime) {
-        return Math.max(0, serviceEndTime - currentGameTime);
+        return Math.max(0, serviceEndTime - (System.currentTimeMillis() / 1000));
     }
 
     public void setSelectedService(Service service) {

@@ -24,7 +24,7 @@ public class Building implements Serializable {
         this.name = name;
         this.canRecruitUnits = canRecruitUnits;
         this.services = new ConcurrentHashMap<>();
-        this.serviceQueue = new ServiceQueue(name, maxVisitors);
+        this.serviceQueue = new ServiceQueue(this, maxVisitors);
         allBuildings.add(this);
     }
 
@@ -114,7 +114,7 @@ public class Building implements Serializable {
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        // Инициализируем очередь после десериализации
-        this.serviceQueue = new ServiceQueue(name, maxVisitors);
+        // Восстанавливаем очередь после десериализации
+        this.serviceQueue = new ServiceQueue(this, maxVisitors);
     }
 }

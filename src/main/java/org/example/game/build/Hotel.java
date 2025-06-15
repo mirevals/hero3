@@ -24,9 +24,9 @@ public class Hotel extends Building {
 
     private void initializeServices() {
         services.clear();
-        services.put("hour_room", new Service("Номер на час", 50, 60, new ServiceEffect(EffectType.HEALTH_BOOST, 20)));
-        services.put("night_room", new Service("Номер на ночь", 200, 480, new ServiceEffect(EffectType.HEALTH_BOOST, 50)));
-        services.put("luxury_room", new Service("Люкс-номер", 500, 1440, new ServiceEffect(EffectType.HEALTH_BOOST, 100)));
+        services.put("hour_room", new Service("Номер на час", 50, 10, new ServiceEffect(EffectType.HEALTH_BOOST, 20)));
+        services.put("night_room", new Service("Номер на ночь", 200, 12, new ServiceEffect(EffectType.HEALTH_BOOST, 50)));
+        services.put("luxury_room", new Service("Люкс-номер", 500, 15, new ServiceEffect(EffectType.HEALTH_BOOST, 100)));
     }
 
     public List<Service> getServices() {

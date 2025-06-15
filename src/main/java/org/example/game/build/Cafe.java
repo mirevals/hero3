@@ -30,14 +30,14 @@ public class Cafe extends Building {
         services.put("coffee", new Service(
             "Кофе",
             50,
-            30,
+            5,
             new ServiceEffect(EffectType.MOVEMENT_BOOST, 2)
         ));
 
         services.put("meal", new Service(
             "Питание",
             100,
-            60,
+            15,
             new ServiceEffect(EffectType.HEALTH_BOOST, 30)
         ));
     }

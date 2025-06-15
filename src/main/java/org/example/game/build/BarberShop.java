@@ -33,14 +33,14 @@ public class BarberShop extends Building {
         services.put("simple_cut", new Service(
             "Простая стрижка",
             10, // стоимость
-            30, // длительность
+            8, // длительность в секундах
             new ServiceEffect(EffectType.HEALTH_BOOST, 10)
         ));
 
         services.put("fashion_cut", new Service(
             "Модная стрижка",
             100, // стоимость
-            30, // длительность
+            12, // длительность в секундах
             new ServiceEffect(EffectType.CASTLE_CAPTURE_TIME_REDUCTION, 1)
         ));
     }

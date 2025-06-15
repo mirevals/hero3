@@ -2,6 +2,7 @@ package org.example.game.build;
 
 import org.example.game.person.NPC;
 import java.io.Serializable;
+import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.Random;
 import java.util.List;
@@ -19,62 +20,69 @@ public class ServiceQueue implements Serializable {
     private static final long MIN_NPC_SPAWN_INTERVAL = 5; // Минимальный интервал между появлениями NPC (в игровых минутах)
     private static final long MAX_NPC_SPAWN_INTERVAL = 15; // Максимальный интервал между появлениями NPC (в игровых минутах)
     private static final double NPC_SPAWN_CHANCE = 0.3; // Шанс появления NPC при проверке
+    private transient Building building; // Добавляем ссылку на здание
 
-    public ServiceQueue(String buildingName, int maxQueueSize) {
+    public ServiceQueue(Building building, int maxQueueSize) {
         this.queueId = random.nextInt(1000);
-        this.buildingName = buildingName;
+        this.building = building;
+        this.buildingName = building.getName();
         this.queue = new ConcurrentLinkedQueue<>();
         this.maxQueueSize = maxQueueSize;
         this.lastNpcSpawnTime = 0;
     }
 
     public void updateQueue(long currentGameTime) {
-        // Проверяем, не пора ли добавить нового NPC
-        if (shouldSpawnNPC(currentGameTime)) {
-            tryAddRandomNPC(currentGameTime);
+        // Проверяем завершение услуги для текущего клиента
+        if (currentCustomer != null) {
+            if (currentCustomer.isServiceCompleted(currentGameTime)) {
+                System.out.println(currentCustomer.getName() + " покинул " + buildingName + " (услуга завершена)");
+                currentCustomer = null;
+                processNextCustomer(currentGameTime);
+            }
+        } else {
+            // Если нет текущего клиента, обрабатываем следующего
+            processNextCustomer(currentGameTime);
         }
 
-        // Проверяем завершение услуги для текущего клиента
-        if (currentCustomer != null && currentCustomer.isServiceCompleted(currentGameTime)) {
-            System.out.println(currentCustomer.getName() + " покинул " + buildingName);
-            currentCustomer = null;
-            processNextCustomer(currentGameTime);
+        // Добавляем нового NPC только если очередь пуста или почти пуста
+        if (queue.size() < 2) {
+            tryAddRandomNPC(currentGameTime);
         }
     }
 
     private boolean shouldSpawnNPC(long currentGameTime) {
-        if (currentGameTime - lastNpcSpawnTime < MIN_NPC_SPAWN_INTERVAL) {
-            return false;
-        }
-        if (currentGameTime - lastNpcSpawnTime > MAX_NPC_SPAWN_INTERVAL) {
-            return true;
-        }
-        return random.nextDouble() < NPC_SPAWN_CHANCE;
+        // Этот метод больше не используется, так как NPC добавляются при каждом обновлении
+        return false;
     }
 
     private void tryAddRandomNPC(long currentGameTime) {
-        NPC npc = NPC.generateRandomNPC();
-        
-        // Получаем список доступных услуг из здания
-        Building building = getBuilding();
-        if (building != null) {
-            List<Service> availableServices = building.getAvailableServices();
-            if (!availableServices.isEmpty()) {
-                // Выбираем случайную услугу
-                Service randomService = availableServices.get(random.nextInt(availableServices.size()));
-                npc.setSelectedService(randomService);
-            }
+        if (building == null) {
+            System.out.println("Ошибка: здание не инициализировано");
+            return;
         }
-        
+
+        List<Service> availableServices = building.getAvailableServices();
+        if (availableServices.isEmpty()) {
+            System.out.println("Нет доступных услуг в " + buildingName);
+            return;
+        }
+
+        // Создаем NPC и выбираем случайную услугу
+        NPC npc = NPC.generateRandomNPC();
+        Service randomService = availableServices.get(random.nextInt(availableServices.size()));
+        npc.setSelectedService(randomService);
+
+        // Добавляем в очередь
         if (addToQueue(npc, currentGameTime)) {
             lastNpcSpawnTime = currentGameTime;
-            System.out.println(npc.getName() + " встал в очередь в " + buildingName);
+            System.out.println(npc.getName() + " встал в очередь на услугу: " + randomService.getName());
         }
     }
 
-    private Building getBuilding() {
-        // Находим здание по имени в списке всех зданий
-        return Building.getAllBuildings().stream()
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        // Восстанавливаем ссылку на здание после десериализации
+        this.building = Building.getAllBuildings().stream()
             .filter(b -> b.getName().equals(buildingName))
             .findFirst()
             .orElse(null);
@@ -101,8 +109,14 @@ public class ServiceQueue implements Serializable {
     public void processNextCustomer(long currentGameTime) {
         if (currentCustomer == null && !queue.isEmpty()) {
             currentCustomer = queue.poll();
-            if (currentCustomer != null) {
+            if (currentCustomer != null && currentCustomer.getSelectedService() != null) {
                 System.out.println(currentCustomer.getName() + " подошел к обслуживанию в " + buildingName);
+                startServiceForCurrentCustomer(currentCustomer.getSelectedService(), currentGameTime);
+            } else {
+                // Если у клиента нет выбранной услуги, пропускаем его
+                System.out.println(currentCustomer.getName() + " покинул " + buildingName + " (не выбрана услуга)");
+                currentCustomer = null;
+                processNextCustomer(currentGameTime); // Обрабатываем следующего клиента
             }
         }
     }
@@ -125,21 +139,59 @@ public class ServiceQueue implements Serializable {
 
         // Показываем текущего клиента
         if (currentCustomer != null) {
+            long remainingTime = currentCustomer.getRemainingTime(currentGameTime);
             status.append("Сейчас обслуживается: ").append(currentCustomer.getName())
-                  .append(" (Услуга: ").append(currentCustomer.getSelectedService().getName()).append(")\n");
+                  .append(" (Услуга: ").append(currentCustomer.getSelectedService().getName()).append(")\n")
+                  .append("Осталось времени: ").append(formatTime(remainingTime)).append("\n");
         }
 
         // Показываем очередь
         if (!queue.isEmpty()) {
             status.append("\nОжидают в очереди:\n");
             int position = 1;
+            long totalWaitingTime = 0;
+            
+            // Сначала считаем общее время ожидания
             for (NPC npc : queue) {
-                status.append(position++).append(". ").append(npc.getName())
-                      .append(" (Услуга: ").append(npc.getSelectedService().getName()).append(")\n");
+                if (npc.getSelectedService() != null) {
+                    totalWaitingTime += npc.getSelectedService().getDurationMinutes(); // durationMinutes теперь в секундах
+                }
+            }
+            
+            // Если есть текущий клиент, добавляем его время
+            if (currentCustomer != null && currentCustomer.getSelectedService() != null) {
+                totalWaitingTime += currentCustomer.getRemainingTime(currentGameTime);
+            }
+            
+            // Показываем каждого в очереди
+            for (NPC npc : queue) {
+                if (npc.getSelectedService() != null) {
+                    status.append(position++).append(". ").append(npc.getName())
+                          .append(" (Услуга: ").append(npc.getSelectedService().getName()).append(")\n");
+                }
+            }
+            
+            // Показываем общее время ожидания
+            if (totalWaitingTime > 0) {
+                status.append("\nПримерное время ожидания: ").append(formatTime(totalWaitingTime)).append("\n");
             }
         }
 
         return status.toString();
+    }
+
+    private String formatTime(long seconds) {
+        if (seconds < 60) {
+            return seconds + " сек";
+        } else {
+            int minutes = (int) (seconds / 60);
+            int secs = (int) (seconds % 60);
+            if (secs == 0) {
+                return minutes + " мин";
+            } else {
+                return minutes + " мин " + secs + " сек";
+            }
+        }
     }
 
     public boolean isQueueFull() {
