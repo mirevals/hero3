@@ -39,6 +39,10 @@ public class MapManager {
 
     private static final String MAPS_DIRECTORY = "maps/";
 
+    private long gameTimeInMinutes = 0; // Игровое время в минутах
+    private long lastTimeUpdate = 0; // Время последнего обновления в реальном времени
+    private static final long REAL_TIME_TO_GAME_TIME = 100; // 100мс реального времени = 1 минута игрового времени
+
     public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage, Game game) {
         this.scanner = new Scanner(System.in);
         this.heroCastle = heroCastle;
@@ -112,8 +116,13 @@ public class MapManager {
             carriage,
             road,
             isAccountInfected,
-            accountViruses
+            accountViruses,
+            gameState != null ? gameState.getGameTimeInMinutes() : 0 // Используем сохраненное время или 0 для новой игры
         );
+
+        // Устанавливаем начальное время
+        this.gameTimeInMinutes = gameState != null ? gameState.getGameTimeInMinutes() : 0;
+        this.lastTimeUpdate = System.currentTimeMillis();
 
         placeCastles(heroCastle, enemyCastle, gameMap);
         placeCarriage(carriage, gameMap);
@@ -123,7 +132,11 @@ public class MapManager {
 
     public void setGame(Game game) {
         this.game = game;
-        // Update infection state after game is set
+        // Обновляем время при установке игры
+        if (gameState != null) {
+            this.gameTimeInMinutes = gameState.getGameTimeInMinutes();
+            this.lastTimeUpdate = System.currentTimeMillis();
+        }
         updateInfectionState();
     }
 
@@ -341,6 +354,7 @@ public class MapManager {
                         Player player, EnemyCastle enemyCastle, HeroCastle heroCastle2, GameMap gameMap,
                         MapManager mapManager, List<Unit> units, Hero hero2, BattleField battleField,
                         List<Unit> allUnits, Carriage carriage) {
+        updateGameTime(); // Обновляем игровое время перед каждым ходом
         Position oldPosition = hero.getPosition();
         Position newPosition = new Position(oldPosition.getX() + dx, oldPosition.getY() + dy);
 
@@ -756,5 +770,30 @@ public class MapManager {
                 System.out.println("Время захвата замка уменьшено на " + effect.getValue() + " минут");
                 break;
         }
+    }
+
+    public void updateGameTime() {
+        long currentTime = System.currentTimeMillis();
+        if (lastTimeUpdate == 0) {
+            lastTimeUpdate = currentTime;
+            return;
+        }
+
+        long timeDiff = currentTime - lastTimeUpdate;
+        if (timeDiff >= REAL_TIME_TO_GAME_TIME) {
+            gameTimeInMinutes++;
+            lastTimeUpdate = currentTime;
+            System.out.println("\nПрошло игрового времени: " + gameTimeInMinutes + " минут");
+        }
+    }
+
+    public long getGameTimeInMinutes() {
+        return gameTimeInMinutes;
+    }
+
+    public String getFormattedGameTime() {
+        long hours = gameTimeInMinutes / 60;
+        long minutes = gameTimeInMinutes % 60;
+        return String.format("%02d:%02d", hours, minutes);
     }
 }

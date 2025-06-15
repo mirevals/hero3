@@ -27,6 +27,7 @@ public class GameState implements Serializable {
     private final Road road;
     private final boolean accountInfected;
     private final List<Virus> accountViruses;
+    private final long gameTimeInMinutes;
 
     public GameState(String playerName, Player player, GameMap gameMap, Hero hero, Enemy enemy,
                      HeroCastle heroCastle, EnemyCastle enemyCastle, List<Unit> allUnits,
@@ -43,6 +44,33 @@ public class GameState implements Serializable {
         this.road = road;
         this.accountInfected = accountInfected;
         this.accountViruses = new ArrayList<>(accountViruses);
+        this.gameTimeInMinutes = 0;
+        
+        System.out.println("Creating GameState for " + playerName);
+        System.out.println("Account infected: " + accountInfected);
+        System.out.println("Number of viruses: " + accountViruses.size());
+        for (Virus virus : accountViruses) {
+            System.out.println("  - Virus: " + virus.getName() + " (ID: " + virus.getId() + ")");
+        }
+    }
+
+    public GameState(String playerName, Player player, GameMap gameMap, Hero hero, Enemy enemy,
+                    HeroCastle heroCastle, EnemyCastle enemyCastle, List<Unit> allUnits,
+                    Carriage carriage, Road road, boolean accountInfected, List<Virus> accountViruses,
+                    long gameTimeInMinutes) {
+        this.playerName = playerName;
+        this.player = player;
+        this.gameMap = gameMap;
+        this.hero = hero;
+        this.enemy = enemy;
+        this.heroCastle = heroCastle;
+        this.enemyCastle = enemyCastle;
+        this.allUnits = allUnits;
+        this.carriage = carriage;
+        this.road = road;
+        this.accountInfected = accountInfected;
+        this.accountViruses = new ArrayList<>(accountViruses);
+        this.gameTimeInMinutes = gameTimeInMinutes;
         
         System.out.println("Creating GameState for " + playerName);
         System.out.println("Account infected: " + accountInfected);
@@ -99,5 +127,9 @@ public class GameState implements Serializable {
 
     public List<Virus> getAccountViruses() {
         return new ArrayList<>(accountViruses);
+    }
+
+    public long getGameTimeInMinutes() {
+        return gameTimeInMinutes;
     }
 } 
