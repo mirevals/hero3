@@ -348,7 +348,58 @@ public class App {
         String saveName = saves.get(choice - 1);
         GameState gameState = saveManager.loadGame(currentAccount.getUsername(), saveName);
         if (gameState != null) {
-            startGameLoop(gameState);
+            // Синхронизируем флаги построек с замком героя
+            CastleManager.syncBuildingFlags(gameState.getHeroCastle());
+            // Синхронизируем флаги покупки юнитов и героя
+            CastleManager.syncUnitFlags(gameState.getHero());
+
+            // Создаем buyUnit и mapManager для передачи в enterCastle
+            List<Unit> buyUnit = new ArrayList<>();
+            Unit warrior1 = new Unit(WARRIOR, 100, 100, 1, 10, Team.HERO, 'W', 100);
+            Unit warrior2 = new Unit(WARRIOR, 100, 100, 1, 10, Team.HERO, 'W', 100);
+            buyUnit.add(warrior1);
+            buyUnit.add(warrior2);
+
+            MapManager mapManager = new MapManager(
+                gameState.getHeroCastle(),
+                gameState.getEnemyCastle(),
+                gameState.getEnemy(),
+                gameState.getHero(),
+                gameState.getGameMap(),
+                gameState.getRoad(),
+                gameState.getCarriage(),
+                gameState.isAccountInfected(),
+                gameState.getAccountViruses()
+            );
+
+            // Проверяем, находится ли герой в замке
+            Position heroPos = gameState.getHero().getPosition();
+            Position heroCastlePos = gameState.getHeroCastle().getPosition();
+            Position enemyCastlePos = gameState.getEnemyCastle().getPosition();
+
+            if ((heroPos.getX() == heroCastlePos.getX() && heroPos.getY() == heroCastlePos.getY()) ||
+                (heroPos.getX() == enemyCastlePos.getX() && heroPos.getY() == enemyCastlePos.getY())) {
+                // Герой в замке — открываем меню замка
+                CastleManager.enterCastle(
+                    gameState.getHeroCastle(),
+                    gameState.getHero(),
+                    gameState.getPlayer(),
+                    gameState.getEnemy(),
+                    gameState.getEnemyCastle(),
+                    gameState.getHeroCastle(),
+                    gameState.getGameMap(),
+                    mapManager,
+                    buyUnit,
+                    gameState.getHero(),
+                    new BattleField(gameState.getAllUnits()),
+                    gameState.getAllUnits(),
+                    gameState.getCarriage(),
+                    scanner
+                );
+            } else {
+                // Герой не в замке — сразу запускаем игровой цикл
+                startGameLoop(gameState);
+            }
         }
     }
 

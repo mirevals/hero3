@@ -119,7 +119,7 @@ public class CastleManager {
         String command = scanner.nextLine().trim().toLowerCase();
 
         if (command.equals("m")) {
-            openShop(scanner, castle);
+            openShop(scanner, castle, null);
         } else {
             System.out.println("Пожалуйста, купите Пост перед тем, как продолжить.");
         }
@@ -131,7 +131,7 @@ public class CastleManager {
         String command = scanner.nextLine().trim().toLowerCase();
 
         if (command.equals("m")) {
-            openShop(scanner, castle);  // Открываем магазин для покупки Таверны
+            openShop(scanner, castle, null);
         } else {
             System.out.println("Пожалуйста, купите Таверну перед тем, как продолжить.");
         }
@@ -143,7 +143,7 @@ public class CastleManager {
         String command = scanner.nextLine().trim().toLowerCase();
 
         if (command.equals("b")) {
-            openStorage(scanner, castle, hero, player, buyUnit);  // Покупка героя
+            openStorage(scanner, castle, hero, player, buyUnit);
         } else {
             System.out.println("Пожалуйста, выберите героя перед тем, как продолжить.");
         }
@@ -167,10 +167,18 @@ public class CastleManager {
                                             List<Unit> allUnits, Carriage carriage, Scanner scanner) {
         switch (command) {
             case "q":
-                exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, character, battleField, allUnits, carriage, scanner);  // Выход из замка
+                Position heroPos = hero.getPosition();
+                Position heroCastlePos = heroCastle.getPosition();
+                Position enemyCastlePos = enemyCastle.getPosition();
+                if ((heroPos.getX() == heroCastlePos.getX() && heroPos.getY() == heroCastlePos.getY()) ||
+                    (heroPos.getX() == enemyCastlePos.getX() && heroPos.getY() == enemyCastlePos.getY())) {
+                    exitCastle(enemy, enemyCastle, heroCastle, hero, player, gameMap, castle, mapManager, buyUnit, character, battleField, allUnits, carriage, scanner);
+                } else {
+                    isInCastle = false;
+                }
                 break;
             case "m":
-                openShop(scanner, castle);
+                openShop(scanner, castle, gameMap);
                 break;
             case "b":
                 openStorage(scanner, castle, hero, player, buyUnit);
@@ -180,7 +188,7 @@ public class CastleManager {
         }
     }
 
-    private static void openShop(Scanner scanner, Castle castle) {
+    private static void openShop(Scanner scanner, Castle castle, GameMap gameMap) {
         System.out.println("Добро пожаловать в магазин!");
         Shop.showAvailableBuildings();
 
@@ -198,6 +206,33 @@ public class CastleManager {
                 Building purchasedBuilding = buyBuilding(buildingChoice, castle);
                 if (purchasedBuilding != null) {
                     System.out.println("Здание " + purchasedBuilding.getName() + " добавлено в ваш замок.");
+
+                    // Размещаем на карте, если это не Tavern и не GuardPost
+                    if (!(purchasedBuilding instanceof Tavern) && !(purchasedBuilding instanceof GuardPost)) {
+                        // Ищем случайную свободную позицию для здания
+                        int maxAttempts = 100; // Максимальное количество попыток найти свободное место
+                        int attempts = 0;
+                        boolean placed = false;
+                        
+                        while (!placed && attempts < maxAttempts) {
+                            // Генерируем случайные координаты в пределах карты
+                            int x = (int) (Math.random() * gameMap.getWidth());
+                            int y = (int) (Math.random() * gameMap.getHeight());
+                            
+                            // Проверяем, можно ли разместить здание в этой точке
+                            if (purchasedBuilding.canPlaceAt(x, y, gameMap.getMap())) {
+                                purchasedBuilding.placeAt(x, y);
+                                gameMap.setCellValue(x, y, purchasedBuilding.getSymbol());
+                                System.out.println("Здание " + purchasedBuilding.getName() + " автоматически размещено на карте в точке (" + x + ", " + y + ")!");
+                                placed = true;
+                            }
+                            attempts++;
+                        }
+                        
+                        if (!placed) {
+                            System.out.println("Не удалось найти подходящее место для здания на карте.");
+                        }
+                    }
                     break; // покупка завершена — выходим
                 } else {
                     System.out.println("Невозможно купить здание. Попробуйте снова.");
@@ -395,5 +430,19 @@ public class CastleManager {
 
         // Устанавливаем флаг выхода из замка
         isInCastle = false;
+    }
+
+    public static void syncBuildingFlags(Castle castle) {
+        isTavernNotBuild = true;
+        isNoGuardPost = true;
+        for (Building b : castle.getConstructedBuildings()) {
+            if (b instanceof Tavern) isTavernNotBuild = false;
+            if (b instanceof GuardPost) isNoGuardPost = false;
+        }
+    }
+
+    public static void syncUnitFlags(Hero hero) {
+        isNoUnitsBuy = (hero == null || hero.getUnits() == null || hero.getUnits().isEmpty());
+        isFirstHero = (hero == null);
     }
 }

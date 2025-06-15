@@ -22,10 +22,12 @@ import static org.example.game.person.Carriage.Direction.*;
 public class MapManager {
 
     private final Scanner scanner;
-    private final SaveManager saveManager;
-    private final String playerName;
-    private final GameMap gameMap;
     private Game game;
+    private final HeroCastle heroCastle;
+    private final EnemyCastle enemyCastle;
+    private final GameMap gameMap;
+    private final String playerName;
+    private final SaveManager saveManager;
     private GameState gameState;
     private boolean infectionStateInitialized = false;
 
@@ -37,12 +39,15 @@ public class MapManager {
 
     private static final String MAPS_DIRECTORY = "maps/";
 
-    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage, boolean isInfected, List<Virus> viruses) {
+    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage, Game game) {
         this.scanner = new Scanner(System.in);
-        this.saveManager = new SaveManager();
-        this.playerName = hero.getName();
+        this.heroCastle = heroCastle;
+        this.enemyCastle = enemyCastle;
+        this.game = game;
         this.gameMap = gameMap;
-
+        this.playerName = hero.getName();
+        this.saveManager = new SaveManager();
+        
         // Создаем список юнитов для GameState
         List<Unit> allUnits = new ArrayList<>();
         allUnits.addAll(hero.getUnits());
@@ -53,7 +58,7 @@ public class MapManager {
         // Создаем временного игрока для GameState
         Player player = new Player(hero.getName(), hero.getGold());
         
-        // Create GameState with provided infection state
+        // Инициализируем GameState
         this.gameState = new GameState(
             playerName,
             player,
@@ -65,11 +70,55 @@ public class MapManager {
             allUnits,
             carriage,
             road,
-            isInfected,
-            viruses
+            false,
+            new ArrayList<>()
         );
+
+        placeCastles(heroCastle, enemyCastle, gameMap);
+        placeCarriage(carriage, gameMap);
+        initializeCharacterPositions(enemy, hero, gameMap);
+        road.placeRoad(gameMap.getMap());
+    }
+
+    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage, boolean isAccountInfected, List<Virus> accountViruses) {
+        this.scanner = new Scanner(System.in);
+        this.heroCastle = heroCastle;
+        this.enemyCastle = enemyCastle;
+        this.game = null;
+        this.gameMap = gameMap;
+        this.playerName = hero.getName();
+        this.saveManager = new SaveManager();
         
-        initializeMap(heroCastle, enemyCastle, enemy, hero, gameMap, road, carriage);
+        // Создаем список юнитов для GameState
+        List<Unit> allUnits = new ArrayList<>();
+        allUnits.addAll(hero.getUnits());
+        if (enemy != null && enemy.getUnits() != null) {
+            allUnits.addAll(enemy.getUnits());
+        }
+        
+        // Создаем временного игрока для GameState
+        Player player = new Player(hero.getName(), hero.getGold());
+        
+        // Инициализируем GameState с учетом состояния заражения
+        this.gameState = new GameState(
+            playerName,
+            player,
+            gameMap,
+            hero,
+            enemy,
+            heroCastle,
+            enemyCastle,
+            allUnits,
+            carriage,
+            road,
+            isAccountInfected,
+            accountViruses
+        );
+
+        placeCastles(heroCastle, enemyCastle, gameMap);
+        placeCarriage(carriage, gameMap);
+        initializeCharacterPositions(enemy, hero, gameMap);
+        road.placeRoad(gameMap.getMap());
     }
 
     public void setGame(Game game) {
@@ -301,27 +350,47 @@ public class MapManager {
             Position previousPosition = new Position(oldPosition.getX(), oldPosition.getY());
             
             // Check for virus at new position before moving
-            if (isVirusOnPosition(newPosition.getX(), newPosition.getY(), gameMap)) {
-                // Find the virus object at this position
-                Virus encounteredVirus = null;
-                if (game != null) {
-                    for (Virus virus : game.getActiveVirusesOnMap()) {
-                        if (virus.getPosition() != null && 
-                            virus.getPosition().getX() == newPosition.getX() && 
-                            virus.getPosition().getY() == newPosition.getY()) {
-                            encounteredVirus = virus;
-                            break;
-                        }
-                    }
-                    if (encounteredVirus != null) {
-                        game.playerPicksUpVirus(encounteredVirus);
+            if (game != null) {
+                for (Virus virus : game.getActiveVirusesOnMap()) {
+                    if (virus.getPosition() != null && 
+                        virus.getPosition().getX() == newPosition.getX() && 
+                        virus.getPosition().getY() == newPosition.getY()) {
+                        game.playerPicksUpVirus(virus);
                         // Don't move hero if virus was picked up
                         return;
                     }
                 }
             }
             
-            // Move hero
+            // Проверка входа в замок по символу (если на новой позиции символ равен 'C' или 'E')
+            char cell = gameMap.getCellValue(newPosition.getX(), newPosition.getY());
+            if (cell == 'C' || cell == 'E') {
+                // Move hero
+                hero.setX(newPosition.getX());
+                hero.setY(newPosition.getY());
+                gameMap.setCellValue(oldPosition.getX(), oldPosition.getY(), ' ');
+                gameMap.setCellValue(newPosition.getX(), newPosition.getY(), 'H');
+                CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, this, units, hero, battleField, allUnits, carriage, this.scanner);
+                return;
+            }
+
+            // Проверка входа в здания
+            if (cell == 'O' || cell == 'K' || cell == 'B') {
+                // Move hero
+                hero.setX(newPosition.getX());
+                hero.setY(newPosition.getY());
+                gameMap.setCellValue(oldPosition.getX(), oldPosition.getY(), ' ');
+                gameMap.setCellValue(newPosition.getX(), newPosition.getY(), 'H');
+
+                // Находим здание по координатам
+                Building building = findBuildingAt(newPosition.getX(), newPosition.getY());
+                if (building != null) {
+                    enterBuilding(building, hero, player);
+                }
+                return;
+            }
+
+            // Move hero if not entering castle or building
             hero.setX(newPosition.getX());
             hero.setY(newPosition.getY());
             gameMap.setCellValue(oldPosition.getX(), oldPosition.getY(), ' ');
@@ -537,5 +606,155 @@ public class MapManager {
         return position.getX() >= 0 && position.getX() < gameMap.getWidth() &&
                position.getY() >= 0 && position.getY() < gameMap.getHeight() &&
                gameMap.getCellValue(position.getX(), position.getY()) != '#';
+    }
+
+    private Building findBuildingAt(int x, int y) {
+        // Ищем здание в списке построенных зданий обоих замков
+        for (Building building : heroCastle.getConstructedBuildings()) {
+            if (building.getX() == x && building.getY() == y) {
+                return building;
+            }
+        }
+        for (Building building : enemyCastle.getConstructedBuildings()) {
+            if (building.getX() == x && building.getY() == y) {
+                return building;
+            }
+        }
+        return null;
+    }
+
+    private void enterBuilding(Building building, Hero hero, Player player) {
+        if (building == null) {
+            System.out.println("Здание не найдено!");
+            return;
+        }
+
+        if (game == null) {
+            System.out.println("Ошибка: игра не инициализирована!");
+            return;
+        }
+
+        System.out.println("\nВы вошли в " + building.getName());
+        
+        if (building instanceof Hotel) {
+            showHotelServices((Hotel) building, hero, player);
+        } else if (building instanceof Cafe) {
+            showCafeServices((Cafe) building, hero, player);
+        } else if (building instanceof BarberShop) {
+            showBarberShopServices((BarberShop) building, hero, player);
+        }
+    }
+
+    private void showHotelServices(Hotel hotel, Hero hero, Player player) {
+        System.out.println("\nДоступные услуги в отеле:");
+        for (Service service : hotel.getAvailableServices()) {
+            System.out.println(service.toString());
+        }
+        
+        while (true) {
+            System.out.println("\nВыберите услугу (введите номер) или 0 для выхода:");
+            try {
+                int choice = Integer.parseInt(scanner.nextLine());
+                if (choice == 0) break;
+                
+                List<Service> services = hotel.getAvailableServices();
+                if (choice > 0 && choice <= services.size()) {
+                    Service selectedService = services.get(choice - 1);
+                    if (player.getGold() >= selectedService.getGoldCost()) {
+                        player.spendGold(selectedService.getGoldCost());
+                        System.out.println("Вы приобрели услугу: " + selectedService.getName());
+                        // Применяем эффект услуги
+                        applyServiceEffect(selectedService.getEffect(), hero);
+                    } else {
+                        System.out.println("Недостаточно золота!");
+                    }
+                } else {
+                    System.out.println("Неверный выбор!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Пожалуйста, введите число!");
+            }
+        }
+    }
+
+    private void showCafeServices(Cafe cafe, Hero hero, Player player) {
+        System.out.println("\nДоступные услуги в кафе:");
+        for (Service service : cafe.getAvailableServices()) {
+            System.out.println(service.toString());
+        }
+        
+        while (true) {
+            System.out.println("\nВыберите услугу (введите номер) или 0 для выхода:");
+            try {
+                int choice = Integer.parseInt(scanner.nextLine());
+                if (choice == 0) break;
+                
+                List<Service> services = cafe.getAvailableServices();
+                if (choice > 0 && choice <= services.size()) {
+                    Service selectedService = services.get(choice - 1);
+                    if (player.getGold() >= selectedService.getGoldCost()) {
+                        player.spendGold(selectedService.getGoldCost());
+                        System.out.println("Вы приобрели услугу: " + selectedService.getName());
+                        // Применяем эффект услуги
+                        applyServiceEffect(selectedService.getEffect(), hero);
+                    } else {
+                        System.out.println("Недостаточно золота!");
+                    }
+                } else {
+                    System.out.println("Неверный выбор!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Пожалуйста, введите число!");
+            }
+        }
+    }
+
+    private void showBarberShopServices(BarberShop barberShop, Hero hero, Player player) {
+        System.out.println("\nДоступные услуги в парикмахерской:");
+        for (Service service : barberShop.getAvailableServices()) {
+            System.out.println(service.toString());
+        }
+        
+        while (true) {
+            System.out.println("\nВыберите услугу (введите номер) или 0 для выхода:");
+            try {
+                int choice = Integer.parseInt(scanner.nextLine());
+                if (choice == 0) break;
+                
+                List<Service> services = barberShop.getAvailableServices();
+                if (choice > 0 && choice <= services.size()) {
+                    Service selectedService = services.get(choice - 1);
+                    if (player.getGold() >= selectedService.getGoldCost()) {
+                        player.spendGold(selectedService.getGoldCost());
+                        System.out.println("Вы приобрели услугу: " + selectedService.getName());
+                        // Применяем эффект услуги
+                        applyServiceEffect(selectedService.getEffect(), hero);
+                    } else {
+                        System.out.println("Недостаточно золота!");
+                    }
+                } else {
+                    System.out.println("Неверный выбор!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Пожалуйста, введите число!");
+            }
+        }
+    }
+
+    private void applyServiceEffect(ServiceEffect effect, Hero hero) {
+        switch (effect.getType()) {
+            case HEALTH_BOOST:
+                hero.setHealth(hero.getHealth() + effect.getValue());
+                System.out.println("Здоровье увеличено на " + effect.getValue());
+                break;
+            case MOVEMENT_BOOST:
+                hero.addMoves(effect.getValue());
+                System.out.println("Добавлено " + effect.getValue() + " шагов");
+                break;
+            case CASTLE_CAPTURE_TIME_REDUCTION:
+                // Здесь можно добавить логику для уменьшения времени захвата замка
+                System.out.println("Время захвата замка уменьшено на " + effect.getValue() + " минут");
+                break;
+        }
     }
 }
