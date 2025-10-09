@@ -107,15 +107,15 @@ public class Main {
         BattleField battleField = new BattleField(allUnits);
         Game game = new Game(accountManager, gameMap);
         MapManager mapManager = new MapManager(
-            heroCastle,
-            enemyCastle,
-            enemy,
-            hero,
-            gameMap,
-            road,
-            carriage,
-            gameState.isAccountInfected(),
-            gameState.getAccountViruses()
+                heroCastle,
+                enemyCastle,
+                enemy,
+                hero,
+                gameMap,
+                road,
+                carriage,
+                gameState.isAccountInfected(),
+                gameState.getAccountViruses()
         );
 
         game.setMapManager(mapManager);

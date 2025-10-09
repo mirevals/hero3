@@ -67,6 +67,12 @@ public class Virus implements Serializable {
         this.attachedToPlayer = attachedToPlayer;
     }
 
+    public void attachToPlayer(AccountManager accountManager, String playerName) {
+        this.attachedToPlayer = true;
+        accountManager.infectAccount(playerName, this);
+    }
+
+
     public Position getPosition() {
         if (position == null && (positionX != 0 || positionY != 0)) {
             position = new Position(positionX, positionY);

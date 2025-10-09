@@ -2,6 +2,7 @@ package org.example.account;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.example.game.Virus;
 import org.example.game.person.Hero;
 
 import java.io.*;
@@ -62,6 +63,24 @@ public class AccountManager {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error hashing password", e);
         }
+    }
+
+    public boolean addVirusToCurrentAccount(Virus virus) {
+        if (currentAccount != null) {
+            currentAccount.addVirus(virus);
+            saveAccounts(); // сразу сохраняем
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeVirusFromCurrentAccount(Virus virus) {
+        if (currentAccount != null) {
+            currentAccount.removeVirus(virus);
+            saveAccounts(); // тоже сохраняем
+            return true;
+        }
+        return false;
     }
 
     public boolean register(String username, String password) {

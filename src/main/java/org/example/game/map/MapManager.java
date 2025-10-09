@@ -14,7 +14,6 @@ import org.example.game.Virus; // Add this import
 
 import java.util.Random;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.io.*;
 
 import static org.example.game.person.Carriage.Direction.*;
@@ -41,9 +40,12 @@ public class MapManager {
 
     private long gameTimeInMinutes = 0; // Игровое время в минутах
     private long lastTimeUpdate = 0; // Время последнего обновления в реальном времени
-    private static final long REAL_TIME_TO_GAME_TIME = 100; // 100мс реального времени = 1 минута игрового времени
+    private static final long REAL_TIME_TO_GAME_TIME = 1000; // 100мс реального времени = 1 минута игрового времени
 
-    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage, Game game) {
+    private Thread timeThread;
+    private volatile boolean running = false;
+
+    public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage) {
         this.scanner = new Scanner(System.in);
         this.heroCastle = heroCastle;
         this.enemyCastle = enemyCastle;
@@ -354,7 +356,6 @@ public class MapManager {
                         Player player, EnemyCastle enemyCastle, HeroCastle heroCastle2, GameMap gameMap,
                         MapManager mapManager, List<Unit> units, Hero hero2, BattleField battleField,
                         List<Unit> allUnits, Carriage carriage) {
-        updateGameTime(); // Обновляем игровое время перед каждым ходом
         Position oldPosition = hero.getPosition();
         Position newPosition = new Position(oldPosition.getX() + dx, oldPosition.getY() + dy);
 
@@ -956,19 +957,32 @@ public class MapManager {
         }
     }
 
-    public void updateGameTime() {
-        long currentTime = System.currentTimeMillis();
-        if (lastTimeUpdate == 0) {
-            lastTimeUpdate = currentTime;
-            return;
-        }
+    public void startGameTime() {
+        if (running) return; // предотвращает повторный запуск
+        running = true;
+        timeThread = new Thread(() -> {
+            while (running) {
+                try {
+                    Thread.sleep(1000);
+                    gameTimeInMinutes++;
+                    System.out.println("\nПрошло игрового времени: " + gameTimeInMinutes + " минут");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+        timeThread.start();
+    }
 
-        long timeDiff = currentTime - lastTimeUpdate;
-        if (timeDiff >= REAL_TIME_TO_GAME_TIME) {
-            gameTimeInMinutes++;
-            lastTimeUpdate = currentTime;
-            System.out.println("\nПрошло игрового времени: " + gameTimeInMinutes + " минут");
+    public void stopGameTime() {
+        running = false;
+        if (timeThread != null) {
+            timeThread.interrupt();
         }
+    }
+
+    public long getGameTime() {
+        return gameTimeInMinutes;
     }
 
     public long getGameTimeInMinutes() {

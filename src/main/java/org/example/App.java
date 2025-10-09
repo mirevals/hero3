@@ -292,6 +292,8 @@ public class App {
             gameState.getAccountViruses()
         );
 
+        mapManager.startGameTime();
+
         // Создаем игру и устанавливаем ее в MapManager
         Game game = new Game(accountManager, gameMap);
         game.setMapManager(mapManager);
@@ -316,7 +318,7 @@ public class App {
         );
 
         // После выхода из замка запускаем игровой цикл
-        startGameLoop(gameState);
+        startGameLoop(gameState, mapManager);
     }
 
     private static void loadGame() {
@@ -372,6 +374,8 @@ public class App {
                 gameState.getAccountViruses()
             );
 
+            mapManager.startGameTime();
+
             // Проверяем, находится ли герой в замке
             Position heroPos = gameState.getHero().getPosition();
             Position heroCastlePos = gameState.getHeroCastle().getPosition();
@@ -398,7 +402,7 @@ public class App {
                 );
             } else {
                 // Герой не в замке — сразу запускаем игровой цикл
-                startGameLoop(gameState);
+                startGameLoop(gameState, mapManager);
             }
         }
     }
@@ -493,19 +497,8 @@ public class App {
         );
     }
 
-    private static void startGameLoop(GameState gameState) {
+    private static void startGameLoop(GameState gameState, MapManager mapManager) {
         BattleField battleField = new BattleField(gameState.getAllUnits());
-        MapManager mapManager = new MapManager(
-            gameState.getHeroCastle(),
-            gameState.getEnemyCastle(), 
-            gameState.getEnemy(),
-            gameState.getHero(),
-            gameState.getGameMap(),
-            gameState.getRoad(),
-            gameState.getCarriage(),
-            gameState.isAccountInfected(),
-            gameState.getAccountViruses()
-        );
 
         // Запускаем игровой цикл
         while (true) {
@@ -525,6 +518,7 @@ public class App {
                     saveManager.saveGame(currentAccount.getUsername(), gameState, false);
                     break;
                 case 3:
+                    mapManager.stopGameTime();
                     return;
                 default:
                     System.out.println("Неверный выбор!");

@@ -38,7 +38,57 @@
     "id" : "33a84eb1-0ad6-4d70-ae9c-6aea0b915bbf",
     "heroes" : [ ],
     "createdAt" : 1749587880147,
-    "lastLoginAt" : 1750014686878,
+    "lastLoginAt" : 1760023766439,
+    "infected" : true,
+    "viruses" : [ {
+      "id" : "virus_5",
+      "name" : "Virus-5",
+      "attachedToPlayer" : false,
+      "positionX" : 5,
+      "positionY" : 6
+    } ],
+    "activeHero" : null
+  },
+  "кк" : {
+    "username" : "кк",
+    "passwordHash" : "71d5edb669454f266f9ce0a107a8969d8e12763b2c79477989edfd37296dc539",
+    "id" : "a47ea60b-c765-4f56-92d5-bd472bbdb485",
+    "heroes" : [ ],
+    "createdAt" : 1758287385723,
+    "lastLoginAt" : 1758287385749,
+    "infected" : false,
+    "viruses" : [ ],
+    "activeHero" : null
+  },
+  "regina" : {
+    "username" : "regina",
+    "passwordHash" : "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+    "id" : "663009d3-f2cd-40fc-ad65-cc8ad5036920",
+    "heroes" : [ ],
+    "createdAt" : 1758291278627,
+    "lastLoginAt" : 1758291278635,
+    "infected" : false,
+    "viruses" : [ ],
+    "activeHero" : null
+  },
+  "TestAccount" : {
+    "username" : "TestAccount",
+    "passwordHash" : "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+    "id" : "4fe2af72-6475-4bbf-96a3-93617453150b",
+    "heroes" : [ ],
+    "createdAt" : 1760007674247,
+    "lastLoginAt" : 1760007741335,
+    "infected" : false,
+    "viruses" : [ ],
+    "activeHero" : null
+  },
+  "Alice" : {
+    "username" : "Alice",
+    "passwordHash" : "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+    "id" : "6739a61f-deb1-4aad-be83-e4409d2879a5",
+    "heroes" : [ ],
+    "createdAt" : 1760008203750,
+    "lastLoginAt" : 1760008275463,
     "infected" : false,
     "viruses" : [ ],
     "activeHero" : null

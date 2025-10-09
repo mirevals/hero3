@@ -93,7 +93,6 @@ public class NPC implements Serializable {
         this.serviceEndTime = 0;
     }
 
-    // Метод для генерации случайного NPC
     public static NPC generateRandomNPC() {
         String[] firstNames = {"Иван", "Петр", "Мария", "Анна", "Алексей", "Елена", "Дмитрий", "Ольга"};
         String[] lastNames = {"Иванов", "Петров", "Сидоров", "Козлова", "Смирнов", "Кузнецова", "Попов", "Васильева"};
