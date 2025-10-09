@@ -42,8 +42,12 @@ public class MapManager {
     private long lastTimeUpdate = 0; // Время последнего обновления в реальном времени
     private static final long REAL_TIME_TO_GAME_TIME = 1000; // 100мс реального времени = 1 минута игрового времени
 
+    private boolean running = false;
     private Thread timeThread;
-    private volatile boolean running = false;
+
+    // Локальная переменная класса для хранения текущей погоды
+    private static String currentWeather = "";
+    private static String currentPartOfDay = "";
 
     public MapManager(HeroCastle heroCastle, EnemyCastle enemyCastle, Enemy enemy, Hero hero, GameMap gameMap, Road road, Carriage carriage) {
         this.scanner = new Scanner(System.in);
@@ -353,73 +357,88 @@ public class MapManager {
     }
 
     public void moveHero(int dx, int dy, int steps, Hero hero, Enemy enemy, HeroCastle heroCastle,
-                        Player player, EnemyCastle enemyCastle, HeroCastle heroCastle2, GameMap gameMap,
-                        MapManager mapManager, List<Unit> units, Hero hero2, BattleField battleField,
-                        List<Unit> allUnits, Carriage carriage) {
+                         Player player, EnemyCastle enemyCastle, HeroCastle heroCastle2, GameMap gameMap,
+                         MapManager mapManager, List<Unit> units, Hero hero2, BattleField battleField,
+                         List<Unit> allUnits, Carriage carriage) {
+
+        // Эффекты погоды перед ходом
+        switch (currentWeather) {
+            case "Туман":
+                hero.setAttack(Math.max(0, hero.getAttack() - 1));
+                System.out.println("Туман снижает атаку героя на 1. Текущая атака: " + hero.getAttack());
+                break;
+            case "Солнечно":
+                hero.setHealth(hero.getHealth() + 1);
+                System.out.println("Солнечно! Герой восстанавливает 1 здоровье. Текущее здоровье: " + hero.getHealth());
+                break;
+            case "Дождь":
+                hero.setDefense(Math.max(0, hero.getDefense() - 1));
+                System.out.println("Дождь снижает защиту героя на 1. Текущая защита: " + hero.getDefense());
+                break;
+            case "Звезды":
+                steps += 1;
+                System.out.println("Герой получает дополнительное перемещение! Шаги: " + steps);
+                break;
+            case "Гроза":
+                hero.setHealth(Math.max(0, hero.getHealth() - 1));
+                System.out.println("Гроза! Герой теряет 1 здоровье. Текущее здоровье: " + hero.getHealth());
+                break;
+        }
+
+        System.out.println("Герой делает " + steps + " шагов. Погода: " + currentWeather);
+
+        // Дальше идёт твоя существующая логика движения
         Position oldPosition = hero.getPosition();
         Position newPosition = new Position(oldPosition.getX() + dx, oldPosition.getY() + dy);
 
-        // Check if the new position is valid
         if (isValidPosition(newPosition, gameMap)) {
-            // Store old position for virus spreading
             Position previousPosition = new Position(oldPosition.getX(), oldPosition.getY());
-            
-            // Check for virus at new position before moving
+
+            // Проверка вируса
             if (game != null) {
                 for (Virus virus : game.getActiveVirusesOnMap()) {
-                    if (virus.getPosition() != null && 
-                        virus.getPosition().getX() == newPosition.getX() && 
-                        virus.getPosition().getY() == newPosition.getY()) {
+                    if (virus.getPosition() != null &&
+                            virus.getPosition().getX() == newPosition.getX() &&
+                            virus.getPosition().getY() == newPosition.getY()) {
                         game.playerPicksUpVirus(virus);
-                        // Don't move hero if virus was picked up
                         return;
                     }
                 }
             }
-            
-            // Проверка входа в замок по символу (если на новой позиции символ равен 'C' или 'E')
+
             char cell = gameMap.getCellValue(newPosition.getX(), newPosition.getY());
             if (cell == 'C' || cell == 'E') {
-                // Move hero
                 hero.setX(newPosition.getX());
                 hero.setY(newPosition.getY());
                 gameMap.setCellValue(oldPosition.getX(), oldPosition.getY(), ' ');
                 gameMap.setCellValue(newPosition.getX(), newPosition.getY(), 'H');
-                CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap, this, units, hero, battleField, allUnits, carriage, this.scanner);
+                CastleManager.enterCastle(heroCastle, hero, player, enemy, enemyCastle, heroCastle, gameMap,
+                        this, units, hero, battleField, allUnits, carriage, this.scanner);
                 return;
             }
 
-            // Проверка входа в здания
             if (cell == 'O' || cell == 'K' || cell == 'B') {
-                // Move hero
                 hero.setX(newPosition.getX());
                 hero.setY(newPosition.getY());
                 gameMap.setCellValue(oldPosition.getX(), oldPosition.getY(), ' ');
                 gameMap.setCellValue(newPosition.getX(), newPosition.getY(), 'H');
-
-                // Находим здание по координатам
                 Building building = findBuildingAt(newPosition.getX(), newPosition.getY());
-                if (building != null) {
-                    enterBuilding(building, hero, player);
-                }
+                if (building != null) enterBuilding(building, hero, player);
                 return;
             }
 
-            // Move hero if not entering castle or building
             hero.setX(newPosition.getX());
             hero.setY(newPosition.getY());
             gameMap.setCellValue(oldPosition.getX(), oldPosition.getY(), ' ');
             gameMap.setCellValue(newPosition.getX(), newPosition.getY(), 'H');
 
-            // Handle virus spreading if game instance exists
-            if (game != null) {
-                game.handleHeroMovement(previousPosition, newPosition);
-            }
+            if (game != null) game.handleHeroMovement(previousPosition, newPosition);
 
-            // Check for battle after movement
-            checkForBattle(hero, enemy, newPosition.getX(), newPosition.getY(), gameMap, enemyCastle, battleField, allUnits);
+            checkForBattle(hero, enemy, newPosition.getX(), newPosition.getY(), gameMap,
+                    enemyCastle, battleField, allUnits);
         }
     }
+
 
     private boolean isObstacleOnPosition(int y, int x, GameMap gameMap) {
         return gameMap.getCellValue(x, y) == '#';
@@ -958,21 +977,73 @@ public class MapManager {
     }
 
     public void startGameTime() {
-        if (running) return; // предотвращает повторный запуск
+        if (running) return;
         running = true;
+        Random rand = new Random();
+
+        // === УСТАНАВЛИВАЕМ НАЧАЛЬНУЮ ПОГОДУ ===
+        updateWeather(rand, 0);
+
+        System.out.println("Начальная погода: " + currentWeather + " (" + currentPartOfDay + ")");
+
         timeThread = new Thread(() -> {
             while (running) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500); // ускоренный игровой день
                     gameTimeInMinutes++;
-                    System.out.println("\nПрошло игрового времени: " + gameTimeInMinutes + " минут");
+
+                    // Один игровой день = 60 секунд (24 часа)
+                    double secondsPerHour = 60.0 / 24;
+                    int currentHour = (int)((gameTimeInMinutes * 1.0 / 60 * 60) / secondsPerHour) % 24;
+
+                    // === Обновляем погоду при смене части дня ===
+                    updateWeather(rand, currentHour);
+
+                    // === Лог игрового времени ===
+                    System.out.println("\nПрошло игрового времени: " + gameTimeInMinutes +
+                            " мин. Сейчас: " + currentPartOfDay +
+                            ". Погода: " + currentWeather);
+
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
         });
+
         timeThread.start();
     }
+
+    /**
+     * Определяет часть дня и обновляет погоду, если часть дня изменилась.
+     */
+    private void updateWeather(Random rand, int currentHour) {
+        String partOfDay;
+        String[] possibleWeather;
+
+        if (currentHour >= 6 && currentHour < 12) {
+            partOfDay = "Утро";
+            possibleWeather = new String[]{"Туман", "Солнечно"};
+        } else if (currentHour >= 12 && currentHour < 19) {
+            partOfDay = "День";
+            possibleWeather = new String[]{"Солнечно", "Туман", "Дождь"};
+        } else {
+            partOfDay = "Ночь";
+            possibleWeather = new String[]{"Звезды", "Гроза", "Туман"};
+        }
+
+        // Меняем погоду только если часть дня изменилась
+        if (!partOfDay.equals(currentPartOfDay)) {
+            currentPartOfDay = partOfDay;
+            currentWeather = possibleWeather[rand.nextInt(possibleWeather.length)];
+            System.out.println(">>> Погода изменилась! Теперь: " + currentWeather + " (" + currentPartOfDay + ")");
+        }
+
+        // Если первый запуск — устанавливаем начальную погоду
+        if (currentWeather.isEmpty()) {
+            currentWeather = possibleWeather[rand.nextInt(possibleWeather.length)];
+        }
+    }
+
 
     public void stopGameTime() {
         running = false;

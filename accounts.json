@@ -38,7 +38,7 @@
     "id" : "33a84eb1-0ad6-4d70-ae9c-6aea0b915bbf",
     "heroes" : [ ],
     "createdAt" : 1749587880147,
-    "lastLoginAt" : 1760023766439,
+    "lastLoginAt" : 1760030613112,
     "infected" : true,
     "viruses" : [ {
       "id" : "virus_5",
